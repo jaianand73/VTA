@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VTA Portal — UAT Guide</title>
+<style>
+  :root {
+    --teal: #0092b4;
+    --teal-dark: #007a9a;
+    --teal-light: #e6f6fa;
+    --green: #16a34a;
+    --green-light: #ecfdf3;
+    --purple: #7c3aed;
+    --purple-light: #f4f0fe;
+    --amber: #d97706;
+    --amber-light: #fff8eb;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f7f8fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+  }
+  a { color: var(--teal); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    background: #eef2f5;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    color: #0f172a;
+  }
+
+  /* ===== Layout ===== */
+  .layout { display: flex; max-width: 1280px; margin: 0 auto; }
+  .sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    overflow-y: auto;
+    background: #fff;
+    border-right: 1px solid var(--border);
+    padding: 20px 14px 40px;
+  }
+  .sidebar h4 {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 18px 0 6px 6px;
+  }
+  .sidebar a {
+    display: block;
+    color: var(--ink);
+    font-size: 13.5px;
+    padding: 5px 8px;
+    border-radius: 6px;
+  }
+  .sidebar a:hover { background: var(--teal-light); text-decoration: none; }
+  .sidebar .section-link { font-weight: 700; margin-top: 4px; }
+  .sidebar .sub { padding-left: 18px; font-size: 12.5px; color: var(--muted); }
+  .progress-box {
+    background: var(--teal-light);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 6px;
+  }
+  .progress-box .pct { font-size: 22px; font-weight: 800; color: var(--teal-dark); }
+  .progress-bar-track { height: 6px; background: #cfeef5; border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .progress-bar-fill { height: 100%; background: var(--teal); width: 0%; transition: width .2s; }
+
+  .main { flex: 1; min-width: 0; padding: 0 0 80px; }
+
+  /* ===== Header ===== */
+  .cover {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #fff;
+    padding: 48px 48px 36px;
+  }
+  .cover .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+  }
+  .cover h1 { font-size: 30px; margin: 0 0 6px; font-weight: 800; }
+  .cover .sub1 { font-size: 16px; opacity: 0.95; margin: 0 0 2px; }
+  .cover .sub2 { font-size: 13.5px; opacity: 0.85; }
+
+  .content-pad { padding: 32px 48px; }
+
+  /* ===== Generic info boxes ===== */
+  .info-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+  }
+  .info-card h2 {
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--teal-dark);
+    margin: 0 0 12px;
+  }
+  table.cred-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    margin-top: 8px;
+  }
+  table.cred-table th {
+    text-align: left;
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    padding: 8px 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+  table.cred-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.cred-table tr:last-child td { border-bottom: none; }
+  .important-note {
+    background: var(--amber-light);
+    border-left: 4px solid var(--amber);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    margin-top: 14px;
+  }
+  ul.howto { margin: 8px 0 0 0; padding-left: 20px; font-size: 14px; }
+  ul.howto li { margin-bottom: 6px; }
+
+  /* ===== Section banners ===== */
+  .section-banner {
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin: 36px 0 22px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .section-banner h2 { margin: 0; font-size: 19px; }
+  .section-banner .login-as { font-size: 13.5px; background: rgba(255,255,255,.18); padding: 5px 12px; border-radius: 20px; }
+  .sectionA .section-banner, .sectionA-accent { background: var(--teal); }
+  .sectionB .section-banner, .sectionB-accent { background: var(--green); }
+  .sectionC .section-banner, .sectionC-accent { background: var(--purple); }
+  .sectionD .section-banner, .sectionD-accent { background: var(--amber); }
+
+  /* ===== Step cards ===== */
+  .step-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 5px solid var(--teal);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+  }
+  .sectionB .step-card { border-left-color: var(--green); }
+  .sectionC .step-card { border-left-color: var(--purple); }
+  .sectionD .step-card { border-left-color: var(--amber); }
+
+  .step-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px;}
+  .step-title-row h3 { margin: 0; font-size: 15.5px; font-weight: 700; }
+  .new-badge {
+    background: var(--amber);
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .represents {
+    background: #f4f5f7;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #4b5563;
+    margin: 8px 0 12px;
+  }
+  .represents strong { color: var(--ink); }
+  .goto-line { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  .steps-list { margin: 0 0 12px 0; padding-left: 22px; font-size: 14px; }
+  .steps-list li { margin-bottom: 5px; }
+  .steps-list ul { margin: 4px 0 6px 0; padding-left: 20px; }
+  .pass-box {
+    background: var(--green-light);
+    border-left: 4px solid var(--green);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .pass-box .tick { color: var(--green); font-weight: 800; font-size: 15px; line-height: 1.4; }
+  .note-callout {
+    background: var(--amber-light);
+    border-left: 4px solid var(--amber);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-top: 10px;
+    color: #7c4a03;
+  }
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+  .check-row input { width: 17px; height: 17px; cursor: pointer; accent-color: var(--teal); }
+  .check-row label { font-size: 13px; color: var(--muted); cursor: pointer; }
+
+  /* ===== Diagram block ===== */
+  .flow-diagram {
+    background: #0f1b22;
+    color: #d7f3fb;
+    border-radius: 12px;
+    padding: 22px 26px;
+    font-size: 13.5px;
+    line-height: 1.9;
+    overflow-x: auto;
+  }
+  .flow-diagram .arrow { color: #5fc7de; text-align: center; }
+  .flow-diagram .step-line { color: #fff; }
+  .flow-diagram .tag { color: #facc15; font-weight: 700; }
+
+  h2.major { font-size: 20px; margin: 40px 0 14px; color: var(--ink); }
+  .feedback-list, .escalate-list { font-size: 14px; padding-left: 22px; }
+  .feedback-list li, .escalate-list li { margin-bottom: 8px; }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 30px 20px 50px;
+  }
+
+  /* ===== Print ===== */
+  @media print {
+    .sidebar { display: none; }
+    .cover { background: var(--teal) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .step-card, .info-card { break-inside: avoid; }
+    .section-banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .content-pad, .cover { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <nav class="sidebar">
+    <div class="progress-box">
+      <div class="pct" id="progressPct">0%</div>
+      <div style="font-size:12px;color:#0f6e87;">steps checked off (<span id="progressCount">0/49</span>)</div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+    </div>
+
+    <h4>Getting Started</h4>
+    <a href="#access">How to Access</a>
+    <a href="#credentials">Login Credentials</a>
+    <a href="#howto">How to Use This Guide</a>
+
+    <h4>Section A — Samy (Admin)</h4>
+    <a class="section-link" href="#sectionA">Jump to Section A</a>
+    <a class="sub" href="#A1">A1. Dashboard</a>
+    <a class="sub" href="#A2">A2. Log Enquiry</a>
+    <a class="sub" href="#A3">A3. Convert Enquiry</a>
+    <a class="sub" href="#A4">A4. NDA Signed</a>
+    <a class="sub" href="#A5">A5. Materials Sent</a>
+    <a class="sub" href="#A6">A6. Log Communication</a>
+    <a class="sub" href="#A6B">A6B. Follow-up on Calendar <span class="new-badge">NEW</span></a>
+    <a class="sub" href="#A7">A7. Create Patient</a>
+    <a class="sub" href="#A8">A8. Assign Associate</a>
+    <a class="sub" href="#A9">A9. Update Status</a>
+    <a class="sub" href="#A10">A10. Upload Document</a>
+    <a class="sub" href="#A10B">A10B. Case Notes on Patient <span class="new-badge">NEW</span></a>
+    <a class="sub" href="#A10C">A10C. Patient Notes Fix <span class="new-badge">NEW</span></a>
+    <a class="sub" href="#A11">A11. Cost Estimation</a>
+    <a class="sub" href="#A12">A12. Assessment Scheduled</a>
+    <a class="sub" href="#A13">A13. Add Appointment</a>
+    <a class="sub" href="#A14">A14. Team Calendar</a>
+    <a class="sub" href="#A15">A15. Complete Assessment</a>
+    <a class="sub" href="#A16">A16. 2nd Cost Estimation</a>
+    <a class="sub" href="#A17">A17. Funding Cycle</a>
+    <a class="sub" href="#A18">A18. Treatment Active</a>
+    <a class="sub" href="#A19">A19. Associate Invoice</a>
+    <a class="sub" href="#A20">A20. VTA Invoice</a>
+    <a class="sub" href="#A21">A21. Funding Balance</a>
+    <a class="sub" href="#A22">A22. Activity Types</a>
+    <a class="sub" href="#A23">A23. Doc Permissions</a>
+    <a class="sub" href="#A24">A24. Associate Rates</a>
+    <a class="sub" href="#A25">A25. Finance Reports</a>
+    <a class="sub" href="#A26">A26. Email Intake</a>
+
+    <h4>Section B — Sheeba (Staff)</h4>
+    <a class="section-link" href="#sectionB">Jump to Section B</a>
+    <a class="sub" href="#B1">B1. Sidebar View</a>
+    <a class="sub" href="#B2">B2. Daily Actions</a>
+    <a class="sub" href="#B3">B3. Mark Reviewed</a>
+    <a class="sub" href="#B4">B4. No Finance Access</a>
+    <a class="sub" href="#B5">B5. Upload Document</a>
+    <a class="sub" href="#B6">B6. No Delete Docs</a>
+    <a class="sub" href="#B7">B7. Log Communication</a>
+    <a class="sub" href="#B8">B8. Email Intake</a>
+
+    <h4>Section C — Associate (Kate)</h4>
+    <a class="section-link" href="#sectionC">Jump to Section C</a>
+    <a class="sub" href="#C1">C1. Portal Loads</a>
+    <a class="sub" href="#C2">C2. Own Patients Only</a>
+    <a class="sub" href="#C3">C3. Patient Detail</a>
+    <a class="sub" href="#C4">C4. Upload Case Note</a>
+    <a class="sub" href="#C5">C5. No Other Patients</a>
+    <a class="sub" href="#C6">C6. Own Calendar</a>
+    <a class="sub" href="#C7">C7. No Finance</a>
+
+    <h4>Section D — Case Manager</h4>
+    <a class="section-link" href="#sectionD">Jump to Section D</a>
+    <a class="sub" href="#D1">D1. Portal Loads</a>
+    <a class="sub" href="#D2">D2. Own Company Only</a>
+    <a class="sub" href="#D3">D3. Patient Details</a>
+    <a class="sub" href="#D4">D4. Download Docs</a>
+    <a class="sub" href="#D5">D5. No Upload</a>
+    <a class="sub" href="#D6">D6. No Admin Routes</a>
+
+    <h4>Wrap Up</h4>
+    <a href="#summary">Full Cycle Summary</a>
+    <a href="#issues">If Something Doesn't Work</a>
+    <a href="#feedback">Feedback Checklist</a>
+  </nav>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <div class="cover">
+      <span class="badge">USER ACCEPTANCE TESTING (UAT)</span>
+      <h1>VTA Portal — UAT Guide</h1>
+      <p class="sub1">Vestibular Therapy Associates</p>
+      <p class="sub2">June 2026 &nbsp;|&nbsp; For: Dr. Samy Selvanayagam, Sheeba Rossewilliam, Associates &nbsp;|&nbsp; Version 1.1</p>
+    </div>
+
+    <div class="content-pad">
+
+      <div class="info-card" id="access">
+        <h2>How to Access the Portal</h2>
+        <p><strong>Portal URL:</strong> <a href="https://easyerp.co.in/vta-portal/login">https://easyerp.co.in/vta-portal/login</a></p>
+        <p><strong>From the VTA Website:</strong></p>
+        <ul class="howto">
+          <li>Go to <a href="https://easyerp.co.in/VTA/">https://easyerp.co.in/VTA/</a></li>
+          <li>Click <strong>LOGIN TO VTA</strong> in the top navigation menu</li>
+          <li>You will be taken to the portal login page</li>
+        </ul>
+      </div>
+
+      <div class="info-card" id="credentials">
+        <h2>Login Credentials for UAT Testing</h2>
+        <table class="cred-table">
+          <tr><th>Role</th><th>Email</th><th>Password</th><th>What You Can See</th></tr>
+          <tr><td><strong>Samy (Admin)</strong></td><td>samy@vestibulartherapyassociates.co.uk</td><td>ChangeMe2026!</td><td>Everything</td></tr>
+          <tr><td><strong>Sheeba (Staff)</strong></td><td>sheeba@vestibulartherapyassociates.co.uk</td><td>ChangeMe2026!</td><td>All patients — no finance</td></tr>
+          <tr><td><strong>Associate (Kate)</strong></td><td>kate@test.com</td><td>ChangeMe2026!</td><td>Own patients only</td></tr>
+          <tr><td><strong>Case Manager (Sarah)</strong></td><td>sarah.mitchell@smithjones.co.uk</td><td>ChangeMe2026!</td><td>Own company patients + documents</td></tr>
+          <tr><td><strong>Case Manager (Michael)</strong></td><td>m.turner@turnerins.co.uk</td><td>ChangeMe2026!</td><td>Own company patients + documents</td></tr>
+          <tr><td><strong>Case Manager (David)</strong></td><td>david.williams@cunninghamclaims.co.uk</td><td>ChangeMe2026!</td><td>Own company patients + documents</td></tr>
+        </table>
+        <div class="important-note"><strong>Important:</strong> Please change your password after UAT testing is complete. Go to your profile settings in the portal.</div>
+      </div>
+
+      <div class="info-card" id="howto">
+        <h2>How to Use This Guide</h2>
+        <ul class="howto">
+          <li>Work through <strong>Section A</strong> logged in as <strong>Samy</strong></li>
+          <li>Work through <strong>Section B</strong> logged in as <strong>Sheeba</strong></li>
+          <li>Work through <strong>Section C</strong> logged in as <strong>Kate</strong> (associate)</li>
+          <li>Work through <strong>Section D</strong> logged in as a <strong>Case Manager</strong> (Sarah, Michael or David)</li>
+          <li><strong>To switch users:</strong> Click <strong>Logout</strong> in the sidebar → you will be redirected to the login page. Enter the next user's credentials. Use this "Switch User" method — do not use the browser back button.</li>
+          <li>Each step tells you exactly what to click, what to fill in, and what you should see</li>
+          <li>If something does not work as described, note it down and report to Jai</li>
+          <li>Tick the checkbox under each step as you complete it — your progress is tracked in the sidebar</li>
+        </ul>
+      </div>
+
+      <!-- ================= SECTION A ================= -->
+      <section class="sectionA" id="sectionA">
+        <div class="section-banner">
+          <h2>Section A — Samy (Admin) Testing</h2>
+          <span class="login-as">Log in as: samy@vestibulartherapyassociates.co.uk</span>
+        </div>
+
+        <div class="step-card" id="A1">
+          <div class="step-title-row"><h3>A1. Check the Dashboard</h3></div>
+          <div class="goto-line"><strong>Go to:</strong> https://easyerp.co.in/vta-portal/</div>
+          <p style="font-size:13.5px;"><strong>What you should see:</strong></p>
+          <ul class="steps-list">
+            <li>Four KPI cards at the top (Total Active Cases, Needs Review Today, Awaiting Funding Approval, Overdue Associate Invoices)</li>
+            <li>A "Daily Actions" table below showing patients that need attention</li>
+            <li>An "Unprocessed Emails" section showing recent emails that need actioning</li>
+            <li>An "Upcoming Appointments" section</li>
+            <li>Left sidebar with full navigation menu</li>
+          </ul>
+          <ol class="steps-list">
+            <li>After logging in you land on the Dashboard automatically</li>
+            <li>Check the four coloured KPI cards at the top — they should show numbers</li>
+            <li>Check the Daily Actions table — it may be empty if no test data exists yet</li>
+            <li>Check the left sidebar — you should see all menu items including Finance and Settings</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Dashboard loads, KPI cards show, sidebar shows all menus including Finance and Settings</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A1"><label>Mark A1 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A2">
+          <div class="step-title-row"><h3>A2. Log a New Enquiry</h3></div>
+          <div class="goto-line"><strong>Go to:</strong> Click <strong>Enquiries</strong> in the left sidebar → click <strong>Log New Enquiry</strong></div>
+          <div class="represents"><strong>What this represents:</strong> This is the first thing you do when someone contacts you — before you create any folders or records. It is the quick log of "someone got in touch."</div>
+          <ol class="steps-list">
+            <li>Click <strong>Enquiries</strong> in the left sidebar</li>
+            <li>Click <strong>Log New Enquiry</strong> button (top right)</li>
+            <li>Fill in:
+              <ul>
+                <li>Enquirer Name: <code>Emma Bracher</code></li>
+                <li>Company: this is now a <strong>dropdown</strong> of existing companies (so the same company can never be typed twice with slightly different spelling). Since "Community Case Management Ltd" doesn't exist yet, click <strong>+ Add New</strong> next to the Company dropdown — a small popup opens — fill in:
+                  <ul>
+                    <li>Company Name: <code>Community Case Management Ltd</code></li>
+                    <li>Type: <code>Case Management</code></li>
+                    <li>Phone: <code>01608 682522</code></li>
+                    <li>Email: <code>emma@communitycasemanagement.co.uk</code></li>
+                    <li>Click <strong>Add Company</strong> — the popup closes and the new company is automatically selected in the dropdown</li>
+                  </ul>
+                </li>
+                <li>Case Manager: leave as <strong>"-- Select (optional) --"</strong> for now — we'll create Emma as the Case Manager in the next step (A3)</li>
+                <li>Email: <code>emma@communitycasemanagement.co.uk</code></li>
+                <li>Phone: <code>01608 682522</code></li>
+                <li>Source: select <strong>Email</strong> from dropdown</li>
+                <li>Reason: <code>Enquiry about vestibular patient in Rugby area — TBI with dizziness</code></li>
+                <li>Enquiry Date: today's date</li>
+              </ul>
+            </li>
+            <li>Click <strong>Save Enquiry</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Enquiry saved, redirected to enquiry detail page, status shows "New". Going back to <strong>Log New Enquiry</strong> again, "Community Case Management Ltd" should now appear in the Company dropdown — confirming it was saved as a proper master record, not just text on this one enquiry.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A2"><label>Mark A2 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A3">
+          <div class="step-title-row"><h3>A3. Convert Enquiry to Company and Case Manager Record</h3></div>
+          <div class="represents"><strong>What this represents:</strong> After the initial enquiry, you decide to proceed. Now you create the proper Company and Case Manager records — just like when you create the Company and Case Manager folders on your desktop.</div>
+          <ol class="steps-list">
+            <li>On the Enquiry detail page, find the <strong>Convert to Full Record</strong> panel</li>
+            <li>Under <strong>Select Existing Company</strong>, choose <code>Community Case Management Ltd</code> (the one you just created in A2) — this hides the "New Company Details" fields since you're using the existing record</li>
+            <li>Under <strong>Case Manager → Select Existing (optional)</strong>, leave as "-- Create New Case Manager --" and fill in:
+              <ul>
+                <li>First Name: <code>Emma</code></li>
+                <li>Last Name: <code>Bracher</code></li>
+                <li>Email: <code>emma@communitycasemanagement.co.uk</code></li>
+              </ul>
+            </li>
+            <li>Click <strong>Confirm Conversion</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Case Manager record "Emma Bracher" created under Community Case Management Ltd, Enquiry status changes to "Converted", links to the new Case Manager record shown.</span></div>
+          <div class="note-callout">Job Title cannot currently be set at this step (or when editing a Case Manager afterwards) — there's no field for it anywhere in the UI yet, even though the system has a place to store it. Not a blocker for UAT, just don't expect to find a Job Title box.</div>
+          <div class="check-row"><input type="checkbox" data-step="A3"><label>Mark A3 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A4">
+          <div class="step-title-row"><h3>A4. Mark NDA as Signed</h3></div>
+          <div class="represents"><strong>What this represents:</strong> When Emma Bracher signs the NDA — you record this in the portal just as you currently note it in your Excel.</div>
+          <ol class="steps-list">
+            <li>Navigate to <strong>Companies</strong> in the sidebar</li>
+            <li>Click <strong>Community Case Management Ltd</strong></li>
+            <li>In the Case Managers section, click <strong>Emma Bracher</strong></li>
+            <li>On her detail page, find the <strong>NDA Status</strong> section</li>
+            <li>Click <strong>Mark as Signed</strong></li>
+            <li>Today's date will be recorded automatically</li>
+            <li>Upload the NDA document if you have one handy</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>NDA shows as "Signed on [today's date]"</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A4"><label>Mark A4 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A5">
+          <div class="step-title-row"><h3>A5. Mark Materials as Sent</h3></div>
+          <ol class="steps-list">
+            <li>Find the <strong>Materials Sent</strong> section (continuing on Emma Bracher's page)</li>
+            <li>Click <strong>Mark as Sent</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Materials section shows "Sent on [today's date]"</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A5"><label>Mark A5 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A6">
+          <div class="step-title-row"><h3>A6. Log a Communication</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Recording the emails and calls you have with Emma — just like you currently note follow-up dates in your Excel columns (Follow up 1, Follow up 2 etc.). This now replaces those Excel follow-up columns properly: instead of a date sitting in a spreadsheet cell, a follow-up date you set here shows up automatically on the <strong>Team Calendar</strong> until someone marks it done.</div>
+          <ol class="steps-list">
+            <li>On Emma Bracher's detail page, find the <strong>Communication Log</strong> card and click <strong>Log Communication</strong></li>
+            <li>Fill in:
+              <ul>
+                <li>Type: <strong>Email</strong></li>
+                <li>Direction: <strong>Inbound</strong></li>
+                <li>Subject: <code>Possible referral — Rugby patient</code></li>
+                <li>Summary: <code>Emma contacted to enquire about a TBI patient in Rugby with vestibular disorder and dizziness</code></li>
+                <li>Date/Time: leave as the pre-filled current date/time</li>
+                <li>Follow-up Date: set to <strong>3 days from today</strong></li>
+              </ul>
+            </li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Communication appears in the Communication Log on Emma's page, with a "Follow-up: [date]" note and a <strong>Mark Done</strong> link underneath it.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A6"><label>Mark A6 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A6B">
+          <div class="step-title-row"><h3>A6B. Check the Follow-up Appears on the Team Calendar</h3><span class="new-badge">NEW</span></div>
+          <div class="represents"><strong>What this represents:</strong> A way to make sure nobody forgets to chase someone — every open follow-up from any Communication Log (Enquiries, Patients, or Case Managers) now shows up automatically on the same calendar as appointments, in a different colour, so it can't get buried in a spreadsheet column.</div>
+          <ol class="steps-list">
+            <li>Click <strong>Appointments</strong> → <strong>Calendar</strong> in the sidebar</li>
+            <li>Navigate to the date you set as the follow-up date in A6 (3 days from today)</li>
+            <li>Look for a <strong>purple</strong> event titled "Follow-up: Emma Bracher" (purple is called out separately in the Legend panel on the left as "Follow-up (from Communications)")</li>
+            <li>Click on it — a popup should show the Contact name, Subject, and a <strong>Mark Done</strong> button alongside <strong>View Record</strong></li>
+            <li>Click <strong>Mark Done</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>The purple follow-up event appears on the correct date. Clicking <strong>Mark Done</strong> removes it from the calendar immediately (no page reload needed). Going back to Emma Bracher's Communication Log, the "Follow-up:" note under that entry should now be gone too (it only shows while a follow-up is still open).</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A6B"><label>Mark A6B as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A7">
+          <div class="step-title-row"><h3>A7. Create a New Patient</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Emma has referred a patient. You create the patient record — this replaces creating the Patient folder under Emma's Case Manager folder, AND adds the row in your Excel tracker.</div>
+          <ol class="steps-list">
+            <li>On Emma Bracher's detail page, click <strong>Add New Patient</strong></li>
+            <li>Fill in:
+              <ul>
+                <li>First Name: <code>David</code></li>
+                <li>Last Name: <code>Clarke</code></li>
+                <li>Date of Birth: <code>15/03/1975</code></li>
+                <li>Location: <code>Rugby, Warwickshire</code></li>
+                <li>Condition: <code>TBI with vestibular disorder — dizziness and balance issues following road traffic accident</code></li>
+                <li>Referral Date: today</li>
+                <li>Invoice Recipient Type: <code>Case Manager Company</code></li>
+                <li>Invoice Recipient Name: <code>Community Case Management Ltd</code></li>
+                <li>Invoice Recipient Email: <code>emma@communitycasemanagement.co.uk</code></li>
+              </ul>
+            </li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Patient David Clarke created, status shows "Enquiry Logged", appears in Emma's patient list</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A7"><label>Mark A7 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A8">
+          <div class="step-title-row"><h3>A8. Assign an Associate to the Patient</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Identifying the nearest associate for David Clarke in Rugby — just like the "Nearest Associate" column in your Excel.</div>
+          <ol class="steps-list">
+            <li>Navigate to David Clarke's patient detail page</li>
+            <li>In the <strong>Associates</strong> card, click <strong>Add Associate</strong></li>
+            <li>Select:
+              <ul>
+                <li>Associate: <strong>Kate Bryce</strong> (North East England — nearest to Rugby)</li>
+                <li>Role: <strong>Assessment</strong></li>
+                <li>Start Date: today</li>
+              </ul>
+            </li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Kate Bryce appears in patient's associates list with role "Assessment"</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A8"><label>Mark A8 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A9">
+          <div class="step-title-row"><h3>A9. Update Patient Status Through the Workflow</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Moving David Clarke through the stages — just like updating the status columns in your Excel.</div>
+          <ol class="steps-list">
+            <li>On David Clarke's patient detail, find the <strong>Status</strong> card</li>
+            <li>Change status from <strong>Enquiry Logged</strong> to <strong>Response Sent</strong></li>
+            <li>Click <strong>Update Status</strong></li>
+            <li>Verify the status history log shows the change</li>
+            <li>Continue updating through: <strong>Awaiting LOI</strong> → <strong>LOI Received</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Each status change saves correctly and appears in history log</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A9"><label>Mark A9 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A10">
+          <div class="step-title-row"><h3>A10. Upload a Document</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Uploading the LOI from Emma — the same document you currently save in the Patient folder on your desktop.</div>
+          <ol class="steps-list">
+            <li>On David Clarke's patient detail, find the <strong>Documents</strong> card</li>
+            <li>Click <strong>Upload</strong></li>
+            <li>Select Document Type: <strong>Letter of Instruction</strong></li>
+            <li>Upload any test PDF file</li>
+            <li>Click <strong>Upload</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Document appears in David Clarke's document list.</span></div>
+          <div class="note-callout">There is currently no "also link to Case Manager" toggle when uploading from a patient's page — a document uploaded here only attaches to the patient. If you want a copy attached directly to Emma's own record, go to her Case Manager page and use the <strong>Upload</strong> button there instead — documents can now be uploaded directly on Enquiry pages and Case Manager pages too, not just Patient pages (this is new — worth spot-checking on Emma's page while you're there).</div>
+          <div class="check-row"><input type="checkbox" data-step="A10"><label>Mark A10 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A10B">
+          <div class="step-title-row"><h3>A10B. View Case Notes on a Patient's Page</h3><span class="new-badge">NEW</span></div>
+          <div class="represents"><strong>What this represents:</strong> Clinical session notes that an Associate logs after a treatment session (you'll see how those get created in Section C4 of this guide). Previously, the only way to see a patient's case notes was through a separate "Case Notes" menu item with no link back to the patient — they didn't show up on the patient's own page at all. That's now fixed.</div>
+          <ol class="steps-list">
+            <li>Since David Clarke doesn't have any case notes yet at this point in the walkthrough, instead open an existing test patient: navigate to <strong>Patients</strong> in the sidebar and click on <strong>James Hartley</strong></li>
+            <li>Scroll down James Hartley's page until you find the <strong>Case Notes</strong> card (sits between Communications and the free-text Notes box)</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>You see a short list of case notes (date, note type, associate name, and a green "Signed off" or amber "Pending sign-off" badge for each). Clicking <strong>View All</strong> in the top-right of that card takes you to the full Case Notes list, already filtered to just James Hartley.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A10B"><label>Mark A10B as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A10C">
+          <div class="step-title-row"><h3>A10C. Save a Note on the Patient Page (Bug Fix Check)</h3><span class="new-badge">NEW</span></div>
+          <div class="represents"><strong>What this represents:</strong> This used to throw an error — worth specifically re-checking it now works.</div>
+          <ol class="steps-list">
+            <li>Still on James Hartley's page (or any patient), scroll to the <strong>Notes</strong> box near the bottom (separate from Case Notes — this is a single free-text box for quick context, not a dated history)</li>
+            <li>Type something, e.g. <code>Checked in — no change to plan</code></li>
+            <li>Click <strong>Save Notes</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>The page saves without any error message and your text remains in the box after the page reloads. (It previously failed with "The first name field is required.")</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A10C"><label>Mark A10C as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A11">
+          <div class="step-title-row"><h3>A11. Create a Cost Estimation</h3></div>
+          <div class="represents"><strong>What this represents:</strong> The first quote you send when someone enquires — "Fee for Initial Ax agreed with Referrer" in your Excel.</div>
+          <ol class="steps-list">
+            <li>On David Clarke's patient detail, find the <strong>Cost Estimations</strong> card</li>
+            <li>Click <strong>Add Cost Estimation</strong></li>
+            <li>Fill in:
+              <ul>
+                <li>Version: 1</li>
+                <li>Title: <code>Initial Assessment Quote</code></li>
+                <li>Estimated Amount: <code>£850.00</code></li>
+                <li>Estimated Sessions: <code>1</code></li>
+                <li>Sent Date: today</li>
+                <li>Sent To: <code>Emma Bracher</code></li>
+              </ul>
+            </li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Cost estimation appears in patient's cost estimation list</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A11"><label>Mark A11 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A12">
+          <div class="step-title-row"><h3>A12. Update Status to Assessment Scheduled</h3></div>
+          <ol class="steps-list">
+            <li>On David Clarke's patient detail</li>
+            <li>Change status to <strong>Assessment Scheduled</strong></li>
+            <li>Click <strong>Update Status</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Status updates to Assessment Scheduled</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A12"><label>Mark A12 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A13">
+          <div class="step-title-row"><h3>A13. Add an Appointment</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Booking the initial assessment appointment with Kate Bryce — this replaces your Qunote calendar.</div>
+          <ol class="steps-list">
+            <li>Click <strong>Appointments</strong> in the left sidebar</li>
+            <li>Click <strong>Add Appointment</strong></li>
+            <li>Fill in:
+              <ul>
+                <li>Patient: <strong>David Clarke</strong></li>
+                <li>Associate: <strong>Kate Bryce</strong></li>
+                <li>Activity Type: <strong>Initial Assessment</strong></li>
+                <li>Date/Time: next Monday at 10:00am</li>
+                <li>Duration: 90 minutes</li>
+                <li>Location: <code>Patient Home, Rugby</code></li>
+                <li>Travel Miles: <code>45</code></li>
+              </ul>
+            </li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Appointment created, appears on team calendar on correct date</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A13"><label>Mark A13 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A14">
+          <div class="step-title-row"><h3>A14. Check the Team Calendar</h3></div>
+          <ol class="steps-list">
+            <li>Click <strong>Appointments</strong> → <strong>Calendar</strong> in the sidebar</li>
+            <li>View the week containing the appointment you just created</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Kate Bryce's appointment shows on correct day, colour-coded, with patient name visible</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A14"><label>Mark A14 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A15">
+          <div class="step-title-row"><h3>A15. Mark Assessment as Completed and Update Status</h3></div>
+          <ol class="steps-list">
+            <li>Click on the appointment in the calendar</li>
+            <li>Change appointment status to <strong>Completed</strong></li>
+            <li>Save</li>
+            <li>Go to David Clarke's patient detail</li>
+            <li>Update status to <strong>Assessment Completed</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Appointment marked completed, patient status updated</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A15"><label>Mark A15 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A16">
+          <div class="step-title-row"><h3>A16. Create a Second Cost Estimation (Post Assessment)</h3></div>
+          <div class="represents"><strong>What this represents:</strong> The second quote — "Funding agreed Phase 1" in your Excel. This is the treatment cost estimation sent after the initial assessment.</div>
+          <ol class="steps-list">
+            <li>On David Clarke's patient detail</li>
+            <li>Add another Cost Estimation:
+              <ul>
+                <li>Version: 2</li>
+                <li>Title: <code>Phase 1 Treatment — 6 months</code></li>
+                <li>Estimated Amount: <code>£4,500.00</code></li>
+                <li>Estimated Sessions: <code>12</code></li>
+                <li>Duration: <code>6 months</code></li>
+              </ul>
+            </li>
+            <li>Update patient status through: <strong>Report Drafted</strong> → <strong>Report Sent</strong> → <strong>Cost Estimation Sent</strong> → <strong>Awaiting Funding Approval</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Second cost estimation saved, status reaches Awaiting Funding Approval</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A16"><label>Mark A16 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A17">
+          <div class="step-title-row"><h3>A17. Create a Funding Cycle (Funding Approval Received)</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Written funding approval received — the portal will not allow treatment to start without this. This replaces "Funding agreed Phase 1" in your Excel.</div>
+          <ol class="steps-list">
+            <li>On David Clarke's patient detail, find the <strong>Funding Cycles</strong> section</li>
+            <li>Click <strong>Add Funding Cycle</strong></li>
+            <li>Fill in:
+              <ul>
+                <li>Link to Cost Estimation: <strong>Phase 1 Treatment — 6 months</strong></li>
+                <li>Approved Amount: <code>£4,500.00</code></li>
+                <li>Approved Sessions: <code>12</code></li>
+                <li>Approval Date: today</li>
+                <li>Funder Name: <code>Community Case Management Ltd</code></li>
+              </ul>
+            </li>
+            <li>Upload the funding approval document (any PDF)</li>
+            <li>Click <strong>Save</strong></li>
+            <li>Now update patient status to <strong>Funding Approved</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Funding cycle created with remaining balance showing £4,500.00. Status successfully moves to Funding Approved. If you try to move to Funding Approved WITHOUT the cycle document — it should be blocked with an error message.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A17"><label>Mark A17 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A18">
+          <div class="step-title-row"><h3>A18. Move to Treatment Active</h3></div>
+          <ol class="steps-list">
+            <li>On David Clarke's patient detail</li>
+            <li>Update status to <strong>Treatment Active</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Status updates to Treatment Active (green badge)</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A18"><label>Mark A18 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A19">
+          <div class="step-title-row"><h3>A19. Log an Associate Invoice (Received from Kate)</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Kate Bryce emails her invoice to you. You log it in the portal — this replaces your Xero entry.</div>
+          <ol class="steps-list">
+            <li>Click <strong>Associate Invoices</strong> in the sidebar (Finance section)</li>
+            <li>Click <strong>Log Associate Invoice</strong></li>
+            <li>Fill in:
+              <ul>
+                <li>Associate: <strong>Kate Bryce</strong></li>
+                <li>Patient: <strong>David Clarke</strong></li>
+                <li>Funding Cycle: <strong>Cycle 1</strong></li>
+                <li>Invoice Reference: <code>KB-2026-001</code></li>
+                <li>Invoice Date: today</li>
+                <li>Sessions Completed: <code>3</code></li>
+                <li>Travel Miles: <code>45</code></li>
+              </ul>
+            </li>
+            <li>Check that Session Amount and Travel Amount are auto-calculated</li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Invoice created with due date auto-set to today + 28 days. Sessions × Kate's rate shown.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A19"><label>Mark A19 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A20">
+          <div class="step-title-row"><h3>A20. Create a VTA Invoice (Sent to Funder)</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Creating the invoice you send to Community Case Management Ltd — this replaces your Xero invoice creation.</div>
+          <ol class="steps-list">
+            <li>Click <strong>VTA Invoices</strong> in the sidebar</li>
+            <li>Click <strong>Create VTA Invoice</strong></li>
+            <li>Fill in:
+              <ul>
+                <li>Patient: <strong>David Clarke</strong></li>
+                <li>Funding Cycle: <strong>Cycle 1</strong> (check remaining balance shown)</li>
+                <li>Invoice Date: today</li>
+                <li>Recipient Type: <code>Case Manager Company</code></li>
+                <li>Recipient Name: <code>Community Case Management Ltd</code></li>
+                <li>Sessions Invoiced: <code>3</code></li>
+                <li>Total Amount: <code>£2,550.00</code></li>
+              </ul>
+            </li>
+            <li>Click <strong>Save</strong></li>
+            <li>Note the invoice number — it should be <strong>VTA-2026-0001</strong> (or next in sequence)</li>
+            <li>Upload the invoice PDF</li>
+            <li>Change status to <strong>Sent</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Invoice number auto-generated. Funding cycle remaining balance reduces. Cannot mark Sent without document uploaded.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A20"><label>Mark A20 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A21">
+          <div class="step-title-row"><h3>A21. Check Funding Cycle Remaining Balance</h3></div>
+          <ol class="steps-list">
+            <li>Go to David Clarke's patient detail</li>
+            <li>Find the Funding Cycles card</li>
+            <li>Check the remaining balance</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Remaining balance shows £1,950.00 (£4,500 − £2,550). Progress bar shows approximately 57% spent.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A21"><label>Mark A21 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A22">
+          <div class="step-title-row"><h3>A22. Settings — Manage Activity Types</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Adding a new activity type — for example if VTA starts offering video consultations.</div>
+          <ol class="steps-list">
+            <li>Click <strong>Settings</strong> in the left sidebar</li>
+            <li>Click <strong>Activity Types</strong> tab</li>
+            <li>Click <strong>Add Activity Type</strong></li>
+            <li>Name: <code>Video Consultation</code></li>
+            <li>Description: <code>Remote video assessment or treatment session</code></li>
+            <li>Click <strong>Save</strong></li>
+            <li>Go to Appointments → Add Appointment and check the Activity Type dropdown</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Video Consultation appears in the appointment form dropdown</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A22"><label>Mark A22 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A23">
+          <div class="step-title-row"><h3>A23. Settings — Manage Document Permissions</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Controlling which documents case managers can see when they eventually get portal access.</div>
+          <ol class="steps-list">
+            <li>Click <strong>Settings</strong> → <strong>Document Permissions</strong> tab</li>
+            <li>You will see a grid — document types as rows, roles as columns</li>
+            <li>Toggle <strong>Assessment Report</strong> → <strong>Case Manager</strong> to ON</li>
+            <li>Toggle <strong>Medical Records</strong> → <strong>Associate</strong> to OFF</li>
+            <li>Click <strong>Save All Permissions</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Permissions saved. Associate login will now reflect the change.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A23"><label>Mark A23 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A24">
+          <div class="step-title-row"><h3>A24. Settings — Set Associate Rates</h3></div>
+          <ol class="steps-list">
+            <li>Click <strong>Settings</strong> → <strong>Associates</strong> tab</li>
+            <li>Find <strong>Kate Bryce</strong></li>
+            <li>Click <strong>Edit</strong></li>
+            <li>Set Session Rate: <code>£95.00</code></li>
+            <li>Set Travel Rate Per Mile: <code>£0.45</code></li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Rates saved. Next associate invoice for Kate auto-calculates based on these rates.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A24"><label>Mark A24 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A25">
+          <div class="step-title-row"><h3>A25. Check Finance Reports</h3></div>
+          <ol class="steps-list">
+            <li>Click <strong>Finance</strong> → <strong>Reports</strong> in the sidebar</li>
+            <li>View Revenue Summary</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Reports load showing invoiced and paid amounts. Charts display.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A25"><label>Mark A25 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="A26">
+          <div class="step-title-row"><h3>A26. Email Intake — Process an Email</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Checking the shared mailbox and actioning new emails — replaces manually checking email and logging in Excel.</div>
+          <ol class="steps-list">
+            <li>Click <strong>Email Intake</strong> in the sidebar</li>
+            <li>You will see any emails that have arrived at operations@vestibulartherapyassociates.co.uk</li>
+            <li>Click <strong>Link to Patient</strong> on an email → search for David Clarke → Confirm</li>
+            <li>OR click <strong>Mark as Irrelevant</strong> on any spam/internal emails</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Email linked to patient and marked as processed. Disappears from unprocessed view.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="A26"><label>Mark A26 as tested</label></div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION B ================= -->
+      <section class="sectionB" id="sectionB">
+        <div class="section-banner">
+          <h2>Section B — Sheeba (Staff) Testing</h2>
+          <span class="login-as">Log out of Samy's account first → log in as: sheeba@vestibulartherapyassociates.co.uk</span>
+        </div>
+
+        <div class="step-card" id="B1">
+          <div class="step-title-row"><h3>B1. Verify Sheeba's View Is Correct</h3></div>
+          <ol class="steps-list"><li>Log in as Sheeba</li><li>Check the left sidebar</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Dashboard, Enquiries, Companies, Patients, Email Intake visible. <strong>Finance and Settings menus NOT visible.</strong></span></div>
+          <div class="check-row"><input type="checkbox" data-step="B1"><label>Mark B1 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="B2">
+          <div class="step-title-row"><h3>B2. Daily Actions View</h3></div>
+          <ol class="steps-list"><li>Navigate to <strong>Patients</strong> in the sidebar</li><li>The default view should show only patients where "Needs Review" is ON</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Only patients flagged for review shown. David Clarke should appear.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="B2"><label>Mark B2 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="B3">
+          <div class="step-title-row"><h3>B3. Mark Patient as Reviewed</h3></div>
+          <ol class="steps-list"><li>Find David Clarke in the Daily Actions list</li><li>Click <strong>Mark as Reviewed</strong> (or toggle Needs Review to OFF on his patient detail)</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>David Clarke disappears from Daily Actions view. Can still be found via "Show All" toggle.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="B3"><label>Mark B3 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="B4">
+          <div class="step-title-row"><h3>B4. Sheeba Cannot Access Finance</h3></div>
+          <ol class="steps-list">
+            <li>Try to navigate directly to: https://easyerp.co.in/vta-portal/vta-invoices</li>
+            <li>Try to navigate directly to: https://easyerp.co.in/vta-portal/finance/reports</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Both pages show "403 — You do not have permission to access this area." Sheeba cannot see any financial information.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="B4"><label>Mark B4 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="B5">
+          <div class="step-title-row"><h3>B5. Upload a Document as Sheeba</h3></div>
+          <ol class="steps-list">
+            <li>Navigate to David Clarke's patient detail</li>
+            <li>Upload any test document (e.g. a correspondence PDF)</li>
+            <li>Select type: <strong>Correspondence</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Document uploaded successfully by Sheeba.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="B5"><label>Mark B5 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="B6">
+          <div class="step-title-row"><h3>B6. Sheeba Cannot Delete Documents</h3></div>
+          <ol class="steps-list">
+            <li>On David Clarke's patient detail, look at the documents list</li>
+            <li>Check what action buttons are available</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Delete button is NOT visible for Sheeba. Only Download is available.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="B6"><label>Mark B6 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="B7">
+          <div class="step-title-row"><h3>B7. Log a Communication as Sheeba</h3></div>
+          <ol class="steps-list">
+            <li>Navigate to Emma Bracher (case manager)</li>
+            <li>Click <strong>Log Communication</strong></li>
+            <li>Fill in: Type Phone, Direction Outbound, Subject "Confirmed appointment", and leave Summary blank this time</li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Communication saves successfully even with Summary left blank — Summary is optional, only Subject is required. Entry appears in Emma's Communication Log.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="B7"><label>Mark B7 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="B8">
+          <div class="step-title-row"><h3>B8. Process Email Intake as Sheeba</h3></div>
+          <ol class="steps-list">
+            <li>Click <strong>Email Intake</strong> in the sidebar</li>
+            <li>Action any unprocessed emails</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Sheeba can view and process email intake just like Samy.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="B8"><label>Mark B8 as tested</label></div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION C ================= -->
+      <section class="sectionC" id="sectionC">
+        <div class="section-banner">
+          <h2>Section C — Associate Testing (Kate Bryce)</h2>
+          <span class="login-as">Log out of Sheeba's account first → log in as: kate@test.com</span>
+        </div>
+
+        <div class="step-card" id="C1">
+          <div class="step-title-row"><h3>C1. Verify Associate Portal Loads</h3></div>
+          <ol class="steps-list"><li>Log in as Kate</li><li>Check where you land and what is visible</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Redirected to /associate-portal (NOT the main dashboard). Sees "My Patients", "My Calendar", "Upload Case Note". Does NOT see Companies, Email Intake, Finance or Settings.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="C1"><label>Mark C1 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="C2">
+          <div class="step-title-row"><h3>C2. Kate Sees Only Her Assigned Patients</h3></div>
+          <ol class="steps-list"><li>In the associate portal, view the patient list</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Only David Clarke appears (assigned to Kate). Any other patients NOT assigned to Kate are invisible.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="C2"><label>Mark C2 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="C3">
+          <div class="step-title-row"><h3>C3. View Patient Detail as Kate</h3></div>
+          <ol class="steps-list"><li>Click on David Clarke</li><li>Check what is visible</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Patient details visible (name, condition, location). Documents shows only permitted types (LOI visible, Associate Invoice NOT visible if permissions set correctly in A23).</span></div>
+          <div class="check-row"><input type="checkbox" data-step="C3"><label>Mark C3 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="C4">
+          <div class="step-title-row"><h3>C4. Upload a Case Note</h3></div>
+          <div class="represents"><strong>What this represents:</strong> Kate uploading her session notes after the assessment — replaces emailing notes to Samy.</div>
+          <ol class="steps-list">
+            <li>On David Clarke's page in the associate portal</li>
+            <li>Click <strong>Upload Case Note</strong></li>
+            <li>Fill in:
+              <ul>
+                <li>Session Date: today</li>
+                <li>Note Type: <strong>Session Note</strong></li>
+                <li>Content: <code>Initial vestibular assessment completed. Patient presents with BPPV and balance difficulties. VOR exercises commenced. Next session recommended in 2 weeks.</code></li>
+              </ul>
+            </li>
+            <li>Upload a test PDF of clinical notes</li>
+            <li>Click <strong>Save</strong></li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Case note saved and appears on David Clarke's page.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="C4"><label>Mark C4 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="C5">
+          <div class="step-title-row"><h3>C5. Kate Cannot Access Other Patients</h3></div>
+          <ol class="steps-list">
+            <li>Try to navigate to a patient NOT assigned to Kate (if any test patients exist)</li>
+            <li>Try: https://easyerp.co.in/vta-portal/patients</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Gets 403 error or is redirected to associate portal. Cannot see the main patients list.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="C5"><label>Mark C5 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="C6">
+          <div class="step-title-row"><h3>C6. View Kate's Own Calendar</h3></div>
+          <ol class="steps-list"><li>Click <strong>My Calendar</strong> in the associate portal</li><li>Check the calendar view</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Only Kate's own appointments visible. The assessment appointment created in A13 should appear.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="C6"><label>Mark C6 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="C7">
+          <div class="step-title-row"><h3>C7. Verify Kate Cannot See Finance</h3></div>
+          <ol class="steps-list"><li>Try to navigate to: https://easyerp.co.in/vta-portal/associate-invoices</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>403 error. Kate cannot see any invoices or financial information.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="C7"><label>Mark C7 as tested</label></div>
+        </div>
+      </section>
+
+      <!-- ================= SECTION D ================= -->
+      <section class="sectionD" id="sectionD">
+        <div class="section-banner">
+          <h2>Section D — Case Manager Portal Testing</h2>
+          <span class="login-as">Log out of Kate's account first → log in as: sarah.mitchell@smithjones.co.uk (or any case manager)</span>
+        </div>
+
+        <div class="step-card" id="D1">
+          <div class="step-title-row"><h3>D1. Verify Case Manager Portal Loads</h3></div>
+          <ol class="steps-list"><li>Log in as Sarah Mitchell</li><li>Check where you land and what is visible</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Redirected to /case-manager-portal. Sees "My Patients", "Documents". Does NOT see Companies, Enquiries, Email Intake, Finance or Settings.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="D1"><label>Mark D1 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="D2">
+          <div class="step-title-row"><h3>D2. Case Manager Sees Only Their Company's Patients</h3></div>
+          <ol class="steps-list"><li>In the case manager portal, view the patient list</li><li>Check which patients appear</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Only patients belonging to Sarah's company (Smith &amp; Jones) are visible. David Clarke (belongs to Community Case Management Ltd) is NOT visible to Sarah.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="D2"><label>Mark D2 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="D3">
+          <div class="step-title-row"><h3>D3. View Patient Details</h3></div>
+          <ol class="steps-list"><li>Click on a patient assigned to Sarah's company</li><li>Check what information is visible</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Patient details visible (name, condition, location). Documents section shows only document types permitted for case manager role.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="D3"><label>Mark D3 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="D4">
+          <div class="step-title-row"><h3>D4. View and Download Documents</h3></div>
+          <ol class="steps-list"><li>On a patient detail page, find the Documents section</li><li>Click <strong>Download</strong> on a document</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>Documents visible and downloadable. Only document types with case_manager can_view = TRUE are shown.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="D4"><label>Mark D4 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="D5">
+          <div class="step-title-row"><h3>D5. Case Manager Cannot Upload Documents</h3></div>
+          <ol class="steps-list"><li>Look for any "Upload" button on the patient detail page</li></ol>
+          <div class="pass-box"><span class="tick">✓</span><span>No upload button visible. Case managers are read-only — they cannot add, edit or delete any data.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="D5"><label>Mark D5 as tested</label></div>
+        </div>
+
+        <div class="step-card" id="D6">
+          <div class="step-title-row"><h3>D6. Case Manager Cannot Access Admin Routes</h3></div>
+          <ol class="steps-list">
+            <li>Try to navigate to: https://easyerp.co.in/vta-portal/patients</li>
+            <li>Try to navigate to: https://easyerp.co.in/vta-portal/enquiries</li>
+            <li>Try to navigate to: https://easyerp.co.in/vta-portal/settings</li>
+          </ol>
+          <div class="pass-box"><span class="tick">✓</span><span>All three routes return 403 Forbidden. Case manager is restricted to /case-manager-portal only.</span></div>
+          <div class="check-row"><input type="checkbox" data-step="D6"><label>Mark D6 as tested</label></div>
+        </div>
+      </section>
+
+      <!-- ================= SUMMARY / WRAP UP ================= -->
+      <h2 class="major" id="summary">Full Cycle Summary — What You Have Just Tested</h2>
+      <p style="font-size:14px;">If all steps above passed, you have verified the complete VTA workflow from start to finish:</p>
+      <div class="flow-diagram">
+        <div class="step-line">Enquiry received <span class="tag">(A2)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Company + Case Manager created <span class="tag">(A3)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">NDA signed, Materials sent <span class="tag">(A4, A5)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Communication logged + follow-up date set <span class="tag">(A6)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Follow-up shows on Team Calendar, then marked Done <span class="tag">(A6B)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Patient created <span class="tag">(A7)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Associate assigned <span class="tag">(A8)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Status tracked through workflow <span class="tag">(A9, A12, A15, A18)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Documents uploaded <span class="tag">(A10)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Case notes visible on the patient's own page <span class="tag">(A10B)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Cost estimation sent <span class="tag">(A11, A16)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Appointment booked and completed <span class="tag">(A13, A14, A15)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Funding approval received <span class="tag">(A17)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Treatment active <span class="tag">(A18)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Associate uploads case note <span class="tag">(C4)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Associate invoice logged <span class="tag">(A19)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">VTA invoice created and sent <span class="tag">(A20)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Funding balance tracked <span class="tag">(A21)</span></div>
+        <div class="arrow">↓</div>
+        <div class="step-line">Finance reports reviewed <span class="tag">(A25)</span></div>
+      </div>
+
+      <h2 class="major" id="issues">What to Do If Something Does Not Work</h2>
+      <ol class="escalate-list">
+        <li>Note down the exact step that failed (e.g. "Step A17 — funding cycle save button did nothing")</li>
+        <li>Take a screenshot if possible</li>
+        <li>Note the exact error message shown</li>
+        <li>Send to Jai at <a href="mailto:jai@vestibulartherapyassociates.co.uk">jai@vestibulartherapyassociates.co.uk</a> with the subject: <strong>VTA Portal UAT — Issue Found</strong></li>
+      </ol>
+
+      <h2 class="major" id="feedback">Things to Specifically Check and Give Feedback On</h2>
+      <p style="font-size:14px;">Beyond pass/fail, please give Jai your opinion on:</p>
+      <ol class="feedback-list">
+        <li><strong>Is the terminology correct?</strong> Does the portal use the same words you use (e.g. "Funding Cycle", "Cost Estimation", "Associate")</li>
+        <li><strong>Is anything missing?</strong> Is there any step in your current workflow that the portal does not seem to cover?</li>
+        <li><strong>Is anything confusing?</strong> Any screen or label that is unclear</li>
+        <li><strong>Mobile use:</strong> Try accessing the portal on your phone — does it work comfortably?</li>
+        <li><strong>Speed:</strong> Does the portal feel fast enough for daily use?</li>
+      </ol>
+
+      <footer>
+        UAT Guide Version: 1.1 | June 2026 (updated 22 June — added A6B Follow-up Calendar check, A10B Case Notes on Patient page, A10C Patient Notes save check; corrected A2/A3 Company/Case Manager dropdown + quick-add flow, removed inaccurate "Also link to Case Manager" toggle and unsupported "Job Title" field, corrected "Add Communication" to "Log Communication")<br>
+        Portal URL: <a href="https://easyerp.co.in/vta-portal/login">https://easyerp.co.in/vta-portal/login</a><br>
+        Prepared by: Jai Anand | jai@vestibulartherapyassociates.co.uk
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script>
+(function() {
+  var checkboxes = document.querySelectorAll('.check-row input[type="checkbox"]');
+  var total = checkboxes.length;
+  var pctEl = document.getElementById('progressPct');
+  var countEl = document.getElementById('progressCount');
+  var fillEl = document.getElementById('progressFill');
+  var STORAGE_KEY = 'vta_uat_progress_v1';
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+  function saveState(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  var state = loadState();
+  checkboxes.forEach(function(cb) {
+    var key = cb.getAttribute('data-step');
+    if (state[key]) cb.checked = true;
+  });
+
+  function update() {
+    var checked = 0;
+    checkboxes.forEach(function(cb) { if (cb.checked) checked++; });
+    var pct = total ? Math.round((checked / total) * 100) : 0;
+    pctEl.textContent = pct + '%';
+    countEl.textContent = checked + '/' + total;
+    fillEl.style.width = pct + '%';
+  }
+
+  checkboxes.forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      var s = loadState();
+      s[cb.getAttribute('data-step')] = cb.checked;
+      saveState(s);
+      update();
+    });
+  });
+
+  countEl.textContent = '0/' + total;
+  update();
+})();
+</script>
+
+</body>
+</html>

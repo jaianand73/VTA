@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VTA Portal — Functional Overview &amp; Workflow Guide</title>
+<style>
+  :root {
+    --teal: #0092b4;
+    --teal-dark: #007a9a;
+    --teal-light: #e6f6fa;
+    --green: #16a34a;
+    --green-light: #ecfdf3;
+    --purple: #7c3aed;
+    --purple-light: #f4f0fe;
+    --amber: #d97706;
+    --amber-light: #fff8eb;
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f7f8fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+    font-size: 14px;
+  }
+  a { color: var(--teal); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    background: #eef2f5;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    color: #0f172a;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  .cover {
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
+    color: #fff;
+    padding: 50px 48px 40px;
+  }
+  .cover .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+  }
+  .cover h1 { font-size: 28px; margin: 0 0 6px; font-weight: 800; }
+  .cover .sub1 { font-size: 15px; opacity: 0.95; margin: 0 0 2px; }
+  .cover .sub2 { font-size: 13px; opacity: 0.85; }
+
+  .readme {
+    background: var(--amber-light);
+    border-left: 5px solid var(--amber);
+    margin: 0;
+    padding: 16px 48px;
+    font-size: 13.5px;
+    color: #7c4a03;
+  }
+
+  .content { padding: 8px 48px 60px; }
+
+  h2.section-h {
+    font-size: 18px;
+    color: #fff;
+    background: var(--teal);
+    padding: 10px 18px;
+    border-radius: 8px;
+    margin: 38px 0 18px;
+  }
+
+  table.replace-table, table.glossary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 10px 0 6px;
+    background: #fff;
+  }
+  table.replace-table th, table.glossary-table th {
+    text-align: left;
+    background: var(--teal-light);
+    color: var(--teal-dark);
+    padding: 8px 10px;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    border: 1px solid var(--border);
+  }
+  table.replace-table td, table.glossary-table td {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  .role-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 14px 0; }
+  .role-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    border-left: 5px solid var(--teal);
+  }
+  .role-card.staff { border-left-color: var(--green); }
+  .role-card.associate { border-left-color: var(--purple); }
+  .role-card.casemanager { border-left-color: var(--amber); }
+  .role-card h4 { margin: 0 0 6px; font-size: 14.5px; }
+  .role-card p { margin: 4px 0; font-size: 12.5px; color: #4b5563; }
+  .role-card .lbl { font-weight: 700; color: var(--ink); }
+
+  .flow-diagram {
+    background: #0f1b22;
+    color: #d7f3fb;
+    border-radius: 12px;
+    padding: 20px 26px;
+    font-size: 13px;
+    line-height: 1.85;
+    margin: 14px 0;
+  }
+  .flow-diagram .arrow { color: #5fc7de; text-align: center; }
+  .flow-diagram .step-line { color: #fff; }
+  .flow-diagram .gate { color: #fbbf24; font-weight: 700; }
+
+  .stage-block {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+  }
+  .stage-block h4 { margin: 0 0 6px; font-size: 14px; color: var(--teal-dark); }
+  .stage-block p { margin: 0; font-size: 13px; color: #374151; }
+
+  .note-callout {
+    background: var(--amber-light);
+    border-left: 4px solid var(--amber);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    margin-top: 10px;
+    color: #7c4a03;
+  }
+  ul.rule-list, ul.new-list { padding-left: 20px; font-size: 13.5px; }
+  ul.rule-list li, ul.new-list li { margin-bottom: 8px; }
+
+  .howto-steps { padding-left: 22px; font-size: 13.5px; }
+  .howto-steps li { margin-bottom: 7px; }
+
+  footer {
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--muted);
+    padding: 28px 20px 50px;
+    border-top: 1px solid var(--border);
+    margin-top: 30px;
+  }
+
+  @media print {
+    body { background: #fff; font-size: 11.5px; }
+    .cover { background: var(--teal) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 30px 36px; }
+    .readme { padding: 12px 36px; }
+    .content { padding: 8px 36px 30px; }
+    h2.section-h { -webkit-print-color-adjust: exact; print-color-adjust: exact; break-after: avoid; margin-top: 26px; }
+    .role-card, .stage-block, table { break-inside: avoid; }
+    .role-grid { grid-template-columns: repeat(2, 1fr); }
+    a { color: var(--ink) !important; text-decoration: none; }
+    .flow-diagram { break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  @media (max-width: 720px) {
+    .role-grid { grid-template-columns: 1fr; }
+    .cover, .content, .readme { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="cover">
+    <span class="badge">FUNCTIONAL OVERVIEW</span>
+    <h1>VTA Portal — Functional Overview &amp; Workflow Guide</h1>
+    <p class="sub1">Vestibular Therapy Associates</p>
+    <p class="sub2">June 2026 &nbsp;|&nbsp; For: Dr. Samy Selvanayagam &nbsp;|&nbsp; Version 1.0</p>
+  </div>
+
+  <div class="readme">
+    <strong>Read this first, then use VTA_Portal_UAT_Guide.md (or its .html version) to actually click through and test.</strong>
+    This document explains <em>what</em> the portal does and <em>why</em> it's built the way it is. The UAT Guide tells you exactly what to click. This one gives you the mental model so the UAT steps make sense rather than feeling like a list of disconnected clicks.
+  </div>
+
+  <div class="content">
+
+    <h2 class="section-h">1. What This Portal Does</h2>
+    <p>The VTA Portal is a single system that replaces several things you currently juggle separately:</p>
+    <table class="replace-table">
+      <tr><th>You currently use...</th><th>For...</th><th>The portal replaces it with...</th></tr>
+      <tr><td><strong>Excel tracker</strong></td><td>Logging enquiries, tracking status, follow-up dates, nearest associate</td><td>Enquiries, Patients, and Communications screens with built-in status workflow and follow-up reminders</td></tr>
+      <tr><td><strong>Desktop folders</strong> (Company → Case Manager → Patient)</td><td>Storing documents</td><td>Documents attached directly to the Company, Case Manager, or Patient record — searchable, permission-controlled, never misfiled</td></tr>
+      <tr><td><strong>Qunote calendar</strong></td><td>Booking and tracking appointments</td><td>A shared Team Calendar, plus each Associate's own filtered view</td></tr>
+      <tr><td><strong>Xero</strong></td><td>Invoicing associates and funders</td><td>Associate Invoices and VTA Invoices, with auto-calculated rates and auto-generated invoice numbers</td></tr>
+      <tr><td><strong>Email inbox</strong></td><td>Tracking enquiries that come in by email</td><td>Email Intake screen — emails can be linked straight to a patient or used to create one</td></tr>
+    </table>
+    <p style="margin-top:14px;">The core idea: <strong>one patient's entire journey — from first enquiry to discharge — lives in one place</strong>, with the right people seeing the right amount of it.</p>
+
+    <h2 class="section-h">2. The Four Roles</h2>
+    <p>Every person who logs in is one of four roles. The role decides what they see the moment they log in — there's no separate "permissions setup" you need to do per person beyond picking their role.</p>
+    <div class="role-grid">
+      <div class="role-card">
+        <h4>Admin <span style="color:var(--muted); font-weight:400;">— You (Samy), Jai</span></h4>
+        <p><span class="lbl">Lands on:</span> Main Dashboard</p>
+        <p><span class="lbl">Can see:</span> Everything — all patients, all companies, finance, settings</p>
+        <p><span class="lbl">Restrictions:</span> None</p>
+      </div>
+      <div class="role-card staff">
+        <h4>Staff <span style="color:var(--muted); font-weight:400;">— Sheeba</span></h4>
+        <p><span class="lbl">Lands on:</span> Main Dashboard</p>
+        <p><span class="lbl">Can see:</span> All patients and companies, same as Admin — except finance</p>
+        <p><span class="lbl">Restrictions:</span> No invoices, no revenue reports, cannot delete documents</p>
+      </div>
+      <div class="role-card associate">
+        <h4>Associate <span style="color:var(--muted); font-weight:400;">— Kate and the other therapists</span></h4>
+        <p><span class="lbl">Lands on:</span> Associate Portal (separate, simplified view)</p>
+        <p><span class="lbl">Can see:</span> Only their own assigned patients — nothing else</p>
+        <p><span class="lbl">Restrictions:</span> No other associates' patients, no Companies, Email Intake, or finance</p>
+      </div>
+      <div class="role-card casemanager">
+        <h4>Case Manager <span style="color:var(--muted); font-weight:400;">— Sarah, Michael, David</span></h4>
+        <p><span class="lbl">Lands on:</span> Case Manager Portal (separate, simplified, read-only)</p>
+        <p><span class="lbl">Can see:</span> Only patients belonging to their own company</p>
+        <p><span class="lbl">Restrictions:</span> Fully read-only — view and download permitted documents only</p>
+      </div>
+    </div>
+    <p style="margin-top:10px;"><strong>A few things worth understanding about this design:</strong></p>
+    <ul class="rule-list">
+      <li>Associates and Case Managers don't get the same screens as you. They're redirected to their own simplified portal the moment they log in — they never see your main navigation menu at all, not even a greyed-out version of it.</li>
+      <li>Case Managers are fully read-only. Until you decide otherwise, they can only look and download — there is no "edit" capability for them anywhere, by design. This protects your data from accidental changes by people outside your organisation.</li>
+      <li>Document visibility per role is separately configurable. Even within what an Associate or Case Manager can see, you control <em>which types</em> of documents they're allowed to view (Settings → Document Permissions) — e.g. you might let Case Managers see Assessment Reports but not Medical Records.</li>
+    </ul>
+
+    <h2 class="section-h">3. The End-to-End Workflow</h2>
+    <p>This is the heart of the system: every patient has a <strong>Status</strong> that moves through a fixed sequence of stages. You can't skip stages, and a few stages have a hard gate that physically blocks you from moving forward without the right document — this is intentional, to stop "Treatment Active" ever happening without funding actually being in writing.</p>
+    <div class="flow-diagram">
+      <div class="step-line">1. Enquiry Logged — someone gets in touch</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">2. Response Sent — you've replied to the enquirer</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">3. Awaiting LOI — waiting on the Letter of Instruction</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">4. LOI Received</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">5. Assessment Scheduled — appointment booked with an Associate</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">6. Assessment Completed</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">7. Report Drafted</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">8. Report Sent — report sent to the referrer</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">9. Cost Estimation Sent — quote for treatment sent</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">10. Awaiting Funding Approval</div>
+      <div class="arrow">↓</div>
+      <div class="step-line gate">11. Funding Approved 🔒 — BLOCKED until a Funding Cycle with an approval document is uploaded</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">12. Treatment Active — sessions happening, case notes logged, invoices raised</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">13. Awaiting Further Funding — if treatment needs to extend</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">14. Discharged</div>
+      <div class="arrow">↓</div>
+      <div class="step-line">15. Case Closed — administratively closed</div>
+    </div>
+
+    <p style="margin-top:18px;"><strong>What happens at each major stage, and who's involved:</strong></p>
+
+    <div class="stage-block">
+      <h4>Enquiry (stages 1–4)</h4>
+      <p>Someone — usually a Case Manager, solicitor, or family member — contacts VTA. You log it as an Enquiry first (quick capture: who, which company, why), before creating any permanent records. Only once you decide to proceed do you "Convert" the enquiry into proper Company and Case Manager records (or link it to ones that already exist). Communications (calls, emails) with the enquirer can be logged from this point on, each with an optional follow-up date that shows up on the Team Calendar so nothing gets forgotten.</p>
+    </div>
+    <div class="stage-block">
+      <h4>Assessment (stages 5–8)</h4>
+      <p>The patient record is created, an Associate is assigned (based on location/specialism), and an appointment is booked. After the assessment happens, a report is drafted and sent.</p>
+    </div>
+    <div class="stage-block">
+      <h4>Funding (stages 9–11)</h4>
+      <p>A Cost Estimation (a quote) is sent to whoever is paying — the Case Manager's company, a solicitor, or an insurer. Once funding is agreed, you create a <strong>Funding Cycle</strong> — the formal record of "£X has been approved for Y sessions," requiring an uploaded approval document. <strong>The portal will not let you mark a patient as Funding Approved without this document attached</strong> — a deliberate safety rule, worth testing it actually blocks you.</p>
+    </div>
+    <div class="stage-block">
+      <h4>Treatment (stages 12–13)</h4>
+      <p>Sessions happen. The Associate logs a Case Note after each one (visible to you on the patient's own page, with a sign-off status). You log the Associate's invoice when it arrives, and raise your own invoice to the funder against the Funding Cycle — the remaining balance updates automatically, and marking your invoice "Sent" is blocked until a document is attached to it, same idea as the funding gate.</p>
+    </div>
+    <div class="stage-block">
+      <h4>Closure (stages 14–15)</h4>
+      <p>Treatment ends, the case is discharged, and eventually closed administratively.</p>
+    </div>
+
+    <h2 class="section-h">4. The Records Involved (Glossary)</h2>
+    <table class="glossary-table">
+      <tr><th>Record</th><th>What it is</th><th>Created by</th></tr>
+      <tr><td><strong>Enquiry</strong></td><td>The very first log of someone getting in touch. Lightweight — just enough to capture who and why.</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>Company</strong></td><td>The organisation that refers patients — case management firm, law firm, or insurer. A master record, picked from a dropdown everywhere it's used.</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>Case Manager</strong></td><td>A named person at a Company who refers patients and is your day-to-day contact. Also a master record.</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>Patient</strong></td><td>The actual person receiving treatment. Belongs to one Case Manager at a time (can be transferred).</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>Associate</strong></td><td>Your therapists who carry out assessments and treatment. Has a session rate and a travel rate, used to auto-calculate invoices.</td><td>Admin/Staff (Settings)</td></tr>
+      <tr><td><strong>Communication</strong></td><td>A logged call, email, letter, meeting, or message — with anyone (enquirer, Case Manager, or about a Patient). Can carry a follow-up date.</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>Follow-up</strong></td><td>Not a separate record — a date set on a Communication. Shows as a purple marker on the Team Calendar while open; "Mark Done" clears it.</td><td>Set on a Communication</td></tr>
+      <tr><td><strong>Case Note</strong></td><td>A clinical note an Associate writes after a treatment session. Needs Admin sign-off. Shown on the Patient's own page.</td><td>Associate</td></tr>
+      <tr><td><strong>Document</strong></td><td>Any file — LOI, assessment report, funding approval, invoice PDF, correspondence. Attaches to an Enquiry, Company/Case Manager, or Patient. Visibility per type controlled in Settings.</td><td>Anyone with upload rights</td></tr>
+      <tr><td><strong>Cost Estimation</strong></td><td>A quote for treatment, sent to the payer. A patient can have several over time.</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>Funding Cycle</strong></td><td>The formal record of approved funding — amount, sessions, approval document. The gate before treatment can become "Active."</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>Associate Invoice</strong></td><td>What an Associate bills VTA for sessions and travel. Due date auto-set to 28 days out.</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>VTA Invoice</strong></td><td>What VTA bills the funder. Auto-numbered (VTA-2026-0001, etc.), tracked against the Funding Cycle's remaining balance.</td><td>Admin/Staff</td></tr>
+      <tr><td><strong>Activity Type</strong></td><td>The kind of appointment (Initial Assessment, Treatment Session, Video Consultation, etc.) — extendable without a developer.</td><td>Admin (Settings)</td></tr>
+      <tr><td><strong>Document Type</strong></td><td>The category a Document falls into (LOI, Assessment Report, Medical Records, etc.) — extendable, each with its own per-role visibility toggle.</td><td>Admin (Settings)</td></tr>
+    </table>
+    <div class="note-callout">
+      <strong>A note on Companies and Case Managers being "master records":</strong> earlier in development, these were free-text fields — meaning the same company could end up typed three slightly different ways across different enquiries, making it impossible to reliably group a Case Manager's patients together. They're now proper dropdown-selected records with a quick "+ Add New" option when one genuinely doesn't exist yet — worth specifically checking during UAT (Guide steps A2/A3).
+    </div>
+
+    <h2 class="section-h">5. Safety Rules Built Into the Portal</h2>
+    <p>These aren't configurable — they're deliberately hard-coded so the system enforces good practice even under time pressure:</p>
+    <ul class="rule-list">
+      <li><strong>Can't mark a patient "Funding Approved"</strong> without an uploaded funding approval document attached to a Funding Cycle.</li>
+      <li><strong>Can't mark a VTA Invoice "Sent"</strong> without a document attached (the invoice itself, as a PDF).</li>
+      <li><strong>An Associate can only hold one active role per patient at a time</strong> (e.g. can't be assigned "Assessment" twice simultaneously) — stops accidental double-booking of the same function.</li>
+      <li><strong>Patient status can only move to specific next stages</strong>, not jump arbitrarily (e.g. can't jump straight from "Enquiry Logged" to "Treatment Active").</li>
+      <li><strong>Associates and Case Managers only ever see their own patients</strong> — enforced at the data level, not just hidden in the menu.</li>
+      <li><strong>Document visibility is checked per document type and per role every time</strong>, not just once when uploaded — so changing a permission in Settings takes effect immediately across all existing documents of that type.</li>
+    </ul>
+
+    <h2 class="section-h">6. What's New Since the Last Round of Testing</h2>
+    <p>A few things were added specifically because they came up during hands-on testing, not in the original plan — worth knowing about going in:</p>
+    <ul class="new-list">
+      <li><strong>Follow-up dates on Communications now show on the Team Calendar</strong> as a separate purple marker, with a one-click "Mark Done" — previously a follow-up date just sat unseen on a Communication record.</li>
+      <li><strong>Case Notes now appear directly on the Patient's own page</strong> (previously only visible via a separate, disconnected Case Notes menu).</li>
+      <li><strong>A few bugs were found and fixed:</strong> saving the free-text Notes box on a Patient was throwing an error; leaving the Summary blank on a Communication was throwing an error; a couple of dropdown menus didn't match what was actually stored in the database (Company Type, Enquiry Source).</li>
+    </ul>
+    <p>All of this is covered in the UAT Guide's new steps (A6B, A10B, A10C, and the tweaks to A2/A3/B7) — you'll exercise all of it naturally as you go through.</p>
+
+    <h2 class="section-h">7. How to Use This Alongside the UAT Guide</h2>
+    <ol class="howto-steps">
+      <li>Read this document end to end first — no clicking required.</li>
+      <li>Keep the Glossary (Section 4) and the Workflow diagram (Section 3) open in another tab while you test — most of the UAT Guide's steps map directly onto one stage of that workflow.</li>
+      <li>Open <code>VTA_Portal_UAT_Guide.md</code> (or the formatted <code>.html</code> version) and work through Section A as Admin, exactly as written.</li>
+      <li>When a step's "What this represents" note doesn't quite make sense, come back here — it's almost certainly explained in Section 3 or 4.</li>
+      <li>Anything that doesn't behave as this document or the UAT Guide describes is worth flagging to Jai — that's the whole point of UAT.</li>
+    </ol>
+
+    <footer>
+      Functional Overview Version: 1.0 | June 2026<br>
+      Companion document to: VTA_Portal_UAT_Guide.md<br>
+      Prepared by: Jai Anand | jai@vestibulartherapyassociates.co.uk
+    </footer>
+
+  </div>
+</div>
+</body>
+</html>

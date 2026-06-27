@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VTA Portal — Discussion Points for Samy</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: #1F2937;
+    background: #F8F9FA;
+    padding: 32px 16px;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .header {
+    background: #1E3A5F;
+    padding: 24px 28px 20px;
+  }
+  .header h1 { color: #fff; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .header p  { color: #90AECB; font-size: 12px; line-height: 1.6; }
+
+  .body { padding: 24px 28px; }
+
+  .intro {
+    background: #F0F7FF;
+    border-left: 4px solid #1E3A5F;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  /* Section */
+  .section { margin-bottom: 28px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #E5E7EB;
+  }
+  .section-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #1E3A5F;
+    color: #fff;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 15px; font-weight: 700; color: #1E3A5F; }
+  .section-tag {
+    margin-left: auto;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 10px; border-radius: 20px;
+  }
+  .tag-decision  { background: #FEF3C7; color: #92400E; }
+  .tag-gap       { background: #FEE2E2; color: #991B1B; }
+  .tag-question  { background: #D0E4F7; color: #1E3A5F; }
+  .tag-process   { background: #D4EDDA; color: #145C37; }
+
+  /* Cards inside sections */
+  .card {
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .card-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+  }
+  .card-label {
+    width: 120px;
+    flex-shrink: 0;
+    padding: 10px 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-right: 1px solid #E5E7EB;
+    background: #F9FAFB;
+    color: #4B5563;
+    line-height: 1.4;
+  }
+  .card-content {
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #1F2937;
+    line-height: 1.6;
+    flex: 1;
+  }
+  .card-row + .card-row { border-top: 1px solid #E5E7EB; }
+
+  .card-content.situation { background: #fff; }
+  .card-content.question  { background: #F0F7FF; }
+  .card-content.suggest   { background: #F0FDF4; }
+
+  .q-mark { color: #1E3A5F; font-weight: 700; margin-right: 4px; }
+  .s-mark { color: #145C37; font-weight: 700; margin-right: 4px; }
+
+  /* Open question block */
+  .open-q {
+    background: #FFFBEB;
+    border: 1px solid #FCD34D;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .open-q-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #92400E; margin-bottom: 6px;
+  }
+  .open-q p { font-size: 13px; color: #374151; line-height: 1.6; }
+
+  /* Footer */
+  .footer {
+    border-top: 1px solid #E5E7EB;
+    padding: 14px 0 0;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #6B7280;
+  }
+  .footer-right { font-size: 12px; font-weight: 700; color: #1E3A5F; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <h1>VTA Portal — Discussion Points for Samy</h1>
+    <p>Prepared by Jai Anand &nbsp;·&nbsp; June 2026 &nbsp;·&nbsp; Portal Review &amp; Next Steps</p>
+  </div>
+
+  <div class="body">
+
+    <div class="intro">
+      Five topics to cover in today's call. Each topic has the current situation, a direct question for Samy, and a suggested direction. The goal is to get Samy's input before making any changes — especially since he was testing the portal yesterday and may have his own observations.
+    </div>
+
+
+    <!-- SECTION 1 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <div class="section-title">Funding Approval — How Should This Work?</div>
+        <span class="section-tag tag-decision">Decision needed</span>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">Current situation</div>
+          <div class="card-content situation">
+            The portal has a "Funding Cycle" record separate from the Cost Estimation. To move a patient to "Funding Approved" status, a Funding Cycle with an approval document must exist. But right now there is no "Add Funding Cycle" button on the patient page — and the create form has no document upload field. So the gate is there in the code but cannot actually be completed through the UI.
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Question for Samy</div>
+          <div class="card-content question">
+            <span class="q-mark">Q1.</span> When you receive the funder's approval email, what do you do with it today? Do you file it in a folder, forward it somewhere, or just keep it in your inbox?<br><br>
+            <span class="q-mark">Q2.</span> Would it work for you to come into the portal, find the patient, and click a single "Record Funding Approval" button — which asks you to upload that email/letter and enter the approved amount? Or do you prefer a different flow?
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Suggestion</div>
+          <div class="card-content suggest">
+            <span class="s-mark">→</span> Add a prominent <strong>"Record Funding Approval"</strong> button on the patient page, visible only when status is "Awaiting Funding Approval." It opens a focused form: upload approval document + approved amount + funder reference + date. One action completes everything and moves the patient to "Funding Approved." The approval document is stored as legal proof and visible on the patient's document list.
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SECTION 2 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <div class="section-title">Cost Estimation + Funding Cycle — Simplify Into One?</div>
+        <span class="section-tag tag-decision">Decision needed</span>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">Current situation</div>
+          <div class="card-content situation">
+            The portal has two separate records: Cost Estimation (the quote you sent) and Funding Cycle (the approval you received). These are always linked — there is no approval without a prior quote. Having two records makes the workflow more complicated than it needs to be.
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Question for Samy</div>
+          <div class="card-content question">
+            <span class="q-mark">Q3.</span> In your current Excel, you have "Fee agreed with referrer" and "Funding agreed Phase 1 / Phase 2 / Phase 3" — these are just two columns on the same row (same phase). Would it make sense for the portal to work the same way — one record per phase, where you first fill in what you quoted, and later fill in what was approved?<br><br>
+            <span class="q-mark">Q4.</span> Is there ever a case where an approval comes in that doesn't match a specific cost estimation you sent? (e.g. a funder approves a different amount or different number of sessions than you quoted?)
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Suggestion</div>
+          <div class="card-content suggest">
+            <span class="s-mark">→</span> Merge both into an enhanced <strong>Cost Estimation</strong> record with two halves: <em>Estimated Amount</em> (what you quoted) and <em>Approved Amount</em> (what they confirmed). Balance tracking — invoiced vs remaining — sits on the same record. One record per phase, full picture in one place.
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SECTION 3 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <div class="section-title">Email as the Evidence Trail</div>
+        <span class="section-tag tag-process">Process question</span>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">Current situation</div>
+          <div class="card-content situation">
+            In VTA's workflow, nearly every financial event is triggered by an email — approval comes by email, associate invoice arrives by email, payment confirmation arrives by email. The portal currently has an Email Intake screen that links emails to patients, but there is no connection between those emails and the financial records (invoices, approvals). If a funder ever disputes a payment, you would need to go back to your email client to find the proof — the portal cannot answer that question today.
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Question for Samy</div>
+          <div class="card-content question">
+            <span class="q-mark">Q5.</span> When a funder's approval email arrives in operations@, who processes it today — you or Sheeba? And what happens to that email after you've read it?<br><br>
+            <span class="q-mark">Q6.</span> If there was ever a dispute with a funder about what was agreed, what document would you currently use as your proof? Is the approval email usually clear enough (i.e. does it state the amount and reference number explicitly)?<br><br>
+            <span class="q-mark">Q7.</span> When associates send their invoices, do they always attach a PDF, or is it sometimes just numbers in the email body?
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Suggestion</div>
+          <div class="card-content suggest">
+            <span class="s-mark">→</span> Extend Email Intake so that when staff process an email, they can tag it as a financial event — "Funding Approval", "Associate Invoice", "Payment Confirmation." The email is then linked directly to the relevant financial record in the portal. Every invoice and approval would have the originating email one click away. Full audit trail, no digging through inboxes.
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SECTION 4 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <div class="section-title">Associate Invoices — Rate Calculation &amp; Process</div>
+        <span class="section-tag tag-gap">Gap in portal</span>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">Current situation</div>
+          <div class="card-content situation">
+            Each associate has a session rate and travel rate stored in the portal. But when staff log an associate invoice, the portal does not auto-calculate the expected amount — staff type in all the numbers manually. Also, the associate invoice form currently shows all patients in the dropdown, not just patients assigned to the selected associate.
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Question for Samy</div>
+          <div class="card-content question">
+            <span class="q-mark">Q8.</span> When Kate sends her invoice, does she always charge exactly her agreed session rate × sessions, or do the amounts sometimes vary? (e.g. different rates for different activity types, or negotiated exceptions?).<br><br>
+            <span class="q-mark">Q9.</span> Are all associates' rates up to date in the portal settings right now? If not, which ones need updating?<br><br>
+            <span class="q-mark">Q10.</span> Does Sheeba typically log associate invoices, or do you do this yourself?
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label">Suggestion</div>
+          <div class="card-content suggest">
+            <span class="s-mark">→</span> When an associate and number of sessions are selected on the invoice form, auto-calculate the expected amount from their rate card. Staff can override if the actual invoice differs. Also filter the patient dropdown to only patients assigned to that associate — reduces errors and speeds up logging.
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SECTION 5 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <div class="section-title">Samy's Testing Yesterday — His Observations</div>
+        <span class="section-tag tag-question">Open question</span>
+      </div>
+
+      <div class="open-q">
+        <div class="open-q-label">Start with this</div>
+        <p>Before going through the above points, ask Samy to share what he found when testing the portal yesterday. He may have spotted issues or had ideas that should be addressed first, or that change the direction of some of the suggestions above. His hands-on experience with the actual screens is more valuable than any analysis done from the code side.</p>
+      </div>
+
+      <div class="open-q">
+        <div class="open-q-label">Specific prompts if he needs them</div>
+        <p>
+          — Was there anything you tried to do that the portal would not let you do?<br>
+          — Was there any screen that was confusing or did not match how you work?<br>
+          — Was the patient status workflow (the 15 stages) clear, or does it need simplifying?<br>
+          — Did the Funding Overview on the patient page make sense to you?<br>
+          — Is there anything from your Excel tracker that you could not find an equivalent for in the portal?
+        </p>
+      </div>
+    </div>
+
+
+    <!-- SECTION 6 — summary -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <div class="section-title">Quick Summary — What Needs a Decision Today</div>
+        <span class="section-tag tag-decision">Action items</span>
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label" style="background:#FEF3C7;color:#92400E;">Must decide</div>
+          <div class="card-content situation">
+            <strong>A.</strong> Should Cost Estimation and Funding Cycle be one combined record or stay separate?<br>
+            <strong>B.</strong> Should "Record Funding Approval" be a single dedicated action on the patient page?<br>
+            <strong>C.</strong> Should the portal store the approval email as a linked document (not just an upload)?
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label" style="background:#D4EDDA;color:#145C37;">Can build now</div>
+          <div class="card-content situation">
+            <strong>D.</strong> Add "Add Funding Cycle" button to patient page — straightforward fix, no design decision needed.<br>
+            <strong>E.</strong> Add document upload to Funding Cycle create form — required for the gate check to work.<br>
+            <strong>F.</strong> Associate invoice rate auto-calculation — confirmed gap, no ambiguity.
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-label" style="background:#F0F7FF;color:#1E3A5F;">For later</div>
+          <div class="card-content situation">
+            <strong>G.</strong> Email threading — linking outbound emails (invoices sent) back into the portal. This requires routing emails through the portal rather than Samy's email client. Bigger change, worth planning.
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="footer">
+      <div>VTA Portal &nbsp;·&nbsp; Discussion Document &nbsp;·&nbsp; June 2026 &nbsp;·&nbsp; Prepared by Jai Anand</div>
+      <div class="footer-right">Internal — Not for Distribution</div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

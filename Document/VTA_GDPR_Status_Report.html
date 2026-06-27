@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GDPR Compliance Status Report — Vestibular Therapy Associates</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    color: #1F2937;
+    background: #F8F9FA;
+    padding: 32px 16px;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: #1E3A5F;
+    padding: 20px 24px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .header-left h1 {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .header-left p {
+    color: #90AECB;
+    font-size: 12px;
+  }
+  .badge-deadline {
+    background: #1A7A4A;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── BODY PADDING ── */
+  .body { padding: 20px 24px; }
+
+  /* ── METRICS ── */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .metric {
+    padding: 14px 10px;
+    text-align: center;
+    background: #F5F5F5;
+    border-right: 1px solid #E5E7EB;
+  }
+  .metric:last-child { border-right: none; }
+  .metric-num {
+    display: block;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .metric-label { font-size: 11px; color: #4B5563; }
+  .green-num { color: #1A7A4A; }
+  .amber-num { color: #92400E; }
+  .blue-num  { color: #1E3A5F; }
+
+  /* ── SUMMARY BOX ── */
+  .summary {
+    background: #F5F5F5;
+    border-left: 4px solid #1A7A4A;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 16px;
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #4B5563;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: #F5F5F5;
+    padding: 7px 12px;
+    border: 1px solid #E5E7EB;
+    border-bottom: none;
+  }
+
+  /* ── STATUS TWO COLUMNS ── */
+  .status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 12px;
+    margin-bottom: 16px;
+  }
+  .status-col {}
+  .status-col-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: #4B5563;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: #F5F5F5;
+    padding: 7px 12px;
+    border: 1px solid #E5E7EB;
+    border-bottom: none;
+  }
+  .status-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1px solid #E5E7EB;
+    border-bottom: none;
+    background: #fff;
+  }
+  .status-item:nth-child(odd) { background: #fff; }
+  .status-item:nth-child(even) { background: #F9FAFB; }
+  .status-item:last-child { border-bottom: 1px solid #E5E7EB; }
+  .status-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .icon-done    { background: #D4EDDA; color: #1A7A4A; }
+  .icon-pending { background: #FEF3C7; color: #92400E; }
+  .icon-partial { background: #D0E4F7; color: #1E3A5F; }
+  .status-body {}
+  .status-title { font-size: 13px; font-weight: 700; color: #1F2937; margin-bottom: 2px; }
+  .status-sub   { font-size: 11px; color: #6B7280; line-height: 1.4; }
+
+  /* ── ACTION ITEMS ── */
+  .actions-wrap { margin-bottom: 16px; }
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid #E5E7EB;
+    border-bottom: none;
+    background: #fff;
+  }
+  .action-item:last-child { border-bottom: 1px solid #E5E7EB; }
+  .action-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #1E3A5F;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .action-body {}
+  .action-title  { font-size: 13px; font-weight: 700; color: #1F2937; margin-bottom: 4px; }
+  .action-detail { font-size: 12px; color: #4B5563; line-height: 1.5; margin-bottom: 7px; }
+  .action-tags   { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .tag-samy     { background: #D4EDDA; color: #145C37; }
+  .tag-jai      { background: #D0E4F7; color: #1E3A5F; }
+  .tag-deadline { background: #FEF3C7; color: #92400E; }
+
+  /* ── CONSULTANTS ── */
+  .consultants-wrap { margin-bottom: 16px; }
+  .consultant-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 14px;
+    border: 1px solid #E5E7EB;
+    border-bottom: none;
+    background: #fff;
+  }
+  .consultant-item:nth-child(even) { background: #F9FAFB; }
+  .consultant-item:last-child { border-bottom: 1px solid #E5E7EB; }
+  .consultant-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #1E3A5F;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .consultant-body {}
+  .consultant-header { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+  .consultant-name { font-size: 13px; font-weight: 700; color: #1F2937; }
+  .consultant-badge {
+    font-size: 10px;
+    font-weight: 700;
+    background: #D4EDDA;
+    color: #145C37;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .consultant-desc { font-size: 12px; color: #4B5563; line-height: 1.5; margin-bottom: 4px; }
+  .consultant-link { font-size: 12px; color: #1E3A5F; text-decoration: none; }
+  .consultant-link:hover { text-decoration: underline; }
+  .consultant-phone { font-size: 12px; color: #6B7280; margin-left: 10px; }
+
+  /* ── FOOTER ── */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #E5E7EB;
+    padding: 12px 0 0;
+    margin-top: 4px;
+  }
+  .footer-left  { font-size: 11px; color: #6B7280; }
+  .footer-right { font-size: 12px; font-weight: 700; color: #1A7A4A; }
+
+  /* ── PRINT STYLES ── */
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; border-radius: 0; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .header { flex-direction: column; }
+    .status-grid { grid-template-columns: 1fr; gap: 12px; }
+    .metrics { grid-template-columns: 1fr; }
+    .metric { border-right: none; border-bottom: 1px solid #E5E7EB; }
+    .metric:last-child { border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h1>GDPR Compliance Status Report</h1>
+      <p>Vestibular Therapy Associates &nbsp;·&nbsp; Prepared for Dr. Samy Selvanayagam &nbsp;·&nbsp; June 2026</p>
+    </div>
+    <div class="badge-deadline">Action by 9 July 2026</div>
+  </div>
+
+  <div class="body">
+
+    <!-- METRICS -->
+    <div class="metrics">
+      <div class="metric">
+        <span class="metric-num green-num">8</span>
+        <span class="metric-label">Items completed</span>
+      </div>
+      <div class="metric">
+        <span class="metric-num amber-num">4</span>
+        <span class="metric-label">Items pending</span>
+      </div>
+      <div class="metric">
+        <span class="metric-num blue-num">1</span>
+        <span class="metric-label">To confirm</span>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+      VTA is in a strong GDPR position. ICO registration is confirmed, UK hosting is in place, and the portal has role-based access and encryption built in. Three GDPR documents have been drafted and are ready for review and signature. Four quick actions are needed within the next two weeks.
+    </div>
+
+    <!-- STATUS TWO COLUMNS -->
+    <div class="status-grid">
+
+      <div class="status-col">
+        <div class="status-col-header">What is already done</div>
+
+        <div class="status-item">
+          <div class="status-icon icon-done">✓</div>
+          <div class="status-body">
+            <div class="status-title">ICO Registration</div>
+            <div class="status-sub">VTA confirmed as registered data controller</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-done">✓</div>
+          <div class="status-body">
+            <div class="status-title">UK-based hosting</div>
+            <div class="status-sub">Krystal Emerald — UK servers, ISO 27001 certified</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-done">✓</div>
+          <div class="status-body">
+            <div class="status-title">SSL / HTTPS encryption</div>
+            <div class="status-sub">All data encrypted in transit — free, auto-renewing</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-done">✓</div>
+          <div class="status-body">
+            <div class="status-title">Role-based access control</div>
+            <div class="status-sub">Each user sees only what their role permits</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-done">✓</div>
+          <div class="status-body">
+            <div class="status-title">Encrypted passwords</div>
+            <div class="status-sub">Stored using bcrypt — never in plain text</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-done">✓</div>
+          <div class="status-body">
+            <div class="status-title">Secure document storage</div>
+            <div class="status-sub">Documents never publicly accessible — authenticated only</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-done">✓</div>
+          <div class="status-body">
+            <div class="status-title">Automated backups</div>
+            <div class="status-sub">Every 4 hours — included in Krystal Emerald</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-done">✓</div>
+          <div class="status-body">
+            <div class="status-title">GDPR documents drafted</div>
+            <div class="status-sub">Privacy Policy, Data Retention Policy, Breach Procedure — ready for sign-off</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="status-col">
+        <div class="status-col-header">What is still pending</div>
+
+        <div class="status-item">
+          <div class="status-icon icon-pending">●</div>
+          <div class="status-body">
+            <div class="status-title">Sign Privacy Policy</div>
+            <div class="status-sub">Document drafted — awaiting Samy's review and signature</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-pending">●</div>
+          <div class="status-body">
+            <div class="status-title">Sign Data Retention Policy</div>
+            <div class="status-sub">Document drafted — awaiting Samy's review and signature</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-pending">●</div>
+          <div class="status-body">
+            <div class="status-title">Sign Data Breach Procedure</div>
+            <div class="status-sub">Document drafted — awaiting Samy's review and signature</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-pending">●</div>
+          <div class="status-body">
+            <div class="status-title">Add Privacy Policy to portal</div>
+            <div class="status-sub">Jai to add link to portal login page after Samy's sign-off</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-partial">■</div>
+          <div class="status-body">
+            <div class="status-title">DPA with Krystal</div>
+            <div class="status-sub">Request from Krystal support — standard document, quick to obtain</div>
+          </div>
+        </div>
+
+        <div class="status-item">
+          <div class="status-icon icon-partial">■</div>
+          <div class="status-body">
+            <div class="status-title">Patient consent review</div>
+            <div class="status-sub">Confirm LOI wording covers patient data processing consent</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACTION ITEMS -->
+    <div class="section-label">Next action items — complete by 9 July 2026</div>
+    <div class="actions-wrap">
+
+      <div class="action-item">
+        <div class="action-num">1</div>
+        <div class="action-body">
+          <div class="action-title">Review and sign the three GDPR documents</div>
+          <div class="action-detail">Privacy Policy, Data Retention Policy and Data Breach Procedure have been drafted and sent. Please review and sign all three. Signed copies to be kept on file.</div>
+          <div class="action-tags">
+            <span class="tag tag-samy">Samy</span>
+            <span class="tag tag-deadline">By 9 July 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-item">
+        <div class="action-num">2</div>
+        <div class="action-body">
+          <div class="action-title">Add Privacy Policy link to portal login page</div>
+          <div class="action-detail">Once Samy has signed the Privacy Policy, Jai will add a link to the VTA Portal login page so all users can access it before logging in.</div>
+          <div class="action-tags">
+            <span class="tag tag-jai">Jai</span>
+            <span class="tag tag-deadline">After Samy's sign-off</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-item">
+        <div class="action-num">3</div>
+        <div class="action-body">
+          <div class="action-title">Request Data Processing Agreement from Krystal</div>
+          <div class="action-detail">Email Krystal support at support.krystal.co.uk asking for their Data Processing Agreement. Standard document — most hosting companies have it ready to send. File it alongside the other GDPR documents.</div>
+          <div class="action-tags">
+            <span class="tag tag-samy">Samy</span>
+            <span class="tag tag-deadline">By 9 July 2026</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-item">
+        <div class="action-num">4</div>
+        <div class="action-body">
+          <div class="action-title">Review LOI wording for patient data consent</div>
+          <div class="action-detail">Confirm the Letter of Instruction template states the patient has consented to their data being shared with VTA for the purpose of receiving vestibular therapy. A GDPR consultant can advise if unsure.</div>
+          <div class="action-tags">
+            <span class="tag tag-samy">Samy</span>
+            <span class="tag tag-deadline">By 9 July 2026</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CONSULTANTS -->
+    <div class="section-label">GDPR consultants — London &amp; UK</div>
+    <div class="consultants-wrap">
+
+      <div class="consultant-item">
+        <div class="consultant-dot"></div>
+        <div class="consultant-body">
+          <div class="consultant-header">
+            <span class="consultant-name">URM Consulting</span>
+            <span class="consultant-badge">Free 30-min consultation</span>
+          </div>
+          <div class="consultant-desc">17-year track record. Free 30-minute consultation for any UK organisation — ideal first step. Gap analysis, virtual DPO and breach support.</div>
+          <a href="https://urmconsulting.com" class="consultant-link" target="_blank">urmconsulting.com</a>
+          <span class="consultant-phone">0118 206 5410</span>
+        </div>
+      </div>
+
+      <div class="consultant-item">
+        <div class="consultant-dot"></div>
+        <div class="consultant-body">
+          <div class="consultant-header">
+            <span class="consultant-name">The DPO Centre</span>
+            <span class="consultant-badge">Healthcare specialist</span>
+          </div>
+          <div class="consultant-desc">Over 1,000 organisations supported. Outsourced DPO service — pay for a Data Protection Officer as a service, no full-time hire needed.</div>
+          <a href="https://dpocentre.com" class="consultant-link" target="_blank">dpocentre.com</a>
+        </div>
+      </div>
+
+      <div class="consultant-item">
+        <div class="consultant-dot"></div>
+        <div class="consultant-body">
+          <div class="consultant-header">
+            <span class="consultant-name">Privacy Helper</span>
+          </div>
+          <div class="consultant-desc">Works with sole traders upwards. Specialises in healthcare. Gap analysis, SAR handling, outsourced DPO and plain-English guidance.</div>
+          <a href="https://privacyhelper.co.uk" class="consultant-link" target="_blank">privacyhelper.co.uk</a>
+        </div>
+      </div>
+
+      <div class="consultant-item">
+        <div class="consultant-dot"></div>
+        <div class="consultant-body">
+          <div class="consultant-header">
+            <span class="consultant-name">Evalian</span>
+          </div>
+          <div class="consultant-desc">Free initial scoping call. Flexible pricing — hourly, daily or fixed project. GDPR Healthcheck and Data Protection Impact Assessment.</div>
+          <a href="https://evalian.co.uk" class="consultant-link" target="_blank">evalian.co.uk</a>
+        </div>
+      </div>
+
+      <div class="consultant-item">
+        <div class="consultant-dot"></div>
+        <div class="consultant-body">
+          <div class="consultant-header">
+            <span class="consultant-name">GDPR Advisor — London</span>
+          </div>
+          <div class="consultant-desc">Central London based. Up to date with the Data Use and Access Act 2026 (Royal Assent June 2026). Gap analysis and ongoing DPO service.</div>
+          <a href="https://gdpradvisor.co.uk" class="consultant-link" target="_blank">gdpradvisor.co.uk</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="footer-left">Vestibular Therapy Associates &nbsp;·&nbsp; GDPR Status Report &nbsp;·&nbsp; June 2026 &nbsp;·&nbsp; Prepared by Jai Anand</div>
+      <div class="footer-right">ICO Registered ✓</div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

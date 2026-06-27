@@ -1,0 +1,17 @@
+/vta-portal/.env
+/vta-portal/vendor/
+/vta-portal/node_modules/
+/vta-portal/storage/framework/cache/data/*
+/vta-portal/storage/framework/sessions/*
+/vta-portal/storage/framework/views/*
+/vta-portal/storage/logs/*
+/vta-portal/bootstrap/cache/*.php
+/vta-portal/bootstrap/cache/packages.php
+/vta-portal/bootstrap/cache/services.php
+/vta-portal/public/build/
+/vta-portal/public/hot
+/vta-portal/public/storage
+/vta-portal/.phpunit.result.cache
+/vta-portal/.vite/
+/vta-portal/yarn-error.log
+nul
