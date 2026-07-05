@@ -121,7 +121,7 @@ Update this file at the end of every session or whenever a task status changes.
 | 6.6 | Add referral_documents (with revision loop example) | ✅ | VTA-006 has doc with revision_requested=true and revision_notes set |
 | 6.7 | Associate users with user_id linked to Associate records | ✅ | Georgios (4), Ileana (5), Nick (6), Sultana (7) — all password: 'password' |
 | 6.8 | VTA-009/010 patients — full chain integrity verified | ✅ | Chain verified: enquiry_id + referral_id correct on both patients |
-| 6.9 | Remove stale /tmp/wipe_case_data.php from production | ⏳ | May still be on server — check before production deploy |
+| 6.9 | Remove stale /tmp/wipe_case_data.php from production | 🚀 | Confirmed present and deleted 2026-07-06 |
 | 6.10 | Seed future-dated appointments + referral sessions (July 2026) | ✅ | 10 appointments (VTA-009/010/011/012) + 3 July referral sessions (VTA-006/007) — calendar now populated |
 
 ---
@@ -155,11 +155,11 @@ Update this file at the end of every session or whenever a task status changes.
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 9.1 | Git commit all outstanding changes | ⏳ | Large batch — referrals, activity layer, calendar, appointment create |
-| 9.2 | Deploy changed files via SCP | ⏳ | All controllers, models, views, routes |
-| 9.3 | Run migrations on production | ⏳ | 8 new migrations since last production deploy (see below) |
-| 9.4 | Verify routes on production | ⏳ | php artisan route:cache on server |
-| 9.5 | Smoke test on production | ⏳ | Enquiry → promote → go-ahead → sessions → proposal → approve → convert |
+| 9.1 | Git commit all outstanding changes | 🚀 | 59 files, commit fe25803 |
+| 9.2 | Deploy changed files via SCP | 🚀 | All controllers, models, views, routes, migrations deployed 2026-07-06 |
+| 9.3 | Run migrations on production | 🚀 | All 11 migrations ran successfully |
+| 9.4 | Verify routes on production | 🚀 | All referral routes confirmed live |
+| 9.5 | Smoke test on production | ⏳ | Manual E→R→P flow test needed |
 
 **Migrations to run on production (in order):**
 1. `2026_07_05_155007_create_referrals_table`
