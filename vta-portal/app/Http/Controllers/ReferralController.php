@@ -54,21 +54,34 @@ class ReferralController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'referral_ref'            => 'required|string|max:50|unique:referrals,referral_ref',
+            'referral_ref'            => 'nullable|string|max:50|unique:referrals,referral_ref',
             'enquiry_id'              => 'nullable|exists:enquiries,id',
             'patient_first_name'      => 'required|string|max:100',
             'patient_last_name'       => 'required|string|max:100',
             'patient_dob'             => 'nullable|date',
             'patient_address'         => 'nullable|string|max:500',
-            'patient_postcode'        => 'required|string|max:20',
+            'patient_postcode'        => 'nullable|string|max:20',
             'patient_phone'           => 'nullable|string|max:50',
             'patient_email'           => 'nullable|email|max:255',
             'company_id'              => 'nullable|exists:companies,id',
-            'case_manager_id'         => 'required|exists:case_managers,id',
+            'case_manager_id'         => 'nullable|exists:case_managers,id',
             'special_instructions'    => 'nullable|string',
             'notes'                   => 'nullable|string',
             'status'                  => 'nullable|string|max:50',
         ]);
+
+        // Auto-generate referral_ref if not provided
+        if (empty($data['referral_ref'])) {
+            if (!empty($data['enquiry_id'])) {
+                $enquiry = Enquiry::find($data['enquiry_id']);
+                $data['referral_ref'] = $enquiry?->enquiry_ref;
+            }
+            if (empty($data['referral_ref'])) {
+                $last = Referral::orderByDesc('id')->value('referral_ref');
+                $num  = $last ? (intval(substr($last, 4)) + 1) : 1;
+                $data['referral_ref'] = 'VTA-' . str_pad($num, 3, '0', STR_PAD_LEFT);
+            }
+        }
 
         $data['created_by'] = Auth::id();
 
@@ -180,6 +193,7 @@ class ReferralController extends Controller
             'phone'           => $data['phone'] ?? null,
             'email'           => $data['email'] ?? null,
             'patient_ref'     => $data['patient_ref'] ?? null,
+            'referral_date'   => now()->toDateString(),
             'enquiry_id'      => $referral->enquiry_id,
             'referral_id'     => $referral->id,
             'company_id'      => $referral->company_id,
