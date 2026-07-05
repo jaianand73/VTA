@@ -12,7 +12,7 @@ class Communication extends Model
     ];
 
     protected $fillable = [
-        'enquiry_id', 'case_manager_id', 'patient_id', 'type', 'direction', 'subject',
+        'enquiry_id', 'case_manager_id', 'patient_id', 'patient_associate_id', 'associate_id', 'type', 'direction', 'subject',
         'summary', 'communication_date', 'follow_up_date',
         'follow_up_completed', 'created_by'
     ];
@@ -30,6 +30,16 @@ class Communication extends Model
     public function patient()
     {
         return $this->belongsTo(Patient::class);
+    }
+
+    public function associate()
+    {
+        return $this->belongsTo(Associate::class, 'associate_id');
+    }
+
+    public function patientAssociate()
+    {
+        return $this->belongsTo(PatientAssociate::class, 'patient_associate_id');
     }
 
     public function createdBy()

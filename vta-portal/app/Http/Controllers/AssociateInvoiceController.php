@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AssociateInvoice;
 use App\Models\Associate;
 use App\Models\Patient;
+use App\Models\PatientAssociate;
 use App\Models\FundingCycle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +54,15 @@ class AssociateInvoiceController extends Controller
         $patients = Patient::orderBy('first_name')->get();
         $fundingCycles = FundingCycle::with('patient')->where('is_active', true)->get();
 
-        return view('associate-invoices.create', compact('associates', 'patients', 'fundingCycles'));
+        $patientsByAssociate = PatientAssociate::with('patient')
+            ->get()
+            ->groupBy('associate_id')
+            ->map(fn($rows) => $rows->map(fn($r) => [
+                'id' => $r->patient_id,
+                'name' => $r->patient?->first_name . ' ' . $r->patient?->last_name,
+            ]));
+
+        return view('associate-invoices.create', compact('associates', 'patients', 'fundingCycles', 'patientsByAssociate'));
     }
 
     public function store(Request $request)

@@ -24,12 +24,23 @@ class FundingCycleController extends Controller
         return view('funding-cycles.index', compact('fundingCycles'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $patients = Patient::orderBy('first_name')->get();
         $costEstimations = CostEstimation::with('patient')->get();
 
-        return view('funding-cycles.create', compact('patients', 'costEstimations'));
+        $preselectedPatient = $request->filled('patient_id')
+            ? Patient::find($request->patient_id)
+            : null;
+
+        $estimationsByPatient = CostEstimation::with('patient')->get()
+            ->groupBy('patient_id')
+            ->map(fn($rows) => $rows->map(fn($r) => [
+                'id' => $r->id,
+                'label' => 'v' . $r->version_number . ' — £' . number_format($r->estimated_amount, 0),
+            ]));
+
+        return view('funding-cycles.create', compact('patients', 'costEstimations', 'preselectedPatient', 'estimationsByPatient'));
     }
 
     public function store(Request $request, FundingBalanceService $balanceService)
@@ -41,7 +52,7 @@ class FundingCycleController extends Controller
             'approved_amount'        => 'required|numeric|min:0',
             'approved_sessions'      => 'nullable|integer|min:0',
             'approval_date'          => 'required|date',
-            'approval_document_path' => 'nullable|string|max:500',
+            'approval_document'      => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:20480',
             'estimated_duration'     => 'nullable|string|max:100',
             'funder_name'            => 'nullable|string|max:255',
             'funder_reference'       => 'nullable|string|max:255',
@@ -51,6 +62,22 @@ class FundingCycleController extends Controller
 
         $data['created_by'] = Auth::id();
 
+        // BR-P6: funding cycles are always sequential — block if one is already active
+        $hasActiveCycle = FundingCycle::where('patient_id', $data['patient_id'])
+            ->where('is_active', true)
+            ->exists();
+
+        if ($hasActiveCycle && !empty($data['is_active'])) {
+            return back()->withInput()->withErrors([
+                'is_active' => 'This patient already has an active funding cycle. Mark the existing cycle as inactive before creating a new one.',
+            ]);
+        }
+
+        if ($request->hasFile('approval_document')) {
+            $data['approval_document_path'] = $request->file('approval_document')
+                ->store('funding-cycles', 'vta-documents');
+        }
+
         if (empty($data['cycle_number'])) {
             $lastCycle = FundingCycle::where('patient_id', $data['patient_id'])
                 ->max('cycle_number');
@@ -58,6 +85,13 @@ class FundingCycleController extends Controller
         }
 
         $fundingCycle = FundingCycle::create($data);
+
+        if (!empty($data['approval_document_path'])) {
+            $patient = $fundingCycle->patient;
+            if ($patient && $patient->canTransitionTo('Funding Approved')) {
+                $patient->update(['status' => 'Funding Approved']);
+            }
+        }
 
         return redirect()->route('funding-cycles.show', $fundingCycle)
             ->with('success', 'Funding cycle created successfully.');
@@ -78,7 +112,14 @@ class FundingCycleController extends Controller
         $patients = Patient::orderBy('first_name')->get();
         $costEstimations = CostEstimation::with('patient')->get();
 
-        return view('funding-cycles.edit', compact('fundingCycle', 'patients', 'costEstimations'));
+        $estimationsByPatient = CostEstimation::with('patient')->get()
+            ->groupBy('patient_id')
+            ->map(fn($rows) => $rows->map(fn($r) => [
+                'id' => $r->id,
+                'label' => 'v' . $r->version_number . ' — £' . number_format($r->estimated_amount, 0),
+            ]));
+
+        return view('funding-cycles.edit', compact('fundingCycle', 'patients', 'costEstimations', 'estimationsByPatient'));
     }
 
     public function update(Request $request, FundingCycle $fundingCycle)
@@ -90,7 +131,7 @@ class FundingCycleController extends Controller
             'approved_amount'        => 'required|numeric|min:0',
             'approved_sessions'      => 'nullable|integer|min:0',
             'approval_date'          => 'required|date',
-            'approval_document_path' => 'nullable|string|max:500',
+            'approval_document'      => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:20480',
             'estimated_duration'     => 'nullable|string|max:100',
             'funder_name'            => 'nullable|string|max:255',
             'funder_reference'       => 'nullable|string|max:255',
@@ -98,7 +139,19 @@ class FundingCycleController extends Controller
             'notes'                  => 'nullable|string',
         ]);
 
+        if ($request->hasFile('approval_document')) {
+            $data['approval_document_path'] = $request->file('approval_document')
+                ->store('funding-cycles', 'vta-documents');
+        }
+
         $fundingCycle->update($data);
+
+        if (!empty($data['approval_document_path'])) {
+            $patient = $fundingCycle->patient;
+            if ($patient && $patient->canTransitionTo('Funding Approved')) {
+                $patient->update(['status' => 'Funding Approved']);
+            }
+        }
 
         return redirect()->route('funding-cycles.show', $fundingCycle)
             ->with('success', 'Funding cycle updated successfully.');

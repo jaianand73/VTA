@@ -70,8 +70,13 @@ class AssociatePortalController extends Controller
             ->where('can_view', true)
             ->pluck('document_type_id');
 
+        $myInvoices = \App\Models\AssociateInvoice::where('associate_id', $associate->id)
+            ->where('patient_id', $patient->id)
+            ->orderBy('invoice_date', 'desc')
+            ->get();
+
         return view('portal.associate.patient', compact(
-            'associate', 'patient', 'appointments', 'caseNotes', 'permittedDocTypes'
+            'associate', 'patient', 'appointments', 'caseNotes', 'permittedDocTypes', 'myInvoices'
         ));
     }
 
@@ -81,9 +86,11 @@ class AssociatePortalController extends Controller
 
         $data = $request->validate([
             'patient_id'   => 'required|exists:patients,id',
-            'appointment_id' => 'nullable|exists:appointments,id',
             'session_date' => 'required|date',
-            'note_type'    => 'required|string|max:50',
+            'note_type'    => 'required|string|max:100',
+            'stage'        => 'nullable|string|in:Draft,Revision,Final',
+            'needs_review' => 'nullable|boolean',
+            'document'     => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:20480',
             'content'      => 'nullable|string',
         ]);
 
@@ -98,10 +105,53 @@ class AssociatePortalController extends Controller
 
         $data['associate_id'] = $associate->id;
         $data['is_signed_off'] = false;
+        $data['needs_review'] = $request->boolean('needs_review');
 
-        CaseNote::create($data);
+        $caseNote = CaseNote::create($data);
+
+        if ($request->hasFile('document')) {
+            $file = $request->file('document');
+            $path = $file->store("case-notes/{$caseNote->patient_id}", 'vta-documents');
+            Document::create([
+                'patient_id'         => $caseNote->patient_id,
+                'document_type_id'   => null,
+                'file_name'          => $file->getClientOriginalName(),
+                'stored_file_name'   => basename($path),
+                'file_path'          => $path,
+                'is_password_protected' => false,
+            ]);
+        }
 
         return back()->with('success', 'Case note uploaded successfully.');
+    }
+
+    public function storeInvoice(Request $request)
+    {
+        $associate = $this->getAssociate();
+
+        $data = $request->validate([
+            'patient_id'         => 'required|exists:patients,id',
+            'invoice_date'       => 'required|date',
+            'sessions_completed' => 'nullable|integer|min:0',
+            'session_amount'     => 'nullable|numeric|min:0',
+            'travel_amount'      => 'nullable|numeric|min:0',
+            'total_amount'       => 'required|numeric|min:0',
+            'notes'              => 'nullable|string|max:1000',
+        ]);
+
+        $isAssigned = $associate->patients()
+            ->where('patient_id', $data['patient_id'])
+            ->whereNull('end_date')
+            ->exists();
+
+        if (!$isAssigned) abort(403, 'You are not assigned to this patient.');
+
+        $data['associate_id'] = $associate->id;
+        $data['status']       = 'Submitted';
+
+        \App\Models\AssociateInvoice::create($data);
+
+        return back()->with('success', 'Invoice submitted for admin review.');
     }
 
     public function calendar()

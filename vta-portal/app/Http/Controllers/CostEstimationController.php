@@ -54,6 +54,11 @@ class CostEstimationController extends Controller
 
         CostEstimation::create($data);
 
+        $patient = Patient::find($data['patient_id']);
+        if ($patient && $patient->canTransitionTo('Cost Estimation Sent')) {
+            $patient->update(['status' => 'Cost Estimation Sent']);
+        }
+
         return redirect()->back()
             ->with('success', 'Cost estimation created successfully.');
     }

@@ -1,7 +1,8 @@
 # VTA Portal — Complete Development Overview
 
 > **Generated:** 2026-06-21  
-> **Last Updated:** 2026-06-22 (Company + Case Manager features: CM Add/Edit/Delete modals on Company page; case_manager_id added to Enquiries; convert flow supports selecting existing CM; CM column on Enquiries list)  
+> **Last Updated:** 2026-06-28 (UAT Guide built and deployed; Sprint Log created; "How We Work" section added)  
+> **Previous update:** 2026-06-22 (Company + Case Manager features)  
 > **Project:** Vestibular Therapy Associates (VTA) — Practice Management Portal  
 > **Specification:** `VTA_Portal_Master_Spec.md`  
 > **Developed by:** AI-assisted (opencode); audited and hardened via Claude (Cowork)  
@@ -29,6 +30,8 @@
 12. [Gaps & Known Issues](#12-gaps--known-issues)
 13. [Pending Activities — Stage 6](#13-pending-activities)
 14. [Project Files Reference](#14-project-files-reference)
+15. [How We Work — Iteration Cycle](#15-how-we-work)
+16. [Session: 2026-06-27 — Feedback Board & Phase 2 Planning](#16-session-2026-06-27)
 
 ---
 
@@ -977,3 +980,193 @@ npm run build
 # List routes
 php artisan route:list
 ```
+
+---
+
+## 15. How We Work — Iteration Cycle
+
+VTA Portal development runs in **sprints**. Each sprint follows a fixed 6-step cycle:
+
+```
+① Samy answers questions     →   ② Dev plans (updates Agent Spec)
+                                          ↓
+⑦ Next sprint                ←   ③ Dev builds + pushes to EC2
+       ↑                                  ↓
+⑥ Dev reviews (fixes fails,  ←   ④ UAT steps added to UAT Guide
+   logs suggestions)                      ↓
+                                  ⑤ Samy tests (Pass / Fail / Suggest)
+```
+
+### Where things live
+
+| Step | Tool |
+|---|---|
+| ① Samy's answers | **Feedback Board → Questions tab** (portal, EC2) |
+| ② Dev plans | **`VTA_Portal_Phase2_Agent_Spec.md`** — updated before each sprint |
+| ③ Dev builds | Local XAMPP → pushed to EC2 via `scp` |
+| ④ UAT steps | **UAT Guide** (`/uat-guide` on portal) — new steps appended each sprint |
+| ⑤ Samy tests | **UAT Guide** — Pass / Fail / Suggestion recorded in `uat_test_results` table |
+| ⑥ Dev reviews | **Feedback Board → Bugs / Improvements tabs** — auto-populated from Fails and Suggestions |
+| Permanent record | **`VTA_Portal_Sprint_Log.md`** — one entry per sprint, filled in after each sprint completes |
+
+### Rules
+
+1. **Never skip staging.** All builds go to EC2 first. Production (Krystal Emerald) only after Samy signs off.
+2. **Agent Spec is the build contract.** Do not build anything not in the spec — add it to the spec first, then build.
+3. **UAT Guide always reflects what's on EC2.** Add UAT steps in the same push as the feature.
+4. **Fails block the next sprint.** If Samy records a Fail, fix it before adding new features in that area.
+5. **Suggestions are logged, not acted on immediately.** They go to the Feedback Board → Improvements tab for the developer to prioritise.
+6. **Sprint Log is updated at the end of each sprint**, not during — it's a record of what happened, not a plan.
+
+### Sprint status (as of 2026-06-28)
+
+| Sprint | Status | Summary |
+|---|---|---|
+| Sprint 0 | ✅ Complete | Full portal foundation (Phases 1-4, all screens, all business rules) |
+| Sprint 1 | ✅ Complete | Feedback Board, UAT Guide (41 steps), Phase 2 Spec, Phase 3 questions |
+| Sprint 2 | ⏳ Waiting | Blocked on Samy's P2/P3 answers + UAT results |
+| Sprint 3+ | 🔜 Future | Defined after Sprint 2 completes |
+
+→ Full detail: **`VTA_Portal_Sprint_Log.md`**
+
+---
+
+## 16. Session: 2026-06-27 — Feedback Board & Phase 2 Planning
+
+### 15.1 Work completed this session
+
+#### Analysis of Samy's working documents
+
+Four documents shared by Samy were fully analysed:
+
+1. **Handwritten PDF 1** — Clinical workflow (Page 1: Enquiry flow, Page 2: Patient + Assessment + Funding)
+2. **Handwritten PDF 2** — Referral tracking process
+3. **"Actions from meeting on 25th June.pptx"** — Portal structure overview (Slide 1: nav sections, Slide 2: dashboard widgets)
+4. **"Process mapping.xlsx"** — Samy's live working Excel tracker (source of truth for data model)
+
+Key findings:
+
+- Enquiry flow has **4 follow-up columns** and a formal **"Qualified as Referral"** gate before patient creation
+- Two separate people at enquiry stage: **Case Manager Name** and **Lead Professional**
+- **No Assessment module** exists despite being a critical real-world stage
+- **EnquiryController::convert()** never creates a Patient — Enquiry and Patient are permanently disconnected
+- Samy calls Finance **"Accounts"** throughout all documents
+- Dashboard should have **5 widgets** per PPTX Slide 2
+
+Analysis document: `C:\xampp\htdocs\VTA_NEW\Document\VTA_Portal_Analysis_27June2026.md`
+
+#### Feedback & Questions board (fully built and deployed)
+
+A client-facing feedback system for Samy to answer questions and log corrections.
+
+**New table: `portal_feedback_items`**
+
+Migration: `2026_06_27_000001_create_portal_feedback_items_table.php`
+
+Key columns: `type` (change/question/improvement/bug), `section`, `reference`, `priority`, `samy_status` (pending/approved/hold/rejected), `samy_response`, `samy_responded_at`, `dev_status` (not_started/in_progress/done), `is_seeded`
+
+**Pre-loaded with 46 items:**
+- 18 change items (A1–G2) — identified gaps
+- 18 question items (Q1–Q18) — questions for Samy
+- 10 improvement items (I1–I10) — workflow enhancements
+
+**New files:**
+
+| File | Purpose |
+|---|---|
+| `app/Models/PortalFeedbackItem.php` | Model with scopes: changes(), questions(), improvements(), bugs() |
+| `app/Http/Controllers/PortalFeedbackController.php` | index(), respond(), storeBug(), storeImprovement() |
+| `resources/views/portal-feedback/index.blade.php` | Full interactive Blade view |
+| `database/migrations/2026_06_27_000001_create_portal_feedback_items_table.php` | Table migration |
+| `database/seeders/PortalFeedbackSeeder.php` | 46 pre-loaded items (guarded by is_seeded flag) |
+
+**Routes:** `GET/POST/PATCH /portal-feedback/*` — protected by `role:admin,developer`
+
+**Tab visibility:**
+
+| Role | Tabs visible |
+|---|---|
+| `admin` (Samy) | Questions + Corrections only |
+| `developer` (Jai Anand) | All 4: Questions, Corrections, Changes, Improvements |
+
+#### Developer role added
+
+Migration: `2026_06_27_000002_add_developer_role_to_users_table.php` — adds `developer` to `users.role` ENUM.
+
+Jai Anand (`jai@vestibulartherapyassociates.co.uk`) updated from `admin` → `developer`.
+
+#### EC2 staging first deployment
+
+| Item | Value |
+|---|---|
+| Server | Ubuntu 22.04, PHP 8.2.31, MySQL 8.0.46, Composer 2.9.5 |
+| SSH | `ssh -i D:\EC2\easyerp-key.pem ubuntu@52.66.166.34` |
+| Portal path on server | `/var/www/easyerp/WebSite/vta-portal/` |
+| Staging URL | `https://easyerp.co.in/vta-portal` |
+| Apache alias | `Alias /vta-portal /var/www/easyerp/WebSite/vta-portal/public` |
+
+All feedback board files, migrations and seeders deployed and verified on EC2.
+
+#### Bug fixes
+
+| Bug | Fix |
+|---|---|
+| Feedback page opened on "Changes" approval content for Samy | `PortalFeedbackController` default tab changed from `changes` → `questions` |
+| Changes/Improvements tab content visible even without tab buttons | Fixed `x-show` bindings in `portal-feedback/index.blade.php` |
+
+### 15.2 Current user accounts (as of 2026-06-27)
+
+| Name | Email | Role | Password |
+|---|---|---|---|
+| Admin User | admin@vta.com | admin | password |
+| Staff User | staff@vta.com | staff | password |
+| Kate Bryce | associate@vta.com | associate | password |
+| Samy Selvanayagam | samy@vestibulartherapyassociates.co.uk | admin | ChangeMe2026! |
+| **Jai Anand** | jai@vestibulartherapyassociates.co.uk | **developer** | ChangeMe2026! |
+| Sheeba Rossewilliam | sheeba@vestibulartherapyassociates.co.uk | staff | ChangeMe2026! |
+
+### 15.3 Phase 2 development plan
+
+**Phase 2 spec document:** `C:\xampp\htdocs\VTA_NEW\Document\VTA_Portal_Phase2_Agent_Spec.md`
+
+This is the single source of truth for all Phase 2 development. It contains full database migrations, controller changes with code snippets, view changes, build order, business rules, testing checklist and deployment instructions.
+
+**Sprint 1 — 15 items, no blockers, build immediately:**
+
+| Ref | Title | Est. |
+|---|---|---|
+| D1 | Document upload on Funding Cycle form | 2h |
+| E1 | Rename Finance → Accounts in nav | 5m |
+| G1 | Promote Email Intake to top-level nav | 30m |
+| A1 | "Qualified as Referral" gate on Enquiry | 3h |
+| A2 | Link Enquiry → Patient | 2h |
+| A4 | Four follow-up slots on Enquiry | 1h |
+| B1 | Next of Kin fields on Patient | 1h |
+| D2 | Show all funding cycles on patient page | 1h |
+| D3 | "Add Funding Cycle" button on patient page | 1h |
+| E2 | Associate invoice rate card auto-calculation | 2h |
+| E3 | Filter patient dropdown on Associate Invoice | 1h |
+| I3 | Patient Journey timeline view | 2h |
+| I7 | Associate allocation activity log | 30m |
+| I8 | Email intake FK tagging | 2h |
+| I10 | Fix CLAUDE.md project path | 30m |
+
+**Sprint 2 — 7 items, blocked pending Samy's Q&A answers:**
+
+| Ref | Title | Blocked by |
+|---|---|---|
+| A3 | Multiple enquiry contacts with roles | Q3 |
+| B2 | Patient referrer roles (4 named roles) | Q3, Q4 |
+| C1 | Assessment module (new table + controller + views) | Q6, Q7 |
+| C2 | Assessment cost vs Cost Estimation (two figures) | Q8, C1 |
+| B3 | Auto status transitions on Patient | C1 |
+| F1 | Dashboard 5 widgets | Q14, Q15 |
+| G2 | Reports section (4 basic reports) | Q15 |
+
+**Sprint 3 — 3 items, depend on Sprint 2:**
+
+I1 (enforce linear status progression), I4 (Quick Actions panel), I5 (Assessment document gate)
+
+### 15.4 Security action required
+
+`D:\EC2\New Text Document.txt` contains a live GitHub PAT. **Delete this file and revoke the token** at GitHub → Settings → Developer settings → Personal access tokens.

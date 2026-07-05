@@ -56,13 +56,14 @@
                 </div>
 
                 <div class="rounded-xl border border-gray-200 bg-white p-4">
-                    <h3 class="text-sm font-semibold text-gray-800 mb-3">Legend</h3>
+                    <h3 class="text-sm font-semibold text-gray-800 mb-1">Appointment Colours</h3>
+                    <p class="text-xs text-gray-400 mb-3">Each colour shows an appointment's current status.</p>
                     <div class="space-y-2 text-xs">
-                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-blue-500"></span> Scheduled</div>
-                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-green-500"></span> Completed</div>
-                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-red-500"></span> Cancelled</div>
-                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-amber-500"></span> DNA</div>
-                        <div class="flex items-center gap-2 pt-1 border-t border-gray-100"><span class="inline-block h-3 w-3 rounded-full" style="background-color:#8B5CF6"></span> Follow-up (from Communications)</div>
+                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-blue-500"></span><span><strong>Scheduled</strong> — booked, not yet taken place</span></div>
+                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-green-500"></span><span><strong>Completed</strong> — appointment has taken place</span></div>
+                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-red-500"></span><span><strong>Cancelled</strong> — appointment was cancelled</span></div>
+                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-amber-500"></span><span><strong>DNA</strong> — patient Did Not Attend</span></div>
+                        <div class="flex items-center gap-2 pt-2 border-t border-gray-100"><span class="inline-block h-3 w-3 rounded-full shrink-0" style="background-color:#8B5CF6"></span><span><strong>Follow-up</strong> — a scheduled follow-up logged under Associate Communications</span></div>
                     </div>
                 </div>
             </div>
@@ -186,7 +187,6 @@
                                 <div><span class="text-gray-500">Status:</span><br><span class="font-medium">${props.status || '-'}</span></div>
                                 <div><span class="text-gray-500">Location:</span><br><span class="font-medium">${props.location || '-'}</span></div>
                                 <div><span class="text-gray-500">Duration:</span><br><span class="font-medium">${props.duration || 60} min</span></div>
-                                <div class="col-span-2"><span class="text-gray-500">Travel Miles:</span><br><span class="font-medium">${props.travel_miles || '0'}</span></div>
                                 ${props.notes ? `<div class="col-span-2"><span class="text-gray-500">Notes:</span><br><span class="font-medium">${props.notes}</span></div>` : ''}
                             </div>
                         `;

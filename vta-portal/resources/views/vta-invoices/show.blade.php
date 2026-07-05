@@ -11,7 +11,7 @@
             <p class="text-sm text-gray-500">{{ $vtaInvoice->recipient_name }}</p>
             <div class="flex gap-3">
                 <a href="{{ route('vta-invoices.edit', $vtaInvoice) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-                <a href="{{ route('vta-invoices.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"><i class="fa-solid fa-arrow-left"></i> Back</a>
+                <a href="{{ route('accounts.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"><i class="fa-solid fa-arrow-left"></i> Back</a>
             </div>
         </div>
 
@@ -34,6 +34,7 @@
                     <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
                         @switch($vtaInvoice->status)
                             @case('Draft') bg-gray-100 text-gray-800 @break
+                            @case('Approved by Director') bg-purple-100 text-purple-800 @break
                             @case('Sent') bg-blue-100 text-blue-800 @break
                             @case('Paid') bg-green-100 text-green-800 @break
                             @case('Overdue') bg-red-100 text-red-800 @break
@@ -63,6 +64,7 @@
                 <div>
                     <select name="status" class="block rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
                         <option value="Draft" {{ $vtaInvoice->status == 'Draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="Approved by Director" {{ $vtaInvoice->status == 'Approved by Director' ? 'selected' : '' }}>Approved by Director</option>
                         <option value="Sent" {{ $vtaInvoice->status == 'Sent' ? 'selected' : '' }}>Sent</option>
                         <option value="Paid" {{ $vtaInvoice->status == 'Paid' ? 'selected' : '' }}>Paid</option>
                         <option value="Overdue" {{ $vtaInvoice->status == 'Overdue' ? 'selected' : '' }}>Overdue</option>

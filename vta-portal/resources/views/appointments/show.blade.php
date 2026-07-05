@@ -68,10 +68,6 @@
                     <p class="text-sm font-medium text-gray-900">{{ $appointment->location ?? '-' }}</p>
                 </div>
 
-                <div>
-                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Travel Miles</p>
-                    <p class="text-sm font-medium text-gray-900">{{ $appointment->travel_miles ?? '0' }}</p>
-                </div>
             </div>
 
             @if($appointment->notes)

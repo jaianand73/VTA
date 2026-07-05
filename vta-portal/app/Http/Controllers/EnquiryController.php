@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Associate;
 use App\Models\Enquiry;
 use App\Models\Company;
 use App\Models\CaseManager;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,12 +37,14 @@ class EnquiryController extends Controller
     {
         $companies = Company::orderBy('name')->get();
         $caseManagers = CaseManager::with('company')->orderBy('first_name')->get();
-        return view('enquiries.create', compact('companies', 'caseManagers'));
+        $associates = Associate::where('is_active', true)->orderBy('name')->get();
+        return view('enquiries.create', compact('companies', 'caseManagers', 'associates'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
+            'enquiry_ref' => 'nullable|string|max:50',
             'enquirer_name' => 'required|string|max:255',
             'company_id' => 'required|exists:companies,id',
             'case_manager_id' => 'nullable|exists:case_managers,id',
@@ -48,10 +52,18 @@ class EnquiryController extends Controller
             'phone' => 'nullable|string|max:50',
             'source' => 'nullable|in:Email,LinkedIn,Phone,Referral Letter,Website,Word of Mouth,Other',
             'reason' => 'nullable|string',
+            'client_location' => 'nullable|string|max:255',
+            'nearest_associate_id' => 'nullable|exists:associates,id',
             'enquiry_date' => 'nullable|date',
             'first_response_date' => 'nullable|date',
+            'first_response_remarks' => 'nullable|string',
             'status' => 'nullable|string|max:50',
             'notes' => 'nullable|string',
+            'contacts' => 'nullable|array',
+            'contacts.*.name' => 'required_with:contacts.*.role|string|max:255',
+            'contacts.*.role' => 'nullable|string|max:255',
+            'contacts.*.email' => 'nullable|email|max:255',
+            'contacts.*.phone' => 'nullable|string|max:50',
         ]);
 
         if ($data['company_id'] ?? null) {
@@ -65,37 +77,50 @@ class EnquiryController extends Controller
 
         $enquiry = Enquiry::create($data);
 
+        foreach ($request->contacts ?? [] as $contact) {
+            if (!empty($contact['name'])) {
+                $enquiry->contacts()->create($contact);
+            }
+        }
+
         return redirect()->route('enquiries.show', $enquiry);
     }
 
     public function show(Enquiry $enquiry)
     {
-        $enquiry->load('createdBy', 'company', 'selectedCompany', 'selectedCaseManager', 'caseManager');
-
-        // A communication/document can be linked to this enquiry directly (enquiry_id),
-        // or to the case manager once one has been selected/created (case_manager_id) —
-        // either pre- or post-conversion. Show both so nothing logged early is lost after conversion.
-        $cmId = $enquiry->converted_to_case_manager_id ?? $enquiry->case_manager_id;
+        $enquiry->load('createdBy', 'company', 'selectedCompany', 'selectedCaseManager', 'caseManager', 'contacts', 'nearestAssociate');
 
         $communications = \App\Models\Communication::where('enquiry_id', $enquiry->id)
-            ->when($cmId, fn ($q) => $q->orWhere('case_manager_id', $cmId))
             ->latest('communication_date')
             ->get();
 
         $documents = \App\Models\Document::where('enquiry_id', $enquiry->id)
-            ->when($cmId, fn ($q) => $q->orWhere('case_manager_id', $cmId))
             ->latest()
             ->get();
 
         $companies = Company::orderBy('name')->get();
         $caseManagers = CaseManager::with('company')->orderBy('first_name')->get();
 
-        return view('enquiries.show', compact('enquiry', 'companies', 'caseManagers', 'communications', 'documents'));
+        // Q35 — suggest associates whose region matches the enquiry's company city/location
+        $location = $enquiry->selectedCompany?->city ?? $enquiry->selectedCompany?->name ?? '';
+        $nearestAssociates = \App\Models\Associate::where('is_active', true)
+            ->when($location, fn ($q) => $q->where(function ($inner) use ($location) {
+                $inner->whereRaw('LOWER(?) LIKE CONCAT("%", LOWER(region), "%")', [$location])
+                      ->orWhereRaw('LOWER(region) LIKE CONCAT("%", LOWER(?), "%")', [$location]);
+            }))
+            ->orderBy('name')
+            ->get();
+
+        $associates = Associate::where('is_active', true)->orderBy('name')->get();
+        $documentTypes = \App\Models\DocumentType::orderBy('name')->get();
+
+        return view('enquiries.show', compact('enquiry', 'companies', 'caseManagers', 'communications', 'documents', 'nearestAssociates', 'associates', 'documentTypes'));
     }
 
     public function update(Request $request, Enquiry $enquiry)
     {
         $data = $request->validate([
+            'enquiry_ref' => 'nullable|string|max:50',
             'enquirer_name' => 'required|string|max:255',
             'company_id' => 'nullable|exists:companies,id',
             'case_manager_id' => 'nullable|exists:case_managers,id',
@@ -103,10 +128,18 @@ class EnquiryController extends Controller
             'phone' => 'nullable|string|max:50',
             'source' => 'nullable|in:Email,LinkedIn,Phone,Referral Letter,Website,Word of Mouth,Other',
             'reason' => 'nullable|string',
+            'client_location' => 'nullable|string|max:255',
+            'nearest_associate_id' => 'nullable|exists:associates,id',
             'enquiry_date' => 'nullable|date',
             'first_response_date' => 'nullable|date',
+            'first_response_remarks' => 'nullable|string',
             'status' => 'nullable|string|max:50',
             'notes' => 'nullable|string',
+            'contacts' => 'nullable|array',
+            'contacts.*.name' => 'required_with:contacts.*.role|string|max:255',
+            'contacts.*.role' => 'nullable|string|max:255',
+            'contacts.*.email' => 'nullable|email|max:255',
+            'contacts.*.phone' => 'nullable|string|max:50',
         ]);
 
         if ($data['company_id'] ?? null) {
@@ -121,7 +154,31 @@ class EnquiryController extends Controller
 
         $enquiry->update($data);
 
+        $enquiry->contacts()->delete();
+        foreach ($request->contacts ?? [] as $contact) {
+            if (!empty($contact['name'])) {
+                $enquiry->contacts()->create($contact);
+            }
+        }
+
         return redirect()->route('enquiries.show', $enquiry);
+    }
+
+    public function qualify(Request $request, Enquiry $enquiry): RedirectResponse
+    {
+        $data = $request->validate([
+            'qualified_date'    => 'required|date',
+            'qualified_remarks' => 'nullable|string|max:2000',
+        ]);
+
+        $enquiry->update([
+            'qualified_as_referral' => true,
+            'qualified_date'        => $data['qualified_date'],
+            'qualified_remarks'     => $data['qualified_remarks'],
+            'status'                => 'Qualified',
+        ]);
+
+        return back()->with('success', 'Enquiry marked as Qualified.');
     }
 
     public function convert(Request $request, Enquiry $enquiry)
@@ -184,5 +241,14 @@ class EnquiryController extends Controller
         ]);
 
         return redirect()->route('enquiries.show', $enquiry);
+    }
+
+    public function destroy(Enquiry $enquiry): RedirectResponse
+    {
+        $name = $enquiry->enquirer_name;
+        $enquiry->delete();
+
+        return redirect()->route('enquiries.index')
+            ->with('success', "Enquiry for \"{$name}\" has been deleted.");
     }
 }

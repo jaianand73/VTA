@@ -14,7 +14,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('styles')
-    @livewireStyles
 </head>
 <body class="h-full font-sans antialiased text-gray-700">
     <div x-data="{ sidebarOpen: false }" class="flex h-full overflow-hidden">
@@ -50,75 +49,98 @@
                 </a>
                 @endif
 
+                {{-- ── CORE PROCESS ─────────────────────────────── --}}
                 @if(in_array(Auth::user()->role, ['admin', 'staff']))
+                <div class="border-t border-gray-200 my-2">
+                    <p class="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">Core Process</p>
+                </div>
+
                 <a href="{{ route('enquiries.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('enquiries.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="fa-solid fa-circle-question w-5 text-center"></i>
                     Enquiries
                 </a>
-                @endif
 
-                @if(in_array(Auth::user()->role, ['admin', 'staff']))
                 <a href="{{ route('patients.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('patients.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="fa-solid fa-user-injured w-5 text-center"></i>
                     Patients
                 </a>
 
-                <a href="{{ route('companies.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('companies.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fa-solid fa-building w-5 text-center"></i>
-                    Companies
+                <a href="{{ route('settings.index', ['tab' => 'associates']) }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('associates.*') || (request()->routeIs('settings.*') && request()->query('tab') === 'associates') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-user-doctor w-5 text-center"></i>
+                    Associates
                 </a>
-
-                <div class="border-t border-gray-200 my-2">
-                    <p class="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">Clinical</p>
-                </div>
 
                 <a href="{{ route('appointments.calendar') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('appointments.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="fa-solid fa-calendar-days w-5 text-center"></i>
                     Appointments
                 </a>
-
-                <a href="{{ route('case-notes.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('case-notes.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fa-solid fa-note-sticky w-5 text-center"></i>
-                    Case Notes
-                </a>
                 @endif
 
                 @if(in_array(Auth::user()->role, ['admin']))
-                <div class="border-t border-gray-200 my-2">
-                    <p class="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">Finance</p>
-                </div>
-
-                <a href="{{ route('associate-invoices.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('associate-invoices.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i>
-                    Associate Invoices
-                </a>
-                <a href="{{ route('vta-invoices.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('vta-invoices.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                <a href="{{ route('accounts.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('accounts.*') || request()->routeIs('vta-invoices.*') || request()->routeIs('associate-invoices.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="fa-solid fa-file-invoice w-5 text-center"></i>
-                    VTA Invoices
-                </a>
-                <a href="{{ route('finance.reports') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('finance.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fa-solid fa-chart-line w-5 text-center"></i>
-                    Reports
+                    Accounts
                 </a>
                 @endif
 
+                {{-- ── SUPPORTIVE PROCESSES ─────────────────────── --}}
+                @if(in_array(Auth::user()->role, ['admin', 'staff']))
                 <div class="border-t border-gray-200 my-2">
-                    <p class="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">Admin</p>
+                    <p class="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">Supportive</p>
                 </div>
+
+                <a href="{{ route('companies.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('companies.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-building w-5 text-center"></i>
+                    Companies
+                </a>
+                @endif
+
+                @if(Auth::user()->can_access_associate_resources)
+                <a href="{{ route('associate-resources.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('associate-resources.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-folder-open w-5 text-center"></i>
+                    Associate Resources
+                </a>
+                @endif
 
                 @if(in_array(Auth::user()->role, ['admin', 'staff']))
                 <a href="{{ route('email-intake.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('email-intake.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="fa-solid fa-envelope-open-text w-5 text-center"></i>
-                    Email Intake
+                    Emails
+                    @php $unprocessedEmails = \App\Models\EmailIntakeLog::where('processed', false)->count(); @endphp
+                    @if($unprocessedEmails > 0)
+                    <span class="ml-auto inline-flex items-center justify-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">{{ $unprocessedEmails }}</span>
+                    @endif
                 </a>
                 @endif
 
+                @if(in_array(Auth::user()->role, ['admin', 'developer']))
+                <a href="{{ route('reports.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('reports.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-chart-bar w-5 text-center"></i>
+                    Reports
+                </a>
+                @endif
+
+                @if(in_array(Auth::user()->role, ['admin']))
+                <a href="{{ route('finance.reports') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('finance.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i>
+                    Accounts Reports
+                </a>
+                @endif
+
+                @if(Auth::user()->role === 'developer')
+                <a href="{{ route('audit.date') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('audit.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-magnifying-glass-chart w-5 text-center"></i>
+                    Audit
+                </a>
+                @endif
+
+                {{-- ── ADMIN / SETTINGS ─────────────────────────── --}}
                 @if(in_array(Auth::user()->role, ['admin']))
                 <div class="border-t border-gray-200 my-2">
                     <p class="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">Settings</p>
                 </div>
 
-                <a href="{{ route('settings.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('settings.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                <a href="{{ route('settings.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('settings.*') && request()->query('tab') !== 'associates' ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="fa-solid fa-gear w-5 text-center"></i>
                     Settings
                 </a>
@@ -128,10 +150,44 @@
                     <p class="px-3 py-1 text-xs font-medium text-gray-400 uppercase tracking-wider">Support</p>
                 </div>
 
-                <a href="{{ url('VTA_Portal_UAT_Guide.html') }}" target="_blank" class="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-600 hover:bg-gray-100">
-                    <i class="fa-solid fa-circle-question w-5 text-center"></i>
-                    Help
+                @if(in_array(Auth::user()->role, ['admin', 'staff', 'developer']))
+                <a href="{{ route('how-it-works') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('how-it-works') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-diagram-project w-5 text-center"></i>
+                    Patient Lifecycle
                 </a>
+                <a href="{{ route('understanding-each-page') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('understanding-each-page') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-table-columns w-5 text-center"></i>
+                    Understanding Each Page
+                </a>
+                @endif
+
+                @if(in_array(Auth::user()->role, ['admin', 'developer']))
+                <a href="{{ route('portal-feedback.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('portal-feedback.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-clipboard-list w-5 text-center"></i>
+                    Feedback
+                    @php
+                        $pendingCount = \App\Models\PortalFeedbackItem::where('samy_status','pending')
+                            ->whereIn('type',['change','question','improvement'])->count();
+                    @endphp
+                    @if($pendingCount > 0)
+                    <span class="ml-auto inline-flex items-center justify-center rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">{{ $pendingCount }}</span>
+                    @endif
+                </a>
+                @endif
+
+                @if(Auth::user()->role === 'admin')
+                <a href="{{ route('uat-guide.show') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('uat-guide.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-flask-vial w-5 text-center"></i>
+                    UAT Testing
+                    @php
+                        $uatFail = \App\Models\UatTestResult::where('result','fail')->count();
+                    @endphp
+                    @if($uatFail > 0)
+                    <span class="ml-auto inline-flex items-center justify-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">{{ $uatFail }} fail</span>
+                    @endif
+                </a>
+                @endif
+
             </nav>
 
             <div class="border-t border-gray-200 p-4">
@@ -153,7 +209,9 @@
                     </svg>
                 </button>
 
-                <div class="flex-1"></div>
+                <div class="flex-1 flex items-center px-2">
+                    @isset($topbar){{ $topbar }}@endisset
+                </div>
 
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-gray-500">{{ Auth::user()->name }}</span>
@@ -166,7 +224,7 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+            <main class="flex-1 overflow-y-auto p-4 lg:p-6" style="padding-bottom:5rem;">
                 @isset($header)
                 <div class="mb-6">
                     <h1 class="text-2xl font-semibold text-gray-800">{{ $header }}</h1>
@@ -179,7 +237,6 @@
     </div>
 
     @stack('scripts')
-    @livewireScripts
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {

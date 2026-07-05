@@ -1,15 +1,100 @@
 # VTA Portal — Project Context for Claude
 
-## Project Overview
+> **Session Start:** Read all four supporting docs below before doing any work.
+> **Session End / After each task:** Update the relevant doc(s) before moving on.
+>
+> Supporting docs: `docs/claude/`
+> - `docs/claude/architecture.md` — data model, roles, modules, routes
+> - `docs/claude/deployment.md` — SSH, SCP, artisan commands, deploy checklist
+> - `docs/claude/ongoing-work.md` — open UAT items, corrections, pending questions
+> - `docs/claude/decisions.md` — why things were built the way they are
 
-**VTA Portal** is a Laravel 11 case management system for a rehabilitation therapy company (VTA). It manages the full lifecycle: Enquiry → Patient → Cost Estimation → Funding Approval → Treatment → Invoicing.
+---
 
-- **Stack:** Laravel 11.54 / PHP 8.2 / Blade + Tailwind CSS / MySQL via XAMPP
-- **Local URL:** http://localhost/vta-portal/public
-- **Code:** `C:\xampp\htdocs\vta-portal`
-- **Documents/assets:** `C:\xampp\htdocs\VTA_NEW`
-- **Original spec:** `C:\xampp\htdocs\VTA_NEW\Document\Original\VTA_Portal_Master_Spec.md`
-- **Project context (Q&A with owner):** `C:\xampp\htdocs\VTA_NEW\Document\Original\VTA_Project_Context.md`
+## What This System Is
+
+**VTA Portal** is a private case management web application for VTA, a UK-based rehabilitation therapy company. It manages the full patient lifecycle from first contact through to invoicing:
+
+**Enquiry → Qualified → Patient → Assessment → Funding Cycle → Treatment → Invoicing**
+
+Users of the system:
+- **Admin (Samy, Sheeba)** — full access, runs the business day-to-day
+- **Staff** — internal team, similar access to admin
+- **Associate** — therapists/assessors, access only their own patients via the Associate Portal
+- **Case Manager** — external contacts stored under Companies; they do NOT have portal login access
+- **Developer (Jaian)** — full access including Feedback & audit sections hidden from others
+
+---
+
+## Stack
+
+- **Framework:** Laravel 11.54 / PHP 8.2
+- **Frontend:** Blade templates + Alpine.js + Tailwind CSS 3 (compiled bundle — see Tailwind note below)
+- **Database:** MySQL via XAMPP locally; MySQL on Bluehost in production
+- **Local URL:** `http://localhost/vta-portal/public`
+- **Production URL:** `http://129.121.92.159/vta-portal/public`
+
+---
+
+## File Paths
+
+| What | Path |
+|------|------|
+| Project root (local) | `C:\xampp\htdocs\VTA_NEW\vta-portal` |
+| Assets / documents | `C:\xampp\htdocs\VTA_NEW` |
+| Phase 2 spec | `C:\xampp\htdocs\VTA_NEW\Document\VTA_Portal_Phase2_Agent_Spec.md` |
+| Original spec | `C:\xampp\htdocs\VTA_NEW\Document\Original\VTA_Portal_Master_Spec.md` |
+| Project Q&A context | `C:\xampp\htdocs\VTA_NEW\Document\Original\VTA_Project_Context.md` |
+
+---
+
+## Production Server (Bluehost)
+
+| Item | Value |
+|------|-------|
+| Host | `129.121.92.159` |
+| SSH user | `root` |
+| SSH key | `D:\blue\bluehost-key` |
+| Remote project root | `/var/www/nett-apps/vta-portal/` |
+| DB name | `vta_portal` |
+| DB user | `vtauser` |
+| DB password | `VtaPortal@2026!` |
+| DB host (on server) | `localhost` |
+
+**SSH and SCP must use PowerShell tool (dangerouslyDisableSandbox: true) — never Bash tool (exits code 58, sandbox blocks outbound SSH).**
+
+See `docs/claude/deployment.md` for full deploy workflow.
+
+---
+
+## Admin Login (production)
+
+| User | Email | Password | Role |
+|------|-------|----------|------|
+| Samy Selvanayagam | samy@vta.com | (ask Jaian) | admin |
+| Sheeba | sheeba@vta.com | (ask Jaian) | admin |
+| Developer | jaian@vta.com | (ask Jaian) | developer |
+
+---
+
+## Critical Rules
+
+1. **NEVER deploy `seed_rich_data.php` or any seeder to Bluehost.** Seeders are local-only.
+2. **Tailwind CSS:** The compiled bundle is fixed. Do NOT add new Tailwind utility classes in Blade — they will be invisible. Use `style=""` inline attributes for any colour, size, or spacing not already in the codebase.
+3. **Case managers** are stored in the `case_managers` table (linked to companies). They have portal user accounts (role = `case_manager`) but login is blocked at `AuthenticatedSessionController`. Do not delete their user records — FK constraints link them to `case_managers.user_id`. They do not appear in Settings → Users.
+4. **Associate Resources** access is restricted to Samy only (`users.can_access_associate_resources = 1`, user id = 4).
+5. **Audit log** is visible to `role = developer` only.
+6. **Feedback & Questions** (`portal_feedback_items`) has two note fields: `client_notes` (shown to admin in plain English) and `dev_notes` (shown to developer in technical detail). Always write both when marking an item done.
+
+---
+
+## Role-Based Display in Blade
+
+```php
+$isDeveloper = Auth::user()->role === 'developer';
+```
+
+Use this to show/hide technical content in views.
 
 ---
 
@@ -17,124 +102,45 @@
 
 ### Security / Storage
 - `'password' => 'hashed'` cast in `User` model → bcrypt applied automatically by Laravel 11
-- Documents stored on `Storage::disk('vta-documents')` → `storage/app/vta-documents` — **private disk, never publicly accessible**
-- No field-level DB encryption (not required at VTA's scale; not claimed in GDPR report)
+- Documents stored on `Storage::disk('vta-documents')` → `storage/app/vta-documents` — private disk
+- No field-level DB encryption (not required at VTA's scale)
 
-### Business Rules (spec Part 3)
-- **BR-C1:** Patient cannot reach "Funding Approved" status unless `funding_cycles.approval_document_path IS NOT NULL`
-- **BR-F1:** Warn (but don't block) if VTA invoice would exceed funding cycle balance
-- **BR-F3:** Associate invoice `due_date` auto-set to `invoice_date + 28 days`
-- **BR-F6:** VTA Invoice cannot be marked "Sent" without a document uploaded
+### Business Rules
+| Rule | Description | Enforced in |
+|------|-------------|-------------|
+| BR-C1 | Patient cannot reach "Funding Approved" without `approval_document_path` | `FundingCycleController` |
+| BR-F1 | Warn (don't block) if VTA invoice exceeds funding cycle balance | `FundingBalanceService` |
+| BR-F3 | Associate invoice `due_date` = `invoice_date + 28 days` | `AssociateInvoiceController` |
+| BR-F6 | VTA Invoice cannot be marked "Sent" without a document | `VtaInvoiceController` |
+| BR-P1 | "Create Patient" only on Qualified enquiry | `enquiries/show.blade.php` |
+| BR-P2 | Enquiry auto-sets to "Converted" on patient create | `PatientController::store()` |
+| BR-P3 | Assessment "Report Sent" requires `report_document_path` | `AssessmentController::update()` |
+| BR-AP1 | Associates upload only for assigned patients | `AssociatePortalController` |
 
 ### Services
 - `FundingBalanceService::remainingBalance()` — sums only **Paid** VTA invoices (not Sent) against `approved_amount`
-- `InvoiceNumberService::generate()` — produces `VTA-YYYY-NNNN` by scanning last invoice for the year
+- `InvoiceNumberService::generate()` — produces `VTA-YYYY-NNNN` format
 
 ---
 
-## Current Flow: Enquiry → Patient
+## Phase 2 — Complete
 
-### What works
-1. **Enquiry created** with company linkage, source, reason, notes
-2. **Communications logged** on enquiry: Type / Direction / Subject / Summary / Follow-up Date
-3. **Follow-up dates** → appear as purple events on the Team Calendar ✓
-4. **Documents** uploadable against the enquiry ✓
-5. **Convert to Full Record** → creates/links Company + Case Manager, sets `status='Converted'`
-
-### Critical Gap — No "Create Patient" after Conversion
-`EnquiryController::convert()` redirects back to `enquiries.show` after creating the Case Manager. There is **no "Create Patient" button** and no automatic redirect to patient creation. The user must manually navigate to Patients → Create and re-select the case manager.
-
-**Fix needed:** After conversion, show a "Create Patient for [Case Manager Name]" button that pre-fills `case_manager_id` from `converted_to_case_manager_id`.
+All sprints built. See `docs/claude/architecture.md` for full module list.
 
 ---
 
-## Funding Cycle Gaps (Critical)
+## Phase 2 — New/Modified Database Tables
 
-### Gap A — No "Add Funding Cycle" button on the Patient page
-`resources/views/patients/show.blade.php` Funding Overview section has no link to create a funding cycle for that patient. Users must navigate to the standalone Funding Cycles menu.
-
-### Gap B — No document upload on Funding Cycle create form
-`resources/views/funding-cycles/create.blade.php` has **no file input for `approval_document_path`**. This means BR-C1 is permanently unsatisfiable through the UI — `approval_document_path` is always NULL, so no patient can ever reach "Funding Approved" status via the normal UI. (Test data was seeded directly via phpMyAdmin.)
-
-### Gap C — Patient page only shows first funding cycle
-`$patient->fundingCycles->first()` in `patients/show.blade.php` — hard-coded to first cycle only. Multi-phase patients lose visibility of subsequent cycles.
-
-### Gap D — Cost Estimation dropdown not filtered by patient
-On the Funding Cycle create form, all patients' cost estimations appear in the dropdown, not filtered to the selected patient.
-
-### Gap E — Associate Invoice: no rate card auto-calculation
-`AssociateInvoiceController::store()` — staff enter all amounts manually. No auto-calculation from associate rate card.
-
-### Gap F — Associate Invoice: patient dropdown not filtered by associate
-All patients shown, not filtered to the selected associate's patients.
-
----
-
-## Design Decisions Pending (Discuss with Samy)
-
-### 1. Merge Cost Estimation + Funding Cycle?
-**Proposal:** Add approval fields directly to `cost_estimations` table (`approved_amount`, `approval_date`, `approval_document_path`, `funder_name`, `funder_reference`, `is_approved`). VTA Invoices would link to `cost_estimation_id` instead of `funding_cycle_id`. This matches Samy's Excel process map where CE and FC are one record per phase.
-
-### 2. "Record Funding Approval" as a formal action
-Single button on patient page (visible when status = "Awaiting Funding Approval") that simultaneously:
-- Creates/updates the Funding Cycle record
-- Accepts the approval document upload
-- Moves patient status to "Funding Approved"
-Document stored in both `funding_cycles.approval_document_path` AND the `documents` table.
-
-### 3. Email as the primary evidence trail
-All key events arrive by email (funding approvals, associate invoices, payment confirmations). Proposal: extend `email_intake_logs` with financial event tagging and foreign keys to financial records (`funding_cycle_id`, `associate_invoice_id`, `vta_invoice_id`).
-
-### 4. Rename "Finance" → "Accounts" in nav
-Samy uses "Accounts" terminology.
-
-### 5. Clinical Head Review dashboard widget
-Samy's slides (Actions from meeting 25th June) reference a dashboard widget showing case notes pending clinical head sign-off. New requirement — not yet built.
-
----
-
-## Files of Note
-
-| File | Purpose |
-|------|---------|
-| `app/Models/User.php` | `'password'=>'hashed'` cast, `$hidden` guard |
-| `app/Models/CostEstimation.php` | No approval fields yet |
-| `app/Models/AssociateInvoice.php` | status: Received/Verified/Paid/Disputed |
-| `app/Models/VtaInvoice.php` | status: Draft/Sent/Paid/Overdue/Cancelled |
-| `app/Http/Controllers/EnquiryController.php` | `convert()` stops at CM creation — no patient step |
-| `app/Http/Controllers/AssociateInvoiceController.php` | `store()` sets due_date+28d; no rate card logic |
-| `app/Http/Controllers/VtaInvoiceController.php` | `updateStatus()` enforces BR-F6 |
-| `app/Services/FundingBalanceService.php` | Counts only Paid invoices against balance |
-| `app/Services/InvoiceNumberService.php` | VTA-YYYY-NNNN generation |
-| `resources/views/funding-cycles/create.blade.php` | Missing document upload field (Gap B) |
-| `resources/views/patients/show.blade.php` | Only shows first funding cycle (Gap C) |
-| `config/filesystems.php` | `vta-documents` disk definition |
-
----
-
-## Documents Produced
-
-| File | Description |
-|------|-------------|
-| `C:\xampp\htdocs\VTA_NEW\Document\VTA_GDPR_Status_Report.html` | GDPR compliance status — all encryption claims verified against code |
-| `C:\xampp\htdocs\VTA_NEW\Document\VTA_Portal_Discussion_Samy.html` | Discussion doc for Samy call — 10 questions on funding, email trail, portal gaps |
-
----
-
-## Immediate Next Steps (Prioritised)
-
-1. **Fix Gap B** — Add document upload field to `funding-cycles/create.blade.php` and handle in `FundingCycleController::store()`. This unblocks BR-C1 and is the most critical blocker.
-2. **Fix Enquiry → Patient flow** — Add "Create Patient" button on `enquiries/show.blade.php` after conversion, linking to `patients/create?case_manager_id=X`.
-3. **Fix Gap A** — Add "Add Funding Cycle" button to `patients/show.blade.php` Funding Overview section, pre-filled with the patient ID.
-4. **Fix Gap C** — Show all funding cycles on patient page, not just `->first()`.
-5. **Fix Gap D** — Filter cost estimation dropdown by selected patient (JavaScript or Livewire).
-6. **Clinical Head Review widget** — Dashboard card for case notes pending sign-off (pending Samy's confirmation of requirement).
-7. **Rename Finance → Accounts** in nav (pending Samy's confirmation).
-8. **EC2 deployment** — Sync vta-portal code + DB to easyerp.co.in/VTA (blocked — revisit bash sandbox access).
-
----
-
-## Security Note
-
-- `D:\EC2\GitHub.txt` — PAT was rotated and file deleted (2026-06-27). New token stored in Windows Credential Manager (`git config --global credential.helper wincred`).
-- EC2 private key at `D:\EC2\easyerp-key.pem` — do not expose.
+| Table | Changes |
+|-------|---------|
+| `enquiries` | Added `qualified_as_referral`, `qualified_date`, `qualified_remarks`, status includes 'Qualified' |
+| `patients` | Added `enquiry_id` FK, `nok_name`, `nok_email`, `nok_phone` |
+| `email_intake_logs` | Added `enquiry_id`, `vta_invoice_id`, `funding_cycle_id` FKs |
+| `case_notes` | Added `stage`, `needs_review` |
+| `patient_associates` | Added `sessions_approved`, `sessions_used` |
+| `assessments` | NEW — 1:1 with patients, UNIQUE on patient_id |
+| `vta_invoices` | Added `assessment_id` FK |
+| `enquiry_contacts` | NEW — multiple contacts per enquiry |
+| `patient_referrers` | NEW — multiple referrers per patient |
+| `portal_feedback_items` | Added `client_notes` (plain English for admin), `dev_notes` (technical for developer), `dev_follow_up` (second developer reply after Samy's second reply) |
+| `patients` | Added `patient_ref` (nullable string, manually assigned Patient ID e.g. P001) — shown on patient show/edit pages |

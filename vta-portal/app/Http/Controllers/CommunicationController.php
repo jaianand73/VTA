@@ -14,15 +14,18 @@ class CommunicationController extends Controller
             'enquiry_id' => 'nullable|exists:enquiries,id',
             'case_manager_id' => 'nullable|exists:case_managers,id',
             'patient_id' => 'nullable|exists:patients,id',
+            'patient_associate_id' => 'nullable|exists:patient_associates,id',
+            'associate_id' => 'nullable|exists:associates,id',
             'type' => 'required|string|max:50',
             'direction' => 'required|string|max:10',
-            'subject' => 'required|string|max:255',
+            'subject' => 'nullable|string|max:255',
             'summary' => 'nullable|string',
             'communication_date' => 'nullable|date',
             'follow_up_date' => 'nullable|date',
             'follow_up_completed' => 'boolean',
         ]);
 
+        $data['subject'] = $data['subject'] ?? $data['type'] ?? 'Follow Up';
         $data['communication_date'] = $data['communication_date'] ?? now();
         $data['created_by'] = Auth::id();
 
@@ -37,6 +40,7 @@ class CommunicationController extends Controller
             'enquiry_id' => 'nullable|exists:enquiries,id',
             'case_manager_id' => 'nullable|exists:case_managers,id',
             'patient_id' => 'nullable|exists:patients,id',
+            'associate_id' => 'nullable|exists:associates,id',
             'type' => 'required|string|max:50',
             'direction' => 'required|string|max:10',
             'subject' => 'required|string|max:255',

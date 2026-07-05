@@ -5,7 +5,7 @@
             <p class="text-sm text-gray-500">{{ $associateInvoice->invoice_reference ?? 'No Reference' }}</p>
             <div class="flex gap-3">
                 <a href="{{ route('associate-invoices.edit', $associateInvoice) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-                <a href="{{ route('associate-invoices.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"><i class="fa-solid fa-arrow-left"></i> Back</a>
+                <a href="{{ route('accounts.index', ['tab' => 'associate']) }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"><i class="fa-solid fa-arrow-left"></i> Back</a>
             </div>
         </div>
 

@@ -7,6 +7,11 @@
 
             <div class="grid gap-6 sm:grid-cols-2">
                 <div>
+                    <label for="enquiry_ref" class="block text-sm font-medium text-gray-700">Enquiry ID</label>
+                    <input type="text" id="enquiry_ref" name="enquiry_ref" value="{{ old('enquiry_ref') }}" placeholder="e.g. E001" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                    @error('enquiry_ref') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
                     <label for="enquirer_name" class="block text-sm font-medium text-gray-700">Enquirer Name <span class="text-red-500">*</span></label>
                     <input type="text" id="enquirer_name" name="enquirer_name" value="{{ old('enquirer_name') }}" required class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
                     @error('enquirer_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
@@ -69,23 +74,83 @@
                     <input type="date" id="enquiry_date" name="enquiry_date" value="{{ old('enquiry_date', date('Y-m-d')) }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
                     @error('enquiry_date') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
-                <div>
-                    <label for="first_response_date" class="block text-sm font-medium text-gray-700">First Response Date</label>
-                    <input type="date" id="first_response_date" name="first_response_date" value="{{ old('first_response_date') }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
-                    @error('first_response_date') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
-                </div>
             </div>
 
             <div class="mt-6">
-                <label for="reason" class="block text-sm font-medium text-gray-700">Reason</label>
+                <label for="reason" class="block text-sm font-medium text-gray-700">Reason for Enquiry</label>
                 <textarea id="reason" name="reason" rows="3" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">{{ old('reason') }}</textarea>
                 @error('reason') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="mt-6 grid gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="client_location" class="block text-sm font-medium text-gray-700">Client's Location</label>
+                    <input type="text" id="client_location" name="client_location" value="{{ old('client_location') }}" placeholder="e.g. Manchester" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                    @error('client_location') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label for="nearest_associate_id" class="block text-sm font-medium text-gray-700">Nearest Associate</label>
+                    <select id="nearest_associate_id" name="nearest_associate_id" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                        <option value="">-- Select Associate --</option>
+                        @foreach($associates as $assoc)
+                            <option value="{{ $assoc->id }}" @selected(old('nearest_associate_id') == $assoc->id)>{{ $assoc->name }}@if($assoc->region) ({{ $assoc->region }})@endif</option>
+                        @endforeach
+                    </select>
+                    @error('nearest_associate_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+            </div>
+
+            <div class="mt-6 grid gap-6 sm:grid-cols-2">
+                <div>
+                    <label for="first_response_date" class="block text-sm font-medium text-gray-700">First Response Date</label>
+                    <input type="date" id="first_response_date_2" name="first_response_date" value="{{ old('first_response_date') }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                </div>
+                <div>
+                    <label for="first_response_remarks" class="block text-sm font-medium text-gray-700">Response Remarks</label>
+                    <input type="text" id="first_response_remarks" name="first_response_remarks" value="{{ old('first_response_remarks') }}" placeholder="Notes on first response…" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                    @error('first_response_remarks') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
             </div>
 
             <div class="mt-6">
                 <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
                 <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">{{ old('notes') }}</textarea>
                 @error('notes') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+            </div>
+
+            <div class="rounded-lg border border-gray-200 bg-white p-6" x-data="{ contacts: [{ name: '', role: 'Case Manager', email: '', phone: '' }] }">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Contacts</h3>
+                <template x-for="(contact, index) in contacts" :key="index">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Name</label>
+                            <input type="text" x-model="contact.name" :name="'contacts['+index+'][name]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Role</label>
+                            <select x-model="contact.role" :name="'contacts['+index+'][role]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                                <option value="Case Manager">Case Manager</option>
+                                <option value="Health Professional">Health Professional</option>
+                                <option value="Line Manager">Line Manager</option>
+                                <option value="Solicitor">Solicitor</option>
+                                <option value="Insurer">Insurer</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Email</label>
+                            <input type="email" x-model="contact.email" :name="'contacts['+index+'][email]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Phone</label>
+                            <input type="text" x-model="contact.phone" :name="'contacts['+index+'][phone]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                            <button type="button" @click="contacts.splice(index, 1)" class="mt-2 text-xs text-red-600 hover:underline" x-show="contacts.length > 1">Remove</button>
+                        </div>
+                    </div>
+                </template>
+                <button type="button" @click="contacts.push({ name: '', role: 'Case Manager', email: '', phone: '' })" class="text-sm text-[#0092b4] hover:underline">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Another Contact
+                </button>
             </div>
 
             <div class="mt-8 flex justify-end gap-3">

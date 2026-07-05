@@ -29,13 +29,22 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+
+        if ($user->role === 'case_manager') {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('login')->withErrors([
+                'email' => 'Case manager portal access is not currently available. Please contact the VTA administrator.',
+            ]);
+        }
+
         $user->forceFill(['last_login_at' => now()])->save();
 
         return match ($user->role) {
             'admin' => redirect()->intended(route('dashboard', absolute: false)),
             'staff' => redirect()->intended(route('dashboard', absolute: false)),
             'associate' => redirect()->intended(route('associate-portal.dashboard', absolute: false)),
-            'case_manager' => redirect()->intended(route('case-manager-portal.dashboard', absolute: false)),
             default => redirect()->intended(route('dashboard', absolute: false)),
         };
     }

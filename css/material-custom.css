@@ -32,9 +32,11 @@ body {
   height: 110px;
   line-height: 110px;
 }
+/* Flex wrapper — stretches children to full nav height */
 nav .nav-wrapper {
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  justify-content: space-between;
   height: 100%;
 }
 nav .brand-logo {
@@ -42,9 +44,11 @@ nav .brand-logo {
   align-items: center;
   height: 100%;
   position: relative;
+  flex: 0 0 auto;
 }
 nav .brand-logo img {
   max-height: 95px;
+  max-width: 220px;
   width: auto;
   display: block;
   transition: transform 0.3s;
@@ -60,15 +64,32 @@ nav .brand-logo:hover img {
   letter-spacing: -0.3px;
   white-space: nowrap;
 }
+/* Desktop nav: flex row (replaces Materialize's float-based layout) */
+nav ul.right {
+  display: flex !important;
+  align-items: stretch;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  flex: 0 0 auto;
+}
+nav ul.right li {
+  float: none !important;
+  display: flex;
+  align-items: stretch;
+}
 nav ul a {
+  display: flex !important;
+  align-items: center;
   color: var(--text-dark) !important;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  padding: 0 16px;
-  height: 110px;
-  line-height: 110px;
+  letter-spacing: 0.5px;
+  padding: 0 11px;
+  height: 100%;
+  line-height: normal;
+  white-space: nowrap;
   transition: color 0.2s;
 }
 nav ul a:hover {
@@ -79,7 +100,15 @@ nav ul a.active {
   color: var(--primary) !important;
   background: transparent !important;
   border-bottom: 3px solid var(--primary);
-  line-height: 107px;
+}
+/* Hide desktop nav on mobile/tablet (must override our display:flex above) */
+@media only screen and (max-width: 992px) {
+  nav ul.right {
+    display: none !important;
+  }
+  .sidenav-trigger {
+    display: block !important;
+  }
 }
 .sidenav-trigger i {
   color: var(--text-dark) !important;
@@ -627,6 +656,24 @@ nav ul a.active {
 .z-depth-1-half { box-shadow: var(--shadow-sm) !important; }
 
 /* --- Responsive --- */
+
+/* Laptop screens — tighter spacing so all 7 items fit */
+@media only screen and (min-width: 993px) and (max-width: 1440px) {
+  nav .brand-logo img {
+    max-width: 160px;
+    max-height: 80px;
+  }
+  nav ul a {
+    font-size: 11px;
+    padding: 0 7px;
+    letter-spacing: 0;
+  }
+  .brand-text {
+    font-size: 13px;
+    margin-left: 6px;
+  }
+}
+
 @media only screen and (max-width: 992px) {
   .hero-title { font-size: 32px; }
   .hero-section { padding: 60px 0; }

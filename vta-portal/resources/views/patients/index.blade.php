@@ -23,7 +23,7 @@
                     <div>
                         <label class="block text-xs font-medium uppercase text-gray-500 mb-2">Needs Review</label>
                         <label class="flex items-center gap-2 text-sm">
-                            <input type="checkbox" name="needs_review" value="1" @checked(request('needs_review', '1') === '1') class="rounded border-gray-300 text-[#0092b4] focus:ring-[#0092b4]">
+                            <input type="checkbox" name="needs_review" value="1" @checked(request('needs_review') === '1') class="rounded border-gray-300 text-[#0092b4] focus:ring-[#0092b4]">
                             Show needs review only
                         </label>
                     </div>
@@ -75,7 +75,7 @@
 
                     <div class="flex gap-2">
                         <button type="submit" class="flex-1 rounded-lg bg-[#0092b4] px-4 py-2 text-sm text-white hover:bg-[#007a9a]">Apply</button>
-                        <a href="{{ route('patients.index', ['needs_review' => 0]) }}" class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-50">Show All</a>
+                        <a href="{{ route('patients.index') }}" class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-center text-sm text-gray-700 hover:bg-gray-50">Show All</a>
                     </div>
                 </form>
             </div>
@@ -120,21 +120,7 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                <div class="flex gap-2">
-                                    <a href="{{ route('patients.show', $patient) }}" class="text-sm text-[#0092b4] hover:underline">View</a>
-                                    <a href="{{ route('patients.edit', $patient) }}" class="text-sm text-gray-600 hover:underline">Edit</a>
-                                    <form method="POST" action="{{ route('patients.status', $patient) }}" class="inline">
-                                        @csrf @method('PATCH')
-                                        <select name="status" onchange="this.form.submit()" class="text-xs border border-gray-300 rounded px-1 py-0.5">
-                                            <option value="">Change to...</option>
-                                            <option value="New">New</option>
-                                            <option value="In Progress">In Progress</option>
-                                            <option value="Converted">Converted</option>
-                                            <option value="Not Proceeding">Not Proceeding</option>
-                                            <option value="Needs Review">Needs Review</option>
-                                        </select>
-                                    </form>
-                                </div>
+                                <a href="{{ route('patients.show', $patient) }}" class="text-sm text-[#0092b4] hover:underline">View</a>
                             </td>
                         </tr>
                         @empty

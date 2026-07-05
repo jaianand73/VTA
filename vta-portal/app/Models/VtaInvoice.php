@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VtaInvoice extends Model
 {
@@ -13,7 +14,7 @@ class VtaInvoice extends Model
     ];
 
     protected $fillable = [
-        'patient_id', 'funding_cycle_id', 'invoice_number', 'invoice_date',
+        'patient_id', 'funding_cycle_id', 'assessment_id', 'invoice_number', 'invoice_date',
         'due_date', 'recipient_type', 'recipient_name', 'recipient_email',
         'recipient_address', 'sessions_invoiced', 'session_amount',
         'additional_charges', 'total_amount', 'status', 'payment_date',
@@ -33,5 +34,10 @@ class VtaInvoice extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function assessment(): BelongsTo
+    {
+        return $this->belongsTo(Assessment::class);
     }
 }

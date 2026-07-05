@@ -27,6 +27,7 @@
         <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-gray-200 text-left text-xs font-medium uppercase text-gray-500">
+                    <th class="px-4 py-3">Enquiry ID</th>
                     <th class="px-4 py-3">Date</th>
                     <th class="px-4 py-3">Enquirer Name</th>
                     <th class="px-4 py-3">Company</th>
@@ -40,6 +41,7 @@
             <tbody class="divide-y divide-gray-100">
                 @forelse($enquiries as $enquiry)
                 <tr class="even:bg-gray-50">
+                    <td class="px-4 py-3 text-xs font-medium text-[#0092b4]">{{ $enquiry->enquiry_ref ?? '—' }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ $enquiry->enquiry_date?->format('d/m/Y') }}</td>
                     <td class="px-4 py-3 font-medium text-gray-800">{{ $enquiry->enquirer_name }}</td>
                     <td class="px-4 py-3 text-gray-600">{{ $enquiry->company_name }}</td>
@@ -53,8 +55,15 @@
                     </td>
                     <td class="px-4 py-3 text-gray-600">{{ $enquiry->first_response_date ?? '—' }}</td>
                     <td class="px-4 py-3">
-                        <div class="flex gap-2">
+                        <div class="flex items-center gap-3">
                             <a href="{{ route('enquiries.show', $enquiry) }}" class="text-sm text-[#0092b4] hover:underline">View</a>
+                            @if(in_array(Auth::user()->role, ['admin', 'staff', 'developer']))
+                            <form method="POST" action="{{ route('enquiries.destroy', $enquiry) }}"
+                                  data-swal="Delete enquiry for {{ $enquiry->enquirer_name }}? This cannot be undone.">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="text-sm text-red-600 hover:underline">Delete</button>
+                            </form>
+                            @endif
                         </div>
                     </td>
                 </tr>

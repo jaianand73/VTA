@@ -48,6 +48,23 @@ class DocumentController extends Controller
         return Storage::disk('vta-documents')->download($document->file_path, $document->file_name);
     }
 
+    public function approve(Request $request, Document $document)
+    {
+        $data = $request->validate([
+            'approval_status'  => 'required|in:approved,rejected',
+            'approval_remarks' => 'nullable|string|max:1000',
+        ]);
+
+        $document->update([
+            'approval_status'  => $data['approval_status'],
+            'approval_remarks' => $data['approval_remarks'] ?? null,
+            'approved_by'      => Auth::id(),
+            'approved_at'      => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Document ' . $data['approval_status'] . '.');
+    }
+
     public function destroy(Document $document)
     {
         $this->authorize('delete', $document);

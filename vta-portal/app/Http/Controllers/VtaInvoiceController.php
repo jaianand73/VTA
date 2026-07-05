@@ -32,7 +32,7 @@ class VtaInvoiceController extends Controller
             $query->whereDate('invoice_date', '<=', $request->date_to);
         }
 
-        $vtaInvoices = $query->latest()->paginate(20);
+        $vtaInvoices = $query->orderBy('invoice_date', 'desc')->paginate(20);
 
         $summary = [
             'invoiced_this_month' => VtaInvoice::whereMonth('invoice_date', now()->month)
@@ -46,13 +46,24 @@ class VtaInvoiceController extends Controller
         return view('vta-invoices.index', compact('vtaInvoices', 'summary'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $patients = Patient::orderBy('first_name')->get();
+        $patients = Patient::with(['caseManager.company'])->orderBy('first_name')->get();
         $fundingCycles = FundingCycle::with('patient')->where('is_active', true)->get();
         $balanceService = app(FundingBalanceService::class);
+        $assessment = $request->filled('assessment_id') ? \App\Models\Assessment::find($request->assessment_id) : null;
 
-        return view('vta-invoices.create', compact('patients', 'fundingCycles', 'balanceService'));
+        $patientData = $patients->mapWithKeys(fn($p) => [
+            $p->id => [
+                'company_name'     => $p->caseManager?->company?->name ?? '',
+                'company_email'    => $p->caseManager?->company?->email ?? '',
+                'company_address'  => $p->caseManager?->company?->address ?? '',
+                'case_manager_name'  => $p->caseManager ? trim($p->caseManager->first_name . ' ' . $p->caseManager->last_name) : '',
+                'case_manager_email' => $p->caseManager?->email ?? '',
+            ],
+        ]);
+
+        return view('vta-invoices.create', compact('patients', 'fundingCycles', 'balanceService', 'assessment', 'patientData'));
     }
 
     public function store(Request $request, InvoiceNumberService $invoiceNumberService, FundingBalanceService $balanceService)
@@ -60,6 +71,7 @@ class VtaInvoiceController extends Controller
         $data = $request->validate([
             'patient_id'         => 'required|exists:patients,id',
             'funding_cycle_id'   => 'nullable|exists:funding_cycles,id',
+            'assessment_id'      => 'nullable|exists:assessments,id',
             'invoice_date'       => 'required|date',
             'due_date'           => 'nullable|date',
             'recipient_type'     => 'required|string|max:50',
@@ -161,6 +173,13 @@ class VtaInvoiceController extends Controller
         }
 
         $vtaInvoice->update($data);
+
+        if ($data['status'] === 'Sent') {
+            $patient = $vtaInvoice->patient;
+            if ($patient && $patient->canTransitionTo('Treatment Active')) {
+                $patient->update(['status' => 'Treatment Active']);
+            }
+        }
 
         return redirect()->back()->with('success', 'Invoice status updated.');
     }

@@ -8,9 +8,11 @@ use App\Models\Company;
 use App\Models\DocumentType;
 use App\Models\DocumentTypePermission;
 use App\Models\User;
+use App\Models\Communication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -24,7 +26,7 @@ class SettingsController extends Controller
         $permissions = DocumentTypePermission::with('documentType')->get()->keyBy(fn($p) => $p->document_type_id . '-' . $p->role);
         $associates = Associate::with('user')->orderBy('name')->get();
         $companies = Company::orderBy('name')->get();
-        $users = User::orderBy('name')->get();
+        $users = User::whereNotIn('role', ['case_manager'])->orderBy('name')->get();
 
         return view('settings.index', compact(
             'tab', 'activityTypes', 'documentTypes', 'roles', 'permissions',
@@ -164,14 +166,56 @@ class SettingsController extends Controller
             'qualifications' => 'nullable|string',
             'session_rate' => 'nullable|numeric|min:0',
             'travel_rate_per_mile' => 'nullable|numeric|min:0',
+            'hourly_rate' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
             'notes' => 'nullable|string',
         ]);
 
         $associate->update($data);
 
-        return redirect()->route('settings.index', ['tab' => 'associates'])
-            ->with('success', 'Associate updated.');
+        return redirect()->back()->with('success', 'Associate updated.');
+    }
+
+    public function showAssociate(Associate $associate)
+    {
+        $associate->load(['user', 'communications.createdBy', 'patients', 'complianceDocuments']);
+        return view('settings.associates.show', compact('associate'));
+    }
+
+    public function storeCompliance(Request $request, Associate $associate)
+    {
+        $data = $request->validate([
+            'document_type' => 'required|string|max:50',
+            'expiry_date'   => 'nullable|date',
+            'notes'         => 'nullable|string|max:500',
+            'document'      => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:20480',
+        ]);
+
+        if ($request->hasFile('document')) {
+            $data['document_path'] = $request->file('document')
+                ->store("associates/{$associate->id}/compliance", 'vta-documents');
+        }
+
+        $data['uploaded_by'] = Auth::id();
+        unset($data['document']);
+
+        $associate->complianceDocuments()->create($data);
+
+        return back()->with('success', 'Compliance document saved.');
+    }
+
+    public function uploadAssociateCv(Request $request, Associate $associate)
+    {
+        $request->validate(['cv' => 'required|file|mimes:pdf,doc,docx|max:10240']);
+
+        if ($associate->cv_path) {
+            Storage::disk('vta-documents')->delete($associate->cv_path);
+        }
+
+        $path = $request->file('cv')->store("associates/{$associate->id}/cv", 'vta-documents');
+        $associate->update(['cv_path' => $path]);
+
+        return back()->with('success', 'CV uploaded successfully.');
     }
 
     public function createAssociateLogin(Request $request, Associate $associate)

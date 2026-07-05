@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Patient;
 use App\Models\AssociateInvoice;
+use App\Models\CaseNote;
 use App\Models\EmailIntakeLog;
-use App\Models\Appointment;
+use App\Models\Enquiry;
 use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
@@ -20,16 +20,8 @@ class DashboardController extends Controller
             return redirect()->route('case-manager-portal.dashboard');
         }
 
-        $totalActiveCases = Patient::whereNotIn('status', ['Discharged', 'Case Closed'])->count();
-        $needsReviewCount = Patient::where('needs_review', true)->count();
-        $awaitingFundingCount = Patient::where('status', 'Awaiting Funding Approval')->count();
-
-        $overdueInvoices = collect();
         $overdueAlerts = collect();
         if (Auth::user()->role === 'admin') {
-            $overdueInvoices = AssociateInvoice::where('due_date', '<', now())
-                ->whereNotIn('status', ['Paid', 'Cancelled'])
-                ->get();
             $overdueAlerts = AssociateInvoice::whereBetween('due_date', [now(), now()->addDays(7)])
                 ->whereIn('status', ['Received', 'Verified'])
                 ->get();
@@ -40,17 +32,39 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $upcomingAppointments = Appointment::whereBetween('scheduled_at', [now(), now()->addDays(7)])
+        // F1 — Dashboard widgets counts
+        $unprocessedEmailsCount = EmailIntakeLog::where('processed', false)->count();
+        $clinicalHeadReview = CaseNote::where('needs_review', true)->where('is_signed_off', false)->count();
+        $pendingEnquiries = Enquiry::whereIn('status', ['New', 'In Progress', 'Qualified'])->count();
+        $invoicesDue = AssociateInvoice::where('due_date', '<', now())->where('status', '!=', 'Paid')->count();
+
+        // Q54 — associate compliance expiry alerts (expired or expiring within 90 days)
+        $expiringCompliance = \App\Models\AssociateComplianceDocument::with('associate')
+            ->whereNotNull('expiry_date')
+            ->where('expiry_date', '<=', now()->addDays(90))
+            ->where('expiry_date', '>=', now()->subDays(30))
+            ->orderBy('expiry_date')
             ->get();
 
-        $dailyActions = Patient::where('needs_review', true)
-            ->orderBy('referral_date', 'asc')
+        // Q65 — associate invoices submitted via portal awaiting admin review
+        $pendingAssocInvoices = \App\Models\AssociateInvoice::where('status', 'Submitted')
+            ->with('associate')
+            ->latest()
+            ->get();
+
+        // Q32 — case notes needing clinical head review (list for detail panel)
+        $reviewNotes = CaseNote::where('needs_review', true)
+            ->where('is_signed_off', false)
+            ->with(['patient', 'associate'])
+            ->latest('session_date')
+            ->take(10)
             ->get();
 
         return view('dashboard.index', compact(
-            'totalActiveCases', 'needsReviewCount', 'awaitingFundingCount',
-            'overdueInvoices', 'unprocessedEmails', 'upcomingAppointments',
-            'dailyActions', 'overdueAlerts'
+            'overdueAlerts', 'unprocessedEmails',
+            'unprocessedEmailsCount', 'clinicalHeadReview',
+            'pendingEnquiries', 'invoicesDue',
+            'expiringCompliance', 'pendingAssocInvoices', 'reviewNotes'
         ));
     }
 }

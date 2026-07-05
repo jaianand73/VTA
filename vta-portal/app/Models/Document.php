@@ -11,13 +11,15 @@ class Document extends Model
     protected $casts = [
         'password_shared_date' => 'date',
         'is_password_protected' => 'boolean',
+        'approved_at' => 'datetime',
     ];
 
     protected $fillable = [
         'document_type_id', 'patient_id', 'case_manager_id', 'appointment_id', 'enquiry_id',
         'file_name', 'stored_file_name', 'file_path', 'file_size', 'mime_type',
         'is_password_protected', 'report_password', 'password_shared_date',
-        'password_shared_via', 'uploaded_by'
+        'password_shared_via', 'uploaded_by',
+        'approval_status', 'approval_remarks', 'approved_by', 'approved_at',
     ];
 
     public function documentType()
@@ -49,4 +51,13 @@ class Document extends Model
     {
         return $this->belongsTo(User::class, 'uploaded_by');
     }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function isPending(): bool   { return $this->approval_status === 'pending'; }
+    public function isApproved(): bool  { return $this->approval_status === 'approved'; }
+    public function isRejected(): bool  { return $this->approval_status === 'rejected'; }
 }

@@ -1,7 +1,7 @@
 @php $header = 'Edit Funding Cycle'; @endphp
 <x-app-layout>
     <div class="max-w-3xl mx-auto">
-        <form method="POST" action="{{ route('funding-cycles.update', $fundingCycle) }}" class="space-y-6">
+        <form method="POST" action="{{ route('funding-cycles.update', $fundingCycle) }}" enctype="multipart/form-data" class="space-y-6">
             @csrf @method('PUT')
             <div class="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -13,6 +13,13 @@
                     <div><label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</label><input type="text" name="estimated_duration" value="{{ old('estimated_duration', $fundingCycle->estimated_duration) }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]"></div>
                     <div><label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Funder Name</label><input type="text" name="funder_name" value="{{ old('funder_name', $fundingCycle->funder_name) }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]"></div>
                     <div><label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Funder Reference</label><input type="text" name="funder_reference" value="{{ old('funder_reference', $fundingCycle->funder_reference) }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]"></div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Approval Document</label>
+                        <input type="file" name="approval_document" accept=".pdf,.doc,.docx,.jpg,.png" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-[#0092b4]/10 file:px-4 file:py-2 file:text-sm file:font-medium file:text-[#0092b4] hover:file:bg-[#0092b4]/20">
+                        @if($fundingCycle->approval_document_path)
+                        <p class="mt-1 text-xs text-green-600"><i class="fa-solid fa-check mr-1"></i> Document already uploaded.</p>
+                        @endif
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', $fundingCycle->is_active) ? 'checked' : '' }} class="rounded border-gray-300 text-[#0092b4] focus:ring-[#0092b4]">

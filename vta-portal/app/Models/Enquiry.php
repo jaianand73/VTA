@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Enquiry extends Model
 {
@@ -10,12 +11,16 @@ class Enquiry extends Model
         'enquiry_date' => 'date',
         'first_response_date' => 'date',
         'converted_date' => 'date',
+        'qualified_date' => 'date',
+        'qualified_as_referral' => 'boolean',
     ];
 
     protected $fillable = [
-        'enquirer_name', 'company_name', 'company_id', 'case_manager_id', 'email', 'phone', 'source', 'reason',
-        'enquiry_date', 'first_response_date', 'status', 'converted_to_company_id',
-        'converted_to_case_manager_id', 'converted_date', 'notes', 'created_by'
+        'enquiry_ref', 'enquirer_name', 'company_name', 'company_id', 'case_manager_id', 'email', 'phone', 'source', 'reason',
+        'client_location', 'nearest_associate_id',
+        'enquiry_date', 'first_response_date', 'first_response_remarks', 'status',
+        'converted_to_company_id', 'converted_to_case_manager_id', 'converted_date',
+        'notes', 'created_by', 'qualified_as_referral', 'qualified_date', 'qualified_remarks',
     ];
 
     public function createdBy()
@@ -51,5 +56,20 @@ class Enquiry extends Model
     public function documents()
     {
         return $this->hasMany(Document::class);
+    }
+
+    public function patient()
+    {
+        return $this->hasOne(Patient::class);
+    }
+
+    public function nearestAssociate()
+    {
+        return $this->belongsTo(Associate::class, 'nearest_associate_id');
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(EnquiryContact::class);
     }
 }

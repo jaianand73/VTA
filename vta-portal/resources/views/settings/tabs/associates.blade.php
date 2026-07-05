@@ -60,8 +60,6 @@
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Region</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Speciality</th>
-                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Session Rate</th>
-                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Travel Rate</th>
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Active</th>
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Portal</th>
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
@@ -73,8 +71,6 @@
                     <td class="px-4 py-3 text-sm font-medium text-gray-800">{{ $assoc->name }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600">{{ $assoc->region }}</td>
                     <td class="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">{{ $assoc->speciality ?? '-' }}</td>
-                    <td class="px-4 py-3 text-sm text-right text-gray-600">{{ $assoc->session_rate ? '£' . number_format($assoc->session_rate, 2) : '-' }}</td>
-                    <td class="px-4 py-3 text-sm text-right text-gray-600">{{ $assoc->travel_rate_per_mile ? '£' . number_format($assoc->travel_rate_per_mile, 2) : '-' }}</td>
                     <td class="px-4 py-3 text-center">
                         @if($assoc->is_active)
                             <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800">Active</span>
@@ -100,12 +96,13 @@
                             </form>
                         @endif
                     </td>
-                    <td class="px-4 py-3 text-right">
+                    <td class="px-4 py-3 text-right whitespace-nowrap">
+                        <a href="{{ route('settings.associates.show', $assoc) }}" class="text-gray-500 hover:text-gray-700 text-sm font-medium mr-3">View</a>
                         <button onclick="toggleEdit('associate-{{ $assoc->id }}')" class="text-[#0092b4] hover:text-[#007a9a] text-sm font-medium">Edit</button>
                     </td>
                 </tr>
                 <tr id="edit-associate-{{ $assoc->id }}" class="hidden">
-                    <td colspan="8" class="bg-gray-50 px-4 py-3">
+                    <td colspan="6" class="bg-gray-50 px-4 py-3">
                         <form method="POST" action="{{ route('settings.associates.update', $assoc) }}" class="grid gap-4 sm:grid-cols-3">
                             @csrf @method('PUT')
                             <input type="text" name="name" value="{{ $assoc->name }}" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0092b4] focus:ring-[#0092b4] text-sm">
@@ -132,3 +129,10 @@
         </table>
     </div>
 </div>
+
+<script>
+function toggleEdit(id) {
+    var row = document.getElementById(id);
+    if (row) row.classList.toggle('hidden');
+}
+</script>

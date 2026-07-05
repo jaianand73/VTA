@@ -92,6 +92,38 @@
             </div>
         </div>
 
+        {{-- Q47 — Clinical Head revision feedback panel (admin only) --}}
+        @if(in_array(Auth::user()->role, ['admin', 'developer']))
+        <div class="rounded-xl border p-5" style="border-color:#e9d5ff;background:#faf5ff;">
+            <h3 class="text-sm font-semibold mb-3" style="color:#6b21a8;">
+                <i class="fa-solid fa-comment-medical mr-1"></i> Clinical Head Review / Revision Feedback
+            </h3>
+            @if($caseNote->review_feedback)
+            <div class="rounded-lg p-3 mb-3" style="background:#fef3c7;border:1px solid #fde68a;">
+                <p class="text-xs font-semibold text-amber-700 mb-1">
+                    Previous feedback
+                    @if($caseNote->reviewedBy) from {{ $caseNote->reviewedBy->name }}@endif
+                    @if($caseNote->reviewed_at) on {{ \Carbon\Carbon::parse($caseNote->reviewed_at)->format('d M Y') }}@endif
+                </p>
+                <p class="text-sm text-amber-900">{{ $caseNote->review_feedback }}</p>
+            </div>
+            @endif
+            @if(!$caseNote->is_signed_off)
+            <form method="POST" action="{{ route('case-notes.feedback', $caseNote) }}">
+                @csrf @method('PATCH')
+                <label class="block text-xs font-medium text-gray-600 mb-1">Send revision request to associate</label>
+                <textarea name="review_feedback" rows="3"
+                          placeholder="Describe what needs to be revised or clarified…"
+                          class="w-full rounded-lg border-gray-300 text-sm px-3 py-2 border focus:outline-none focus:ring-1 focus:ring-purple-400 mb-2">{{ $caseNote->review_feedback }}</textarea>
+                <button type="submit"
+                        style="background:#7c3aed;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;">
+                    <i class="fa-solid fa-paper-plane mr-1"></i> Send Feedback
+                </button>
+            </form>
+            @endif
+        </div>
+        @endif
+
         @if(!$caseNote->is_signed_off)
         <form method="POST" action="{{ route('case-notes.destroy', $caseNote) }}" data-swal-label="this case note">
             @csrf

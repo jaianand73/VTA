@@ -71,20 +71,25 @@ class EmailIntakeController extends Controller
         $emailIntakeLog = EmailIntakeLog::findOrFail($id);
 
         $data = $request->validate([
-            'patient_id' => 'nullable|exists:patients,id',
-            'case_manager_id' => 'nullable|exists:case_managers,id',
+            'link_type' => 'required|in:patient,case_manager,enquiry,vta_invoice,funding_cycle',
+            'link_id' => 'required|integer',
             'notes' => 'nullable|string',
         ]);
 
-        $update = ['processed' => true, 'notes' => $data['notes'] ?? null];
+        $column = match ($data['link_type']) {
+            'patient' => 'linked_patient_id',
+            'case_manager' => 'linked_case_manager_id',
+            'enquiry' => 'enquiry_id',
+            'vta_invoice' => 'vta_invoice_id',
+            'funding_cycle' => 'funding_cycle_id',
+        };
 
-        if (!empty($data['patient_id'])) {
-            $update['linked_patient_id'] = $data['patient_id'];
-            $update['action_taken'] = 'Linked to Patient';
-        } elseif (!empty($data['case_manager_id'])) {
-            $update['linked_case_manager_id'] = $data['case_manager_id'];
-            $update['action_taken'] = 'Linked to Case Manager';
-        }
+        $update = [
+            'processed' => true,
+            $column => $data['link_id'],
+            'notes' => $data['notes'] ?? null,
+            'action_taken' => 'Linked to ' . str_replace('_', ' ', $data['link_type']),
+        ];
 
         $emailIntakeLog->update($update);
 

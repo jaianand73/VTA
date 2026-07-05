@@ -1,16 +1,21 @@
 @php $header = 'Create Funding Cycle'; @endphp
 <x-app-layout>
     <div class="max-w-3xl mx-auto">
-        <form method="POST" action="{{ route('funding-cycles.store') }}" class="space-y-6">
+        <form method="POST" action="{{ route('funding-cycles.store') }}" enctype="multipart/form-data" class="space-y-6">
             @csrf
-            <div class="rounded-xl border border-gray-200 bg-white p-6 space-y-4">
+            <div class="rounded-xl border border-gray-200 bg-white p-6 space-y-4" x-data="{
+                selectedPatient: {{ old('patient_id', $preselectedPatient?->id ?? 'null') }},
+                get filteredEstimations() {
+                    return estimationsByPatient[this.selectedPatient] || [];
+                }
+            }">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Patient <span class="text-red-500">*</span></label>
-                        <select name="patient_id" required class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                        <select name="patient_id" x-model="selectedPatient" required class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
                             <option value="">Select Patient</option>
                             @foreach($patients as $p)
-                            <option value="{{ $p->id }}" {{ old('patient_id') == $p->id ? 'selected' : '' }}>{{ $p->first_name }} {{ $p->last_name }}</option>
+                            <option value="{{ $p->id }}" @if(old('patient_id', $preselectedPatient?->id) == $p->id) selected @endif>{{ $p->first_name }} {{ $p->last_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -18,9 +23,9 @@
                         <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Cost Estimation</label>
                         <select name="cost_estimation_id" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
                             <option value="">None</option>
-                            @foreach($costEstimations as $ce)
-                            <option value="{{ $ce->id }}" {{ old('cost_estimation_id') == $ce->id ? 'selected' : '' }}>{{ $ce->patient?->first_name }} {{ $ce->patient?->last_name }} - v{{ $ce->version_number }} (&pound;{{ number_format($ce->estimated_amount, 0) }})</option>
-                            @endforeach
+                            <template x-for="ce in filteredEstimations" :key="ce.id">
+                                <option :value="ce.id" x-text="ce.label"></option>
+                            </template>
                         </select>
                     </div>
                     <div>
@@ -47,6 +52,10 @@
                         <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Funder Reference</label>
                         <input type="text" name="funder_reference" value="{{ old('funder_reference') }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
                     </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">Approval Document</label>
+                        <input type="file" name="approval_document" accept=".pdf,.doc,.docx,.jpg,.png" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-[#0092b4]/10 file:px-4 file:py-2 file:text-sm file:font-medium file:text-[#0092b4] hover:file:bg-[#0092b4]/20">
+                    </div>
                 </div>
                 <div class="flex items-center gap-2">
                     <input type="checkbox" name="is_active" id="is_active" value="1" {{ old('is_active', '1') ? 'checked' : '' }} class="rounded border-gray-300 text-[#0092b4] focus:ring-[#0092b4]">
@@ -63,4 +72,10 @@
             </div>
         </form>
     </div>
+
+    @push('scripts')
+    <script>
+        const estimationsByPatient = @json($estimationsByPatient);
+    </script>
+    @endpush
 </x-app-layout>

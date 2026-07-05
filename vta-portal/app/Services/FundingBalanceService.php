@@ -38,4 +38,10 @@ class FundingBalanceService
     {
         return $amount > $this->remainingBalance($cycle);
     }
+
+    public function isLowBalance(FundingCycle $cycle, float $threshold = 20.0): bool
+    {
+        return $cycle->approved_amount > 0
+            && $this->usagePercentage($cycle) >= (100 - $threshold);
+    }
 }

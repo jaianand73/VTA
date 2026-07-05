@@ -67,11 +67,6 @@
                         @error('location')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
                     </div>
 
-                    <div>
-                        <label for="travel_miles" class="text-xs font-medium text-gray-500 uppercase tracking-wider">Travel Miles</label>
-                        <input type="number" name="travel_miles" id="travel_miles" value="{{ old('travel_miles') }}" step="0.1" min="0" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
-                        @error('travel_miles')<p class="mt-1 text-xs text-red-500">{{ $message }}</p>@enderror
-                    </div>
                 </div>
 
                 <div>

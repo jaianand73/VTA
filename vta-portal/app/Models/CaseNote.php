@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class CaseNote extends Model
 {
     protected $casts = [
-        'session_date' => 'date',
+        'session_date'  => 'date',
         'signed_off_at' => 'datetime',
+        'reviewed_at'   => 'datetime',
     ];
 
     protected $fillable = [
         'patient_id', 'appointment_id', 'associate_id', 'session_date',
         'note_type', 'content', 'document_path', 'is_signed_off',
-        'signed_off_by', 'signed_off_at'
+        'signed_off_by', 'signed_off_at',
+        'needs_review', 'review_feedback', 'reviewed_by', 'reviewed_at',
     ];
 
     public function patient()
@@ -35,5 +37,10 @@ class CaseNote extends Model
     public function signedOffBy()
     {
         return $this->belongsTo(User::class, 'signed_off_by');
+    }
+
+    public function reviewedBy()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

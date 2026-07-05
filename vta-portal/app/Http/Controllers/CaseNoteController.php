@@ -114,4 +114,21 @@ class CaseNoteController extends Controller
 
         return back()->with('success', 'Case note signed off successfully.');
     }
+
+    public function sendFeedback(Request $request, CaseNote $caseNote)
+    {
+        $data = $request->validate([
+            'review_feedback' => 'required|string|max:2000',
+        ]);
+
+        $caseNote->update([
+            'review_feedback' => $data['review_feedback'],
+            'needs_review'    => true,
+            'reviewed_by'     => Auth::id(),
+            'reviewed_at'     => now(),
+            'is_signed_off'   => false,
+        ]);
+
+        return back()->with('success', 'Revision feedback sent.');
+    }
 }
