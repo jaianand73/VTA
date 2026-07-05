@@ -12,6 +12,8 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EmailIntakeController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\ReferralActivityController;
+use App\Http\Controllers\ReferralController;
 use App\Http\Controllers\PatientMdtMeetingController;
 use App\Http\Controllers\AssociateInvoiceController;
 use App\Http\Controllers\CaseManagerPortalController;
@@ -40,7 +42,34 @@ Route::middleware(['auth', 'verified', 'role:admin,staff'])->group(function () {
     Route::get('/enquiries/{enquiry}/edit', [EnquiryController::class, 'edit'])->name('enquiries.edit');
     Route::put('/enquiries/{enquiry}', [EnquiryController::class, 'update'])->name('enquiries.update');
     Route::delete('/enquiries/{enquiry}', [EnquiryController::class, 'destroy'])->name('enquiries.destroy');
-    Route::post('/enquiries/{enquiry}/convert', [EnquiryController::class, 'convert'])->name('enquiries.convert');
+    Route::post('/enquiries/{enquiry}/promote-to-referral', [EnquiryController::class, 'promoteToReferral'])->name('enquiries.promoteToReferral');
+
+    // Referrals
+    Route::get('/referrals', [ReferralController::class, 'index'])->name('referrals.index');
+    Route::get('/referrals/create', [ReferralController::class, 'create'])->name('referrals.create');
+    Route::post('/referrals', [ReferralController::class, 'store'])->name('referrals.store');
+    Route::get('/referrals/{referral}', [ReferralController::class, 'show'])->name('referrals.show');
+    Route::put('/referrals/{referral}', [ReferralController::class, 'update'])->name('referrals.update');
+    Route::delete('/referrals/{referral}', [ReferralController::class, 'destroy'])->name('referrals.destroy');
+    Route::get('/referrals/{referral}/convert', [ReferralController::class, 'convertToPatient'])->name('referrals.convertToPatient');
+    Route::post('/referrals/{referral}/convert', [ReferralController::class, 'storePatient'])->name('referrals.storePatient');
+    Route::post('/referrals/{referral}/approve-visit', [ReferralController::class, 'approveVisit'])->name('referrals.approveVisit');
+    Route::post('/referrals/{referral}/submit-proposal', [ReferralController::class, 'submitProposal'])->name('referrals.submitProposal');
+    Route::post('/referrals/{referral}/approve-proposal', [ReferralController::class, 'approveProposal'])->name('referrals.approveProposal');
+
+    // Referral activity (sessions, bills, communications, documents)
+    Route::post('/referrals/{referral}/sessions', [ReferralActivityController::class, 'storeSession'])->name('referrals.sessions.store');
+    Route::delete('/referrals/{referral}/sessions/{session}', [ReferralActivityController::class, 'destroySession'])->name('referrals.sessions.destroy');
+    Route::post('/referrals/{referral}/bills', [ReferralActivityController::class, 'storeBill'])->name('referrals.bills.store');
+    Route::patch('/referrals/{referral}/bills/{bill}/status', [ReferralActivityController::class, 'updateBillStatus'])->name('referrals.bills.status');
+    Route::patch('/referral-bills/{bill}/mark-paid', [ReferralActivityController::class, 'markBillPaid'])->name('referrals.bills.mark-paid');
+    Route::delete('/referrals/{referral}/bills/{bill}', [ReferralActivityController::class, 'destroyBill'])->name('referrals.bills.destroy');
+    Route::post('/referrals/{referral}/communications', [ReferralActivityController::class, 'storeCommunication'])->name('referrals.communications.store');
+    Route::delete('/referrals/{referral}/communications/{communication}', [ReferralActivityController::class, 'destroyCommunication'])->name('referrals.communications.destroy');
+    Route::post('/referrals/{referral}/documents', [ReferralActivityController::class, 'storeDocument'])->name('referrals.documents.store');
+    Route::patch('/referrals/{referral}/documents/{document}/visibility', [ReferralActivityController::class, 'toggleVisibility'])->name('referrals.documents.visibility');
+    Route::post('/referrals/{referral}/documents/{document}/request-revision', [ReferralActivityController::class, 'requestRevision'])->name('referrals.documents.request-revision');
+    Route::delete('/referrals/{referral}/documents/{document}', [ReferralActivityController::class, 'destroyDocument'])->name('referrals.documents.destroy');
 
     Route::resource('companies', CompanyController::class);
     Route::get('/companies/{company}/case-managers/{caseManager}', [CaseManagerController::class, 'show'])->name('companies.case-managers.show');
@@ -77,6 +106,7 @@ Route::middleware(['auth', 'verified', 'role:admin,staff'])->group(function () {
     // Phase 2 — Appointments
     Route::get('/appointments/calendar', [AppointmentController::class, 'calendar'])->name('appointments.calendar');
     Route::get('/appointments/events', [AppointmentController::class, 'fetchEvents'])->name('appointments.events');
+    Route::post('/appointments/referral-session', [AppointmentController::class, 'storeReferralSession'])->name('referrals.sessions.store.from-calendar');
     Route::resource('appointments', AppointmentController::class);
 
     // Phase 2 — Case Notes
@@ -121,6 +151,13 @@ Route::middleware(['auth', 'verified', 'role:associate'])->prefix('associate-por
     Route::post('/case-notes', [AssociatePortalController::class, 'uploadNote'])->name('upload-note');
     Route::post('/invoices', [AssociatePortalController::class, 'storeInvoice'])->name('invoices.store');
     Route::get('/calendar', [AssociatePortalController::class, 'calendar'])->name('calendar');
+    Route::get('/referrals', [AssociatePortalController::class, 'referrals'])->name('referrals');
+    Route::get('/referrals/{referral}', [AssociatePortalController::class, 'referral'])->name('referral');
+    Route::post('/referrals/{referral}/sessions', [ReferralActivityController::class, 'storeSession'])->name('referrals.sessions.store');
+    Route::post('/referrals/{referral}/bills', [ReferralActivityController::class, 'storeBill'])->name('referrals.bills.store');
+    Route::post('/referrals/{referral}/communications', [ReferralActivityController::class, 'storeCommunication'])->name('referrals.communications.store');
+    Route::post('/referrals/{referral}/documents', [ReferralActivityController::class, 'storeDocument'])->name('referrals.documents.store');
+    Route::post('/referrals/{referral}/documents/{document}/reupload', [AssociatePortalController::class, 'reuploadDocument'])->name('referrals.documents.reupload');
 });
 
 // Phase 4 — Case Manager Portal
@@ -136,10 +173,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// A1 — Qualify enquiry (admin only — Q2: LOI always comes to VTA, only admin qualifies)
-Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
-    Route::post('/enquiries/{enquiry}/qualify', [EnquiryController::class, 'qualify'])->name('enquiries.qualify');
-});
 
 // Phase 3 — Finance Screens (admin only)
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {

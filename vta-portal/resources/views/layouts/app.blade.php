@@ -36,9 +36,30 @@
                 @endif
 
                 @if(in_array(Auth::user()->role, ['associate']))
-                <a href="{{ route('associate-portal.dashboard') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('associate-portal.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
-                    <i class="fa-solid fa-user-md w-5 text-center"></i>
-                    My Portal
+                <a href="{{ route('associate-portal.dashboard') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('associate-portal.dashboard') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-gauge-high w-5 text-center"></i>
+                    Dashboard
+                </a>
+                <a href="{{ route('associate-portal.referrals') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('associate-portal.referrals') || request()->routeIs('associate-portal.referral') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-file-medical w-5 text-center"></i>
+                    My Referrals
+                    @php
+                        $myAssociate = auth()->user()->associate ?? null;
+                        $pendingRevisions = $myAssociate
+                            ? \App\Models\ReferralDocument::whereHas('referral', fn($q) => $q->where('associate_id', $myAssociate->id))->where('revision_requested', true)->count()
+                            : 0;
+                    @endphp
+                    @if($pendingRevisions > 0)
+                    <span class="ml-auto inline-flex items-center justify-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">{{ $pendingRevisions }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('associate-portal.dashboard') }}#patients" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('associate-portal.patient') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-user-injured w-5 text-center"></i>
+                    My Patients
+                </a>
+                <a href="{{ route('associate-portal.calendar') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('associate-portal.calendar') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-calendar-days w-5 text-center"></i>
+                    My Calendar
                 </a>
                 @endif
 
@@ -58,6 +79,11 @@
                 <a href="{{ route('enquiries.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('enquiries.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
                     <i class="fa-solid fa-circle-question w-5 text-center"></i>
                     Enquiries
+                </a>
+
+                <a href="{{ route('referrals.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('referrals.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">
+                    <i class="fa-solid fa-file-medical w-5 text-center"></i>
+                    Referrals
                 </a>
 
                 <a href="{{ route('patients.index') }}" class="flex items-center gap-3 rounded-lg px-3 py-2 {{ request()->routeIs('patients.*') ? 'bg-[#0092b4]/10 text-[#0092b4]' : 'text-gray-600 hover:bg-gray-100' }}">

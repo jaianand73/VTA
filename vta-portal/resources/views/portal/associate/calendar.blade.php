@@ -15,7 +15,13 @@
     @endpush
 
     <div class="space-y-6">
-        <p class="text-sm text-gray-500">Your appointments only</p>
+        {{-- Legend --}}
+        <div class="flex flex-wrap gap-4 text-xs font-medium text-gray-600">
+            <span class="flex items-center gap-1.5"><span class="inline-block h-3 w-3 rounded-full" style="background:#3B82F6"></span> Appointment (Scheduled)</span>
+            <span class="flex items-center gap-1.5"><span class="inline-block h-3 w-3 rounded-full" style="background:#10B981"></span> Appointment (Completed)</span>
+            <span class="flex items-center gap-1.5"><span class="inline-block h-3 w-3 rounded-full" style="background:#059669"></span> Referral Session</span>
+            <span class="flex items-center gap-1.5"><span class="inline-block h-3 w-3 rounded-full" style="background:#EF4444"></span> Cancelled</span>
+        </div>
 
         <div class="rounded-xl border border-gray-200 bg-white p-4">
             <div id="associate-calendar"></div>
@@ -29,7 +35,7 @@
             <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 <div class="bg-white px-6 pb-4 pt-5">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-900">Appointment Details</h3>
+                        <h3 class="text-lg font-semibold text-gray-900" id="modal-title">Event Details</h3>
                         <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
                             <i class="fa-solid fa-xmark text-xl"></i>
                         </button>
@@ -75,16 +81,40 @@
                 },
                 eventClick: function(info) {
                     const props = info.event.extendedProps;
-                    modalBody.innerHTML = `
-                        <div class="grid grid-cols-2 gap-3">
-                            <div><span class="text-gray-500">Patient:</span><br><span class="font-medium">${props.patient || '-'}</span></div>
-                            <div><span class="text-gray-500">Activity:</span><br><span class="font-medium">${props.activity || '-'}</span></div>
-                            <div><span class="text-gray-500">Status:</span><br><span class="font-medium">${props.status || '-'}</span></div>
-                            <div><span class="text-gray-500">Location:</span><br><span class="font-medium">${props.location || '-'}</span></div>
-                            <div><span class="text-gray-500">Duration:</span><br><span class="font-medium">${props.duration || 60} min</span></div>
-                            ${props.notes ? `<div class="col-span-2"><span class="text-gray-500">Notes:</span><br><span class="font-medium">${props.notes}</span></div>` : ''}
-                        </div>
-                    `;
+                    const type = props.type || 'appointment';
+                    document.getElementById('modal-title').textContent =
+                        type === 'referral_session' ? 'Referral Session' : 'Appointment Details';
+
+                    let html = '';
+                    if (type === 'referral_session') {
+                        html = `
+                            <div class="mb-3 rounded-lg px-3 py-2 text-xs font-medium text-emerald-800" style="background:#d1fae5">
+                                Referral Assessment Session
+                                ${props.ref ? `&nbsp;·&nbsp;<span class="font-mono">${props.ref}</span>` : ''}
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><span class="text-gray-500">Patient:</span><br><span class="font-medium">${props.patient || '-'}</span></div>
+                                <div><span class="text-gray-500">Activity:</span><br><span class="font-medium">${props.activity || '-'}</span></div>
+                                <div><span class="text-gray-500">Location:</span><br><span class="font-medium">${props.location || '-'}</span></div>
+                                <div><span class="text-gray-500">Duration:</span><br><span class="font-medium">${props.duration ? props.duration + ' min' : '-'}</span></div>
+                                ${props.notes ? `<div class="col-span-2"><span class="text-gray-500">Notes:</span><br><span class="font-medium">${props.notes}</span></div>` : ''}
+                            </div>
+                            ${props.url ? `<div class="mt-4"><a href="${props.url}" class="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-white" style="background:#059669">View Referral <i class="fa-solid fa-arrow-right text-xs"></i></a></div>` : ''}
+                        `;
+                    } else {
+                        html = `
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><span class="text-gray-500">Patient:</span><br><span class="font-medium">${props.patient || '-'}</span></div>
+                                <div><span class="text-gray-500">Activity:</span><br><span class="font-medium">${props.activity || '-'}</span></div>
+                                <div><span class="text-gray-500">Status:</span><br><span class="font-medium">${props.status || '-'}</span></div>
+                                <div><span class="text-gray-500">Location:</span><br><span class="font-medium">${props.location || '-'}</span></div>
+                                <div><span class="text-gray-500">Duration:</span><br><span class="font-medium">${props.duration || 60} min</span></div>
+                                ${props.notes ? `<div class="col-span-2"><span class="text-gray-500">Notes:</span><br><span class="font-medium">${props.notes}</span></div>` : ''}
+                            </div>
+                            ${props.url ? `<div class="mt-4"><a href="${props.url}" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50">View Appointment <i class="fa-solid fa-arrow-right text-xs"></i></a></div>` : ''}
+                        `;
+                    }
+                    modalBody.innerHTML = html;
                     modal.classList.remove('hidden');
                 },
                 windowResize: function(view) {

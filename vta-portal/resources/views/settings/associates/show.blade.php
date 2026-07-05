@@ -46,6 +46,66 @@
                 </div>
             </div>
 
+            {{-- Workload summary --}}
+            @php
+                $activeReferrals = \App\Models\Referral::where('associate_id', $associate->id)
+                    ->whereIn('status', ['Assessment', 'Proposal Submitted', 'Approved'])
+                    ->get();
+                $activePatients  = $associate->patients->count();
+            @endphp
+            <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                <div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-2">
+                    <i class="fa-solid fa-briefcase-medical text-gray-400 text-sm"></i>
+                    <span class="font-semibold text-gray-700 text-sm">Current Workload</span>
+                </div>
+                <div class="p-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                    {{-- Active referrals tile --}}
+                    <div class="rounded-lg border p-3 text-center" style="border-color:#d1fae5;background:#f0fdf4;">
+                        <p class="text-2xl font-bold" style="color:#059669;">{{ $activeReferrals->count() }}</p>
+                        <p class="text-xs font-medium text-gray-500 mt-0.5">Active Referrals</p>
+                    </div>
+                    {{-- Active patients tile --}}
+                    <div class="rounded-lg border p-3 text-center" style="border-color:#dbeafe;background:#eff6ff;">
+                        <p class="text-2xl font-bold" style="color:#2563eb;">{{ $activePatients }}</p>
+                        <p class="text-xs font-medium text-gray-500 mt-0.5">Active Patients</p>
+                    </div>
+                    {{-- Assessment count --}}
+                    <div class="rounded-lg border p-3 text-center" style="border-color:#e9d5ff;background:#faf5ff;">
+                        <p class="text-2xl font-bold" style="color:#7c3aed;">{{ $activeReferrals->where('status','Assessment')->count() }}</p>
+                        <p class="text-xs font-medium text-gray-500 mt-0.5">In Assessment</p>
+                    </div>
+                    {{-- Pending approval --}}
+                    <div class="rounded-lg border p-3 text-center" style="border-color:#fde68a;background:#fffbeb;">
+                        <p class="text-2xl font-bold" style="color:#d97706;">{{ $activeReferrals->whereIn('status',['Proposal Submitted','Approved'])->count() }}</p>
+                        <p class="text-xs font-medium text-gray-500 mt-0.5">Proposal / Approved</p>
+                    </div>
+                </div>
+                @if($activeReferrals->count() > 0)
+                <div class="px-5 pb-4">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Active Referrals</p>
+                    <div class="space-y-1.5">
+                        @foreach($activeReferrals as $ref)
+                        <div class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono text-xs font-semibold text-gray-700">{{ $ref->referral_ref }}</span>
+                                <span class="text-sm text-gray-800">{{ $ref->patient_first_name }} {{ $ref->patient_last_name }}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                                    @if($ref->status === 'Assessment') bg-purple-100 text-purple-700
+                                    @elseif($ref->status === 'Proposal Submitted') bg-amber-100 text-amber-700
+                                    @else bg-green-100 text-green-700 @endif">
+                                    {{ $ref->status }}
+                                </span>
+                                <a href="{{ route('referrals.show', $ref) }}" class="text-xs text-[#0092b4] hover:underline">View</a>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+
             {{-- CV card --}}
             <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
                 <div class="px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-2">

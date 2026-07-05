@@ -4,9 +4,6 @@
     @csrf
     @if($patient) @method('PUT') @endif
 
-    @if($enquiry)
-    <input type="hidden" name="enquiry_id" value="{{ $enquiry->id }}">
-    @endif
 
     <div class="grid gap-6 sm:grid-cols-2">
         @php
@@ -129,7 +126,7 @@
             <select id="case_manager_id" name="case_manager_id" class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
                 <option value="">— Select Case Manager —</option>
                 @foreach(\App\Models\CaseManager::with('company')->orderBy('first_name')->get() as $cm)
-                <option value="{{ $cm->id }}" @selected(old('case_manager_id', $enquiry?->converted_to_case_manager_id ?? $enquiry?->case_manager_id) == $cm->id)>
+                <option value="{{ $cm->id }}" @selected(old('case_manager_id', $patient?->case_manager_id) == $cm->id)>
                     {{ $cm->first_name }} {{ $cm->last_name }}{{ $cm->company ? ' — ' . $cm->company->name : '' }}
                 </option>
                 @endforeach

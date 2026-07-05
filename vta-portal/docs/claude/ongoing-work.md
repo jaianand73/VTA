@@ -1,10 +1,10 @@
 # VTA Portal — Ongoing Work & Open Items
 
-_Last updated: 2026-07-05 (session 4)_
+_Last updated: 2026-07-05 (session 5)_
 
 ## Current Phase
 
-**New Flow Build** — Samy and Sheeba have confirmed a redesigned case funnel: Enquiry → Referral → Patient. All existing case data wiped (clean slate). New flow build starting. UAT feedback items remain open and will be revisited after the new flow is built.
+**Flow Migration** — New 3-stage funnel (Enquiry → Referral → Patient) has been built. Now removing the old direct Enquiry→Patient conversion code and updating all dependent pages. Full migration plan documented in `docs/claude/flow-migration.md`.
 
 ---
 
@@ -77,21 +77,59 @@ All 5 UAT improvements (A1, A2, A6, A12, A17) are marked `dev_status = done`. De
 - All existing case data wiped on 2026-07-05 (production + local clean slate)
 - `referral_ref` carries forward from `enquiry_ref` (same reference throughout lifecycle)
 
-### Build tasks — TODO
-- [ ] Migration: create `referrals` table
-- [ ] Migration: add `referral_id` to `patients`
-- [ ] Migration: update `enquiry_contacts` role enum (add GP, Family Member)
-- [ ] Migration: strip referral-stage columns from `enquiries` (company_id, case_manager_id, converted_*, qualified_*, client_location, nearest_associate_id)
-- [ ] Model: `Referral`
-- [ ] Observer: `ReferralObserver`
-- [ ] Register observer in `AppServiceProvider`
-- [ ] Controller: `ReferralController` (index, create, store, show, update, destroy, promoteToPatient)
-- [ ] Views: `referrals/index`, `referrals/create`, `referrals/show`
-- [ ] Update `EnquiryController` — replace convert logic with "Promote to Referral"
-- [ ] Update `enquiries/show` — replace old Convert button with Promote to Referral
-- [ ] Update `PatientController::store()` — accept `referral_id` instead of `enquiry_id`
-- [ ] Update nav (`app.blade.php`) — add Referrals link between Enquiries and Patients
-- [ ] Seed rich sample data (local + production) covering all status stages and scenarios
+### Build tasks — COMPLETED
+- [x] Migration: create `referrals` table
+- [x] Migration: add `referral_id` to `patients`
+- [x] Migration: update `enquiry_contacts` role enum (add GP, Family Member)
+- [x] Model: `Referral` (with all relationships and helpers)
+- [x] Observer: `ReferralObserver`
+- [x] Register ReferralObserver in `AppServiceProvider`
+- [x] Controller: `ReferralController` (index, create, store, show, update, destroy, convertToPatient, storePatient, approveVisit, submitProposal)
+- [x] Routes: all referral routes + `enquiries.promoteToReferral`
+- [x] Nav: Referrals link in sidebar between Enquiries and Patients
+- [x] View: `referrals/index.blade.php`
+- [x] View: `referrals/create.blade.php`
+- [x] View: `referrals/show.blade.php` (with Go-ahead, Proposal, Convert panels)
+- [x] View: `referrals/convert.blade.php`
+- [x] `Enquiry` model: `referral()` hasOne relationship added
+- [x] `EnquiryController::promoteToReferral()` added
+- [x] `EnquiryController::show()` eager-loads referral
+- [x] `enquiries/show.blade.php` header: Promote to Referral / View Referral buttons added
+- [x] `Patient` model: `referral()` belongsTo + `referral_id` in fillable
+
+---
+
+## Flow Migration — Old Code Removal (IN PROGRESS)
+
+**Reference document:** `docs/claude/flow-migration.md` — full before/after details
+
+### Tasks
+
+#### Code Removal
+- [x] `enquiries/show.blade.php` — removed 3 old panels (Qualify, Convert to Record, Create Patient) + qualified badge + hidden CM inputs in comm/doc forms
+- [x] `EnquiryController.php` — removed `qualify()` method + `convert()` method
+- [x] `routes/web.php` — removed `enquiries.qualify` + `enquiries.convert` routes
+- [x] `PatientController.php` — removed `enquiry_id` special-casing in `store()`; `create()` no longer accepts enquiry_id param
+- [x] `patients/form.blade.php` — removed hidden `enquiry_id` input + `converted_to_case_manager_id` pre-fill logic
+- [x] `EnquiryObserver.php` — removed `qualified_as_referral` change detection + log entry
+- [x] `Company` model — removed `hasMany(Enquiry, 'converted_to_company_id')` orphaned relationship
+
+#### Documentation Updates
+- [ ] `understanding-each-page.blade.php` — update Enquiries section (remove Qualify/Convert steps); add Referrals section; update Patients section
+- [ ] `how-it-works.blade.php` — update flow diagram/steps to show 3 stages
+- [ ] `uat-guide/show.blade.php` — replace old qualify/convert test steps with new 3-stage test scenario
+
+#### Enquiry Status Enum
+- [x] Updated enquiry status values: removed 'Qualified', renamed 'Converted' → 'Converted to Referral' in index filter, index colour map, and show edit dropdown
+
+#### Production Deploy
+- [ ] Deploy all referral views + controller + model + observer changes to production
+- [ ] Run 3 new migrations on production (`referrals` table, `referral_id` on patients, `enquiry_contacts` role enum)
+- [ ] Delete stray `/tmp/wipe_case_data.php` from production if still present
+
+#### Seed Data
+- [ ] Seed rich diversified sample data locally — covering all 7 referral statuses, all patient scenarios
+- [ ] Seed same data on production so Samy can experience all scenarios
 
 ---
 

@@ -77,12 +77,7 @@ class PatientController extends Controller
 
     public function create(Request $request)
     {
-        $enquiry = null;
-        if ($request->has('enquiry_id')) {
-            $enquiry = Enquiry::find($request->enquiry_id);
-        }
-
-        return view('patients.create', compact('enquiry'));
+        return view('patients.create');
     }
 
     public function store(Request $request)
@@ -115,7 +110,6 @@ class PatientController extends Controller
             'assigned_staff_id' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
             'folder_path' => 'nullable|string|max:255',
-            'enquiry_id' => 'nullable|exists:enquiries,id',
             'reason_for_referral' => 'nullable|string|max:100',
             'referrers' => 'nullable|array',
             'referrers.*.name' => 'required_with:referrers.*.role|string|max:255',
@@ -142,29 +136,7 @@ class PatientController extends Controller
         $data['referral_date'] = $data['referral_date'] ?? now()->toDateString();
         $data['created_by'] = Auth::id();
 
-        if ($request->filled('enquiry_id') && empty($data['patient_ref'])) {
-            $sourceEnquiry = Enquiry::find($request->enquiry_id);
-            if ($sourceEnquiry && $sourceEnquiry->enquiry_ref) {
-                $data['patient_ref'] = $sourceEnquiry->enquiry_ref;
-            }
-        }
-
         $patient = Patient::create($data);
-
-        if ($request->filled('enquiry_id')) {
-            $patient->enquiry_id = $request->enquiry_id;
-            $patient->save();
-
-            Enquiry::find($request->enquiry_id)->update(['status' => 'Converted']);
-
-            Document::where('enquiry_id', $request->enquiry_id)
-                ->whereNull('patient_id')
-                ->update(['patient_id' => $patient->id]);
-
-            Communication::where('enquiry_id', $request->enquiry_id)
-                ->whereNull('patient_id')
-                ->update(['patient_id' => $patient->id]);
-        }
 
         foreach ($request->referrers ?? [] as $referrer) {
             if (!empty($referrer['name'])) {

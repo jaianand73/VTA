@@ -62,6 +62,7 @@
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Speciality</th>
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Active</th>
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Portal</th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase" style="color:#059669;">Referrals</th>
                     <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
             </thead>
@@ -94,6 +95,22 @@
                                 <input type="password" name="password" placeholder="Password" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#0092b4] focus:ring-[#0092b4] text-xs">
                                 <button type="submit" class="rounded bg-[#0092b4] px-2 py-1 text-xs font-medium text-white hover:bg-[#007a9a]">Go</button>
                             </form>
+                        @endif
+                    </td>
+                    @php
+                        $refCount = \App\Models\Referral::where('associate_id', $assoc->id)
+                            ->whereIn('status', ['Assessment', 'Proposal Submitted', 'Approved'])
+                            ->count();
+                    @endphp
+                    <td class="px-4 py-3 text-center">
+                        @if($refCount > 0)
+                        <a href="{{ route('referrals.index', ['associate_id' => $assoc->id]) }}"
+                           class="inline-flex items-center gap-1 text-xs font-semibold rounded-full px-2.5 py-0.5 hover:opacity-80"
+                           style="background:#d1fae5;color:#059669;">
+                            {{ $refCount }} active
+                        </a>
+                        @else
+                        <span class="text-xs text-gray-400">—</span>
                         @endif
                     </td>
                     <td class="px-4 py-3 text-right whitespace-nowrap">

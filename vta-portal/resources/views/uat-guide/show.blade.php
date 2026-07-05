@@ -1,7 +1,7 @@
 <x-app-layout>
     @php
         $tested  = $stats['total'];
-        $total   = 40;
+        $total   = 50;
         $pctPass = $total > 0 ? round(($stats['pass']        / $total) * 100) : 0;
         $pctFail = $total > 0 ? round(($stats['fail']        / $total) * 100) : 0;
         $pctSug  = $total > 0 ? round(($stats['improvement'] / $total) * 100) : 0;
@@ -29,7 +29,7 @@
                 </div>
                 <div>
                     <div style="font-size:13px; font-weight:700; color:#111827; line-height:1.1;">UAT Testing</div>
-                    <div style="font-size:11px; color:#9ca3af; line-height:1;">{{ $stats['total'] }}/40 steps</div>
+                    <div style="font-size:11px; color:#9ca3af; line-height:1;">{{ $stats['total'] }}/50 steps</div>
                 </div>
             </div>
 
@@ -577,6 +577,103 @@
                         'Confirm Funding Cycle remaining balance is correctly reduced from the invoice in A13.',
                      ],
                      'outcome' => 'Patient page shows a complete unified timeline. Status is Treatment Active. Financial balance is accurate.'],
+                ],
+            ])
+
+            {{-- ══ SECTION G — REFERRAL FLOW ══ --}}
+            @include('uat-guide._section', [
+                'sectionId'    => 'sectionG',
+                'sectionLabel' => 'Section G — Full Referral Flow (Enquiry → Patient)',
+                'roleClass'    => 'bg-emerald-100 text-emerald-700',
+                'roleLabel'    => 'Admin',
+                'note'         => 'This section tests the complete E→R→P journey introduced in the latest build. Log in as Samy throughout. Use Georgios (georgios@test.com / password) to test the associate portal steps.',
+                'steps'        => [
+                    ['ref' => 'G1', 'title' => 'Create a New Enquiry',
+                     'instructions' => [
+                        'Log in as Samy. Go to <strong>Enquiries → New Enquiry</strong>.',
+                        'Create a new enquiry: company <code>Test Insurance Ltd</code>, patient first name <code>Test</code>, last name <code>Patient</code>.',
+                        'Set status to <strong>In Progress</strong> and save.',
+                        'Confirm the enquiry appears with an auto-generated VTA-xxx reference.',
+                     ],
+                     'outcome' => 'Enquiry created with VTA-xxx reference. Status shows "In Progress". No referral or patient record yet.'],
+
+                    ['ref' => 'G2', 'title' => 'Promote to Referral',
+                     'instructions' => [
+                        'Open the enquiry created in G1.',
+                        'Click <strong>"Promote to Referral"</strong>.',
+                        'Confirm a Referral record is created with <em>the same VTA-xxx reference</em>.',
+                        'Confirm the enquiry status has updated to <strong>Qualified</strong>.',
+                        'Go to Referrals → confirm the new referral appears with status <strong>In Progress</strong>.',
+                     ],
+                     'outcome' => 'Referral exists with the same VTA-xxx ref. Enquiry status = Qualified. Referral status = In Progress.'],
+
+                    ['ref' => 'G3', 'title' => 'Block Test — Create Referral Directly',
+                     'instructions' => [
+                        'Go to <strong>Referrals</strong> and look for any "New Referral" button.',
+                     ],
+                     'outcome' => '<span class="text-red-700 font-semibold">Block Test:</span> No "New Referral" button should exist. Referrals can only be created by promoting a qualified enquiry. If a "New Referral" button is present, this is a defect.'],
+
+                    ['ref' => 'G4', 'title' => 'Record Go-ahead & Assign Associate',
+                     'instructions' => [
+                        'Open the referral from G2.',
+                        'Click <strong>"Record Go-ahead"</strong> (or equivalent action). Enter a visit approval date.',
+                        'Assign associate <strong>Georgios Tsiknas</strong>.',
+                        'Confirm referral status updates to <strong>Assessment</strong>.',
+                        'Log in as Georgios (georgios@test.com / password) → confirm the referral appears in <strong>My Referrals</strong> on the associate portal.',
+                     ],
+                     'outcome' => 'Referral status = Assessment. Georgios can see the referral in his portal with patient details and special instructions.'],
+
+                    ['ref' => 'G5', 'title' => 'Log Assessment Session from Associate Portal',
+                     'instructions' => [
+                        'Still logged in as Georgios.',
+                        'Open the referral in the associate portal.',
+                        'Log a new session: activity type <strong>Assessment</strong>, date today, duration 60 minutes, location "Patient\'s home".',
+                        'Log back in as Samy → open the referral → confirm the session appears in the Sessions section.',
+                     ],
+                     'outcome' => 'Session logged by associate is visible to Samy on the referral page. Session count increases by 1.'],
+
+                    ['ref' => 'G6', 'title' => 'Upload Document & Request Revision',
+                     'instructions' => [
+                        'Log in as Georgios → open the referral → upload any small PDF as a document (e.g. a test file).',
+                        'Log back in as Samy → open the referral → find the document → click <strong>"Request Revision"</strong> and enter a note: <code>Please add the date to page 1.</code>',
+                        'Log back in as Georgios → confirm an <strong>amber revision alert</strong> is shown on the referral with the note text.',
+                     ],
+                     'outcome' => 'Document revision request visible to associate with Samy\'s note. Amber banner appears in the associate portal.'],
+
+                    ['ref' => 'G7', 'title' => 'Submit Proposal',
+                     'instructions' => [
+                        'Log in as Samy → open the referral.',
+                        'Click <strong>"Submit Proposal"</strong>.',
+                        'Confirm referral status updates to <strong>Proposal Submitted</strong>.',
+                     ],
+                     'outcome' => 'Referral status = Proposal Submitted. Convert to Patient button is not visible yet.'],
+
+                    ['ref' => 'G8', 'title' => 'Approve Proposal',
+                     'instructions' => [
+                        'On the referral page, click <strong>"Approve Proposal"</strong>.',
+                        'Confirm status updates to <strong>Approved</strong>.',
+                        'Confirm a green <strong>"Convert to Patient"</strong> button now appears.',
+                     ],
+                     'outcome' => 'Referral status = Approved. Convert to Patient button visible.'],
+
+                    ['ref' => 'G9', 'title' => 'Convert to Patient',
+                     'instructions' => [
+                        'Click <strong>"Convert to Patient"</strong> on the approved referral.',
+                        'Complete any required patient fields and save.',
+                        'Confirm a Patient record is created with the <em>same VTA-xxx reference</em> as the enquiry and referral.',
+                        'Confirm the referral status changes to <strong>Converted</strong>.',
+                        'Open the patient → confirm the enquiry and referral IDs are both linked.',
+                     ],
+                     'outcome' => 'Patient created with the same VTA-xxx ref. Referral status = Converted. Patient record shows both enquiry_id and referral_id links.'],
+
+                    ['ref' => 'G10', 'title' => 'Audit Trail Verification',
+                     'instructions' => [
+                        'Go to <strong>Reports → Audit → Patient Audit</strong> and open the patient from G9.',
+                        'Confirm the <strong>Referral Stage card</strong> is visible, showing the referral ref, milestones (go-ahead date, proposal submitted, approval date, conversion date), and the session logged in G5.',
+                        'Go to <strong>Reports → Audit → Associate Audit</strong> → open Georgios\'s audit.',
+                        'Confirm the referral sessions section shows the session from G5.',
+                     ],
+                     'outcome' => 'Patient audit shows full referral history. Associate audit shows referral sessions. The complete E→R→P journey is visible end-to-end.'],
                 ],
             ])
 

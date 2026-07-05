@@ -26,12 +26,17 @@ class Patient extends Model
         'fee_agreed_amount', 'fee_agreed_document', 'assessment_report_sent', 'assessment_report_document',
         'invoice_recipient_type', 'invoice_recipient_name', 'invoice_recipient_email',
         'invoice_recipient_address', 'assigned_staff_id', 'needs_review', 'folder_path',
-        'notes', 'clinical_alert', 'created_by', 'enquiry_id',
+        'notes', 'clinical_alert', 'created_by', 'enquiry_id', 'referral_id',
     ];
 
     public function enquiry()
     {
         return $this->belongsTo(Enquiry::class);
+    }
+
+    public function referral()
+    {
+        return $this->belongsTo(\App\Models\Referral::class);
     }
 
     public function caseManager()

@@ -15,17 +15,17 @@
     </div>
 
     {{-- ══ TABS ══ --}}
-    <div class="mb-10" x-data="{ open: 'patient' }">
+    <div class="mb-10" x-data="{ open: 'enquiry' }">
 
         {{-- ── Tab selectors ── --}}
         @php
         $tabs = [
-            ['id'=>'patient',       'label'=>'Patient Page',           'icon'=>'fa-user-injured',       'color'=>'#6366f1', 'light'=>'#eef2ff', 'dark'=>'#4338ca'],
             ['id'=>'enquiry',       'label'=>'Enquiry Page',           'icon'=>'fa-envelope-open-text', 'color'=>'#3b82f6', 'light'=>'#eff6ff', 'dark'=>'#1d4ed8'],
+            ['id'=>'referrals',     'label'=>'Referrals',              'icon'=>'fa-file-medical',       'color'=>'#059669', 'light'=>'#f0fdf4', 'dark'=>'#065f46'],
+            ['id'=>'patient',       'label'=>'Patient Page',           'icon'=>'fa-user-injured',       'color'=>'#6366f1', 'light'=>'#eef2ff', 'dark'=>'#4338ca'],
             ['id'=>'appointments',  'label'=>'Appointments',           'icon'=>'fa-calendar-days',      'color'=>'#0f766e', 'light'=>'#f0fdfa', 'dark'=>'#065f46'],
             ['id'=>'finance',       'label'=>'Finance / VTA Invoices', 'icon'=>'fa-file-invoice-dollar','color'=>'#f59e0b', 'light'=>'#fffbeb', 'dark'=>'#b45309'],
             ['id'=>'associate-inv', 'label'=>'Associate Invoices',     'icon'=>'fa-file-invoice',       'color'=>'#8b5cf6', 'light'=>'#f5f3ff', 'dark'=>'#6d28d9'],
-            ['id'=>'casenotes',     'label'=>'Case Notes',             'icon'=>'fa-file-lines',         'color'=>'#10b981', 'light'=>'#ecfdf5', 'dark'=>'#065f46'],
             ['id'=>'reports',       'label'=>'Reports',                'icon'=>'fa-chart-bar',          'color'=>'#dc2626', 'light'=>'#fef2f2', 'dark'=>'#991b1b'],
         ];
         @endphp
@@ -333,48 +333,119 @@
         </div>
 
         {{-- ══════════════════════════════════════════════════════ --}}
-        {{-- CASE NOTES --}}
+        {{-- REFERRALS --}}
         {{-- ══════════════════════════════════════════════════════ --}}
-        <div x-show="open === 'casenotes'" x-transition.opacity class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden" style="border-left:4px solid #22c55e;">
+        <div x-show="open === 'referrals'" x-transition.opacity class="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden" style="border-left:4px solid #059669;">
             <div class="border-b border-gray-100 bg-gray-50/60 px-8 py-6">
-                <p class="text-base text-gray-600"><strong>Case Notes</strong> are the clinical record of each session an associate delivers. Associates upload them through their portal; Samy reviews and signs them off. Once signed off, they are visible to the case manager.</p>
+                <p class="text-base text-gray-600">The <strong>Referral page</strong> is the workspace between an enquiry being qualified and the patient being created. It is where the associate does their assessment, you track the proposal, and all pre-patient activity is recorded. Every referral goes through up to 7 statuses before becoming a patient.</p>
             </div>
+
+            {{-- 7-status flow diagram --}}
             @php
-            $noteBlocks = [
-                ['num'=>'1','icon'=>'fa-file-pen','title'=>'Who writes case notes?','what'=>'Associates write and upload case notes from their portal after each session. They cannot be edited by admin or staff — the clinical record belongs to the associate. Samy can add a review comment but not alter the note itself.','when'=>'After each treatment session, the associate should upload their note within 24–48 hours. If a note is missing for a session that was billed, query it before paying the associate invoice.','tip_icon'=>'fa-user-lock','tip_color'=>'green','tip_title'=>'Associate-authored','tip_body'=>'Case notes are the clinical responsibility of the associate who wrote them. Samy\'s sign-off confirms he has reviewed them as Clinical Head — it does not transfer clinical responsibility.'],
-                ['num'=>'2','icon'=>'fa-clipboard-check','title'=>'Sign-off and Review','what'=>'Once an associate submits a note, it appears in the Case Notes list with status "Pending Review". Samy reviews and clicks Sign Off. Signed-off notes become visible to the case manager in their portal. If a note needs changes, Samy contacts the associate directly (the portal will have a feedback feature in a future release).','when'=>'Review new case notes regularly — the Dashboard shows how many are awaiting sign-off. Aim to sign off within a few days of receipt, as case managers may be waiting to view progress.','tip_icon'=>'fa-eye','tip_color'=>'green','tip_title'=>'Case manager visibility','tip_body'=>'Case managers can only see notes that have been signed off by Samy. Unsigned notes are private to Samy and staff. This ensures clinical review happens before external visibility.'],
-                ['num'=>'3','icon'=>'fa-flag','title'=>'Flagged for Clinical Head Review','what'=>'Associates can flag a note as needing Samy\'s specific clinical attention — for example, if the patient\'s condition has changed significantly or a clinical decision is needed. These appear highlighted in the Case Notes list.','when'=>'If an associate flags a note, treat it as urgent. It means the associate has encountered something they need your clinical judgement on before proceeding with the next session.','tip_icon'=>'fa-bell','tip_color'=>'green','tip_title'=>'Dashboard alert','tip_body'=>'Flagged notes appear as a separate counter in the Dashboard Clinical Review widget. They will not disappear until you sign them off.'],
-            ];
-            $noteCardColors = [
-                ['border'=>'#22c55e','bg'=>'#f0fdf4','badge_bg'=>'#dcfce7','badge_txt'=>'#15803d'],
-                ['border'=>'#10b981','bg'=>'#ecfdf5','badge_bg'=>'#d1fae5','badge_txt'=>'#065f46'],
-                ['border'=>'#14b8a6','bg'=>'#f0fdfa','badge_bg'=>'#ccfbf1','badge_txt'=>'#0f766e'],
+            $refStatuses = [
+                ['label'=>'In Progress',        'color'=>'#0092b4','desc'=>'Enquiry has been qualified and a referral created. Awaiting insurer or case manager to confirm they want VTA to proceed.'],
+                ['label'=>'Awaiting Go-ahead',  'color'=>'#6366f1','desc'=>'VTA has confirmed interest. Waiting for formal written go-ahead from the case manager or insurer.'],
+                ['label'=>'Assessment',         'color'=>'#7c3aed','desc'=>'Go-ahead received. Associate assigned and conducting the vestibular or OT assessment. Sessions, bills, and documents are logged here.'],
+                ['label'=>'Proposal Submitted', 'color'=>'#f59e0b','desc'=>'Assessment complete. VTA has sent the proposal (cost estimation, treatment plan) to the insurer. Awaiting decision.'],
+                ['label'=>'Approved',           'color'=>'#059669','desc'=>'Insurer has approved the proposal. Treatment can begin. Ready to convert to a patient record.'],
+                ['label'=>'Not Proceeding',     'color'=>'#dc2626','desc'=>'Referral closed without treatment — insurer declined, patient withdrew, or case is not suitable. This is a terminal status.'],
+                ['label'=>'Converted',          'color'=>'#065f46','desc'=>'Patient record has been created from this referral. The referral ref (VTA-xxx) is carried through as the patient ref.'],
             ];
             @endphp
-            @foreach($noteBlocks as $block)
-            @php $nc = $noteCardColors[$loop->index % count($noteCardColors)]; @endphp
-            <div class="rounded-xl shadow-sm overflow-hidden mb-4 last:mb-0" style="border:1px solid {{ $nc['border'] }}33; border-left:5px solid {{ $nc['border'] }}; background:{{ $nc['bg'] }};">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x p-6" style="border-color:{{ $nc['border'] }}22;">
-                    <div class="pb-5 md:pb-0 md:pr-7">
-                        <div class="flex items-center gap-3 mb-3">
-                            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white text-xs font-black shadow-sm" style="background:{{ $nc['border'] }};">{{ $block['num'] }}</div>
-                            <span class="text-sm font-bold text-gray-800">{{ $block['title'] }}</span>
+            <div class="px-8 py-6 border-b border-gray-100">
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">The 7 Referral Statuses — in typical order</p>
+                <div class="space-y-2">
+                    @foreach($refStatuses as $i => $rs)
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold mt-0.5" style="background:{{ $rs['color'] }};">{{ $i+1 }}</div>
+                        <div>
+                            <span class="inline-block text-xs font-bold px-2.5 py-0.5 rounded-full text-white mr-2" style="background:{{ $rs['color'] }};">{{ $rs['label'] }}</span>
+                            <span class="text-sm text-gray-600">{{ $rs['desc'] }}</span>
                         </div>
-                        <p class="text-sm text-gray-600 leading-relaxed">{{ $block['what'] }}</p>
                     </div>
-                    <div class="pt-5 md:pt-0 md:px-7">
-                        <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:{{ $nc['border'] }};">When to use it</p>
-                        <p class="text-sm text-gray-600 leading-relaxed">{{ $block['when'] }}</p>
-                    </div>
-                    <div class="pt-5 md:pt-0 md:pl-7">
-                        <div class="rounded-xl p-4" style="background:{{ $nc['badge_bg'] }}; border:1px solid {{ $nc['border'] }}44;">
-                            <p class="text-xs font-bold uppercase tracking-wide mb-1.5" style="color:{{ $nc['badge_txt'] }};"><i class="fa-solid {{ $block['tip_icon'] }} mr-1"></i>{{ $block['tip_title'] }}</p>
-                            <p class="text-sm leading-relaxed" style="color:{{ $nc['badge_txt'] }};">{{ $block['tip_body'] }}</p>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Activity section cards --}}
+            @php
+            $refBlocks = [
+                ['num'=>'1','title'=>'Assessment Sessions','stage'=>'Assessment','stage_color'=>'#7c3aed',
+                 'what'=>'Every visit, phone call, or remote session the associate carries out during the assessment stage. Each session records the activity type (Assessment, Report Writing, MDT Meeting, etc.), date, duration, location, and notes. The associate logs these from their portal; Samy can also add them directly on the referral page.',
+                 'when'=>'Check this section to track progress during an active assessment. If the associate has had multiple sessions but no proposal has been submitted, it may be time to chase.',
+                 'tip_icon'=>'fa-user-tie','tip_color'=>'green','tip_title'=>'Associate-logged','tip_body'=>'Sessions logged by the associate in their portal appear here in real time. Samy can also add sessions on behalf of the associate directly from this page.'],
+                ['num'=>'2','title'=>'Assessment Bills','stage'=>'Assessment','stage_color'=>'#7c3aed',
+                 'what'=>'Pre-patient invoices raised by the associate for their assessment work. Each bill has an amount, date, status (Pending / Paid / Unpaid), and optional notes. These are separate from treatment-stage associate invoices — they cover the assessment period only.',
+                 'when'=>'Approve pending bills from the Accounts → Referral Bills tab. Bills must be marked Paid once payment is processed. Unpaid bills show in the Finance reports under Assessment Costs.',
+                 'tip_icon'=>'fa-coins','tip_color'=>'amber','tip_title'=>'Separate from treatment invoices','tip_body'=>'Assessment bills belong to the referral stage and appear in the Accounts → Referral Bills tab. They do not appear alongside treatment-stage Associate Invoices.'],
+                ['num'=>'3','title'=>'Communications','stage'=>'All Stages','stage_color'=>'#6b7280',
+                 'what'=>'All messages, calls, and letters related to this referral — between Samy and the associate, the case manager, or the insurer. Each entry has a type, direction (inbound/outbound), date, and free-text summary.',
+                 'when'=>'Log every contact as it happens. This is the audit trail if a funder later disputes what was agreed during the assessment stage.',
+                 'tip_icon'=>'fa-shield-check','tip_color'=>'blue','tip_title'=>'Audit trail','tip_body'=>'The communication log is admissible evidence if a dispute arises over what was agreed with the insurer or case manager. Log everything — even brief phone calls.'],
+                ['num'=>'4','title'=>'Documents','stage'=>'All Stages','stage_color'=>'#6b7280',
+                 'what'=>'Files shared between Samy and the associate during the assessment — the associate\'s report draft, assessment forms, or any documents the associate uploads from their portal. Each document can have a revision requested flag set by Samy, which triggers an amber alert in the associate\'s portal.',
+                 'when'=>'Upload the insurer\'s Letter of Instruction here when it arrives. When the associate uploads a report draft, review it and either accept it or request a revision with a note.',
+                 'tip_icon'=>'fa-arrows-spin','tip_color'=>'amber','tip_title'=>'Revision loop','tip_body'=>'If a document needs changes, click Request Revision and enter your note. The associate sees an amber alert in their portal with your note and can re-upload. The flag clears automatically when they do.'],
+                ['num'=>'5','title'=>'Referral Status & Actions','stage'=>'All Stages','stage_color'=>'#6b7280',
+                 'what'=>'The status bar at the top of the referral page shows where the case is and offers the appropriate action button for the next step — Record Go-ahead, Submit Proposal, Approve Proposal, or Convert to Patient. Each action advances the status and locks the previous step.',
+                 'when'=>'Update the status every time something meaningful happens. Do not let a referral sit in Assessment for weeks without a note in Communications explaining why. The status drives what the associate can see and do in their portal.',
+                 'tip_icon'=>'fa-lock','tip_color'=>'blue','tip_title'=>'Actions are sequential','tip_body'=>'You cannot skip stages — the system only shows the action appropriate for the current status. Convert to Patient only appears once the referral is Approved.'],
+            ];
+            $refCardColors = [
+                '1' => ['border'=>'#7c3aed','bg'=>'#faf5ff','badge_bg'=>'#ede9fe','badge_txt'=>'#5b21b6'],
+                '2' => ['border'=>'#059669','bg'=>'#f0fdf4','badge_bg'=>'#d1fae5','badge_txt'=>'#065f46'],
+                '3' => ['border'=>'#3b82f6','bg'=>'#eff6ff','badge_bg'=>'#dbeafe','badge_txt'=>'#1d4ed8'],
+                '4' => ['border'=>'#f59e0b','bg'=>'#fffbeb','badge_bg'=>'#fef3c7','badge_txt'=>'#92400e'],
+                '5' => ['border'=>'#0092b4','bg'=>'#f0faff','badge_bg'=>'#e0f2fe','badge_txt'=>'#0369a1'],
+            ];
+            $refTipMap = [
+                'green'  => ['bg'=>'#f0fdf4','border'=>'#bbf7d0','txt'=>'#15803d'],
+                'amber'  => ['bg'=>'#fffbeb','border'=>'#fde68a','txt'=>'#b45309'],
+                'blue'   => ['bg'=>'#eff6ff','border'=>'#bfdbfe','txt'=>'#1d4ed8'],
+                'purple' => ['bg'=>'#faf5ff','border'=>'#e9d5ff','txt'=>'#6d28d9'],
+            ];
+            @endphp
+            <div class="p-6 space-y-4">
+                @foreach($refBlocks as $block)
+                @php
+                    $rc = $refCardColors[$block['num']] ?? ['border'=>'#6b7280','bg'=>'#f9fafb','badge_bg'=>'#f3f4f6','badge_txt'=>'#374151'];
+                    $tipStyle = $refTipMap[$block['tip_color']] ?? ['bg'=>'#f9fafb','border'=>'#e5e7eb','txt'=>'#374151'];
+                @endphp
+                <div class="rounded-xl shadow-sm overflow-hidden" style="border:1px solid {{ $rc['border'] }}33; border-left:5px solid {{ $rc['border'] }}; background:{{ $rc['bg'] }};">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-0 divide-y md:divide-y-0 md:divide-x p-6" style="border-color:{{ $rc['border'] }}22;">
+                        <div class="pb-5 md:pb-0 md:pr-7">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white text-xs font-black shadow-sm" style="background:{{ $rc['border'] }};">{{ $block['num'] }}</div>
+                                <span class="text-sm font-bold text-gray-800">{{ $block['title'] }}</span>
+                                <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap" style="background:{{ $rc['badge_bg'] }}; color:{{ $rc['badge_txt'] }};">{{ $block['stage'] }}</span>
+                            </div>
+                            <p class="text-sm text-gray-600 leading-relaxed">{{ $block['what'] }}</p>
+                        </div>
+                        <div class="pt-5 md:pt-0 md:px-7">
+                            <p class="text-xs font-semibold uppercase tracking-wider mb-3" style="color:{{ $rc['border'] }};">When to use it</p>
+                            <p class="text-sm text-gray-600 leading-relaxed">{{ $block['when'] }}</p>
+                        </div>
+                        <div class="pt-5 md:pt-0 md:pl-7">
+                            <div class="rounded-xl p-4" style="background:{{ $tipStyle['bg'] }}; border:1px solid {{ $tipStyle['border'] }};">
+                                <p class="text-xs font-bold uppercase tracking-wide mb-1.5" style="color:{{ $tipStyle['txt'] }};"><i class="fa-solid {{ $block['tip_icon'] }} mr-1"></i>{{ $block['tip_title'] }}</p>
+                                <p class="text-sm leading-relaxed" style="color:{{ $tipStyle['txt'] }};">{{ $block['tip_body'] }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+                @endforeach
             </div>
-            @endforeach
+
+            {{-- Key rules callout --}}
+            <div class="px-8 py-5 border-t border-gray-100 bg-gray-50/60">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Key Rules</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
+                    <div class="flex items-start gap-2"><i class="fa-solid fa-lock text-amber-500 mt-0.5 flex-shrink-0"></i><span>You cannot create a referral directly — it must be promoted from a qualified enquiry.</span></div>
+                    <div class="flex items-start gap-2"><i class="fa-solid fa-ban text-red-500 mt-0.5 flex-shrink-0"></i><span>A "Not Proceeding" referral cannot be reactivated. Create a new enquiry if the case reopens.</span></div>
+                    <div class="flex items-start gap-2"><i class="fa-solid fa-user-tie text-purple-500 mt-0.5 flex-shrink-0"></i><span>The associate is assigned at the "Go-ahead" stage. They see the referral in their portal from that point on.</span></div>
+                    <div class="flex items-start gap-2"><i class="fa-solid fa-arrow-right text-emerald-600 mt-0.5 flex-shrink-0"></i><span>Converting to patient preserves the VTA-xxx ref throughout — the patient, referral, and enquiry all share the same reference number.</span></div>
+                </div>
+            </div>
         </div>
 
         {{-- ══════════════════════════════════════════════════════ --}}

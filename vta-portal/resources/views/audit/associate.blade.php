@@ -185,11 +185,14 @@
         @if(!empty($stats))
             @php
                 $statTiles = [
-                    ['label'=>'Active Patients',    'value'=>$stats['activePatients'],                    'color'=>'#0092b4', 'icon'=>'fa-user-clock'],
-                    ['label'=>'Completed',          'value'=>$stats['completedPatients'],                 'color'=>'#16a34a', 'icon'=>'fa-user-check'],
-                    ['label'=>'Sessions This Month','value'=>$stats['sessionsThisMonth'],                 'color'=>'#374151', 'icon'=>'fa-calendar-day'],
-                    ['label'=>'Pending Invoices',   'value'=>$stats['pendingInvoices'],                   'color'=>$stats['pendingInvoices'] > 0 ? '#ea580c' : '#374151', 'icon'=>'fa-file-invoice'],
-                    ['label'=>'Total Paid',         'value'=>'£'.number_format($stats['totalEarned'], 0), 'color'=>'#16a34a', 'icon'=>'fa-sterling-sign'],
+                    ['label'=>'Active Patients',      'value'=>$stats['activePatients'],                        'color'=>'#0092b4', 'icon'=>'fa-user-clock'],
+                    ['label'=>'Completed',            'value'=>$stats['completedPatients'],                     'color'=>'#16a34a', 'icon'=>'fa-user-check'],
+                    ['label'=>'Sessions This Month',  'value'=>$stats['sessionsThisMonth'],                     'color'=>'#374151', 'icon'=>'fa-calendar-day'],
+                    ['label'=>'Pending Invoices',     'value'=>$stats['pendingInvoices'],                       'color'=>$stats['pendingInvoices'] > 0 ? '#ea580c' : '#374151', 'icon'=>'fa-file-invoice'],
+                    ['label'=>'Total Paid',           'value'=>'£'.number_format($stats['totalEarned'], 0),     'color'=>'#16a34a', 'icon'=>'fa-sterling-sign'],
+                    ['label'=>'Referral Sessions',    'value'=>$stats['referralSessionsCount'],                 'color'=>'#059669', 'icon'=>'fa-file-medical'],
+                    ['label'=>'Bills Pending',        'value'=>$stats['referralBillsPending'],                  'color'=>$stats['referralBillsPending'] > 0 ? '#d97706' : '#374151', 'icon'=>'fa-receipt'],
+                    ['label'=>'Bills Paid (Ref.)',    'value'=>'£'.number_format($stats['referralBillsPaid'], 0),'color'=>'#059669', 'icon'=>'fa-sterling-sign'],
                 ];
             @endphp
             <div id="gs-stats" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
@@ -237,6 +240,43 @@
             <div class="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 mb-5 text-sm text-gray-400">
                 <i class="fa-solid fa-calendar-xmark mr-2"></i> No upcoming appointments in the next 14 days.
             </div>
+        @endif
+
+        {{-- Referral Sessions section --}}
+        @if($referralSessions->isNotEmpty())
+        <div class="rounded-xl border mb-5 overflow-hidden" style="border-color:#a7f3d0;">
+            <div class="px-5 py-3 flex items-center justify-between" style="background:#ecfdf5;">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-file-medical text-sm" style="color:#059669;"></i>
+                    <span class="font-semibold text-sm text-gray-800">Referral Assessment Sessions</span>
+                    <span class="text-xs text-gray-500">{{ $referralSessions->count() }} sessions across {{ $referralSessions->pluck('referral_id')->unique()->count() }} referrals</span>
+                </div>
+            </div>
+            @php $currentRef = null; @endphp
+            <div class="divide-y divide-gray-100 bg-white">
+                @foreach($referralSessions->sortBy('session_date') as $sess)
+                @if($sess->referral_id !== $currentRef)
+                    @php $currentRef = $sess->referral_id; @endphp
+                    <div class="px-5 py-2 bg-gray-50 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-gray-500 font-mono">{{ $sess->referral->referral_ref }}</span>
+                        <span class="text-xs text-gray-400">{{ $sess->referral->patient_first_name }} {{ $sess->referral->patient_last_name }}</span>
+                        <a href="{{ route('referrals.show', $sess->referral) }}" class="text-xs hover:underline" style="color:#059669;">View Referral</a>
+                    </div>
+                @endif
+                <div class="flex items-center justify-between px-5 py-2.5 text-sm hover:bg-gray-50">
+                    <div>
+                        <span class="font-medium text-gray-700">{{ $sess->activityType?->name ?? 'Session' }}</span>
+                        @if($sess->location) <span class="text-xs text-gray-400 ml-1">&middot; {{ $sess->location }}</span> @endif
+                        @if($sess->notes) <p class="text-xs text-gray-400 mt-0.5 max-w-lg truncate">{{ $sess->notes }}</p> @endif
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-4">
+                        <p class="text-xs text-gray-500">{{ $sess->session_date ? \Carbon\Carbon::parse($sess->session_date)->format('d M Y') : '—' }}</p>
+                        @if($sess->duration_minutes)<p class="text-xs text-gray-400">{{ $sess->duration_minutes }} min</p>@endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
         @endif
 
         {{-- Timeline --}}

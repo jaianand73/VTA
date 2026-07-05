@@ -7,6 +7,8 @@ use App\Models\Patient;
 use App\Models\Associate;
 use App\Models\ActivityType;
 use App\Models\Communication;
+use App\Models\Referral;
+use App\Models\ReferralSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -73,9 +75,10 @@ class AppointmentController extends Controller
             ];
         });
 
-        $followUpEvents = $this->fetchFollowUpEvents();
+        $followUpEvents   = $this->fetchFollowUpEvents();
+        $sessionEvents    = $this->fetchReferralSessionEvents($request);
 
-        return response()->json($appointmentEvents->concat($followUpEvents)->values());
+        return response()->json($appointmentEvents->concat($followUpEvents)->concat($sessionEvents)->values());
     }
 
     /**
@@ -125,13 +128,82 @@ class AppointmentController extends Controller
         });
     }
 
+    private function fetchReferralSessionEvents(Request $request)
+    {
+        $query = ReferralSession::with(['referral', 'activityType',
+            'referral.associate']);
+
+        if ($request->filled('associate_id')) {
+            $query->whereHas('referral', fn($q) =>
+                $q->where('associate_id', $request->associate_id)
+            );
+        }
+
+        if ($request->filled('activity_type_id')) {
+            $query->where('activity_type_id', $request->activity_type_id);
+        }
+
+        return $query->get()->map(function ($session) {
+            $start = $session->scheduled_at ?? $session->session_date;
+            $end   = $session->scheduled_at && $session->duration_minutes
+                ? $session->scheduled_at->copy()->addMinutes($session->duration_minutes)
+                : null;
+
+            return [
+                'id'              => 'rsession-' . $session->id,
+                'title'           => ($session->referral->patient_first_name ?? '') . ' ' .
+                                     ($session->referral->patient_last_name ?? '') .
+                                     ' — ' . ($session->activityType?->name ?? 'Session'),
+                'start'           => $start,
+                'end'             => $end,
+                'allDay'          => !$session->scheduled_at,
+                'backgroundColor' => '#059669',
+                'borderColor'     => '#047857',
+                'extendedProps'   => [
+                    'type'      => 'referral_session',
+                    'patient'   => $session->referral->patient_first_name . ' ' . $session->referral->patient_last_name,
+                    'associate' => $session->referral->associate?->name,
+                    'activity'  => $session->activityType?->name,
+                    'location'  => $session->location,
+                    'duration'  => $session->duration_minutes,
+                    'notes'     => $session->notes,
+                    'ref'       => $session->referral->referral_ref,
+                    'url'       => route('referrals.show', $session->referral_id),
+                ],
+            ];
+        });
+    }
+
     public function create()
     {
-        $patients = Patient::with('caseManager.company')->orderBy('first_name')->get();
-        $associates = Associate::where('is_active', true)->get();
+        $patients      = Patient::with('caseManager.company')->orderBy('first_name')->get();
+        $associates    = Associate::where('is_active', true)->get();
         $activityTypes = ActivityType::where('is_active', true)->get();
+        $referrals     = Referral::whereIn('status', ['Assessment', 'Proposal Submitted', 'Approved'])
+            ->with('associate')
+            ->orderBy('referral_ref')
+            ->get();
 
-        return view('appointments.create', compact('patients', 'associates', 'activityTypes'));
+        return view('appointments.create', compact('patients', 'associates', 'activityTypes', 'referrals'));
+    }
+
+    public function storeReferralSession(Request $request)
+    {
+        $data = $request->validate([
+            'referral_id'      => 'required|exists:referrals,id',
+            'activity_type_id' => 'required|exists:activity_types,id',
+            'session_date'     => 'required|date',
+            'scheduled_at'     => 'nullable|date',
+            'duration_minutes' => 'nullable|integer|min:15|max:480',
+            'location'         => 'nullable|string|max:255',
+            'notes'            => 'nullable|string',
+        ]);
+
+        $data['created_by'] = Auth::id();
+        ReferralSession::create($data);
+
+        return redirect()->route('appointments.calendar')
+            ->with('success', 'Referral session logged and shown on calendar.');
     }
 
     public function store(Request $request)

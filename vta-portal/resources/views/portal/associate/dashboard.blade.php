@@ -11,6 +11,13 @@
                 <p class="mt-1 text-xs text-gray-500">Active assigned patients</p>
             </div>
 
+            <a href="{{ route('associate-portal.referrals') }}"
+                class="rounded-xl border border-orange-200 bg-orange-50 p-6 block hover:bg-orange-100 transition">
+                <p class="text-xs font-medium text-orange-600 uppercase tracking-wider">My Referrals</p>
+                <p class="mt-2 text-3xl font-bold text-orange-500">{{ $activeReferralCount }}</p>
+                <p class="mt-1 text-xs text-orange-500">Active first assessments</p>
+            </a>
+
             <div class="rounded-xl border border-gray-200 bg-white p-6">
                 <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Upcoming Appointments</p>
                 <p class="mt-2 text-3xl font-bold text-[#0092b4]">{{ $upcomingAppointments->count() }}</p>

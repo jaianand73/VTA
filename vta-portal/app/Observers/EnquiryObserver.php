@@ -25,17 +25,7 @@ class EnquiryObserver
                 $enquiry,
                 metadata: ['from' => $enquiry->getOriginal('status'), 'to' => $enquiry->status]
             );
-        }
-
-        if ($enquiry->wasChanged('qualified_as_referral') && $enquiry->qualified_as_referral) {
-            ActivityLogger::log(
-                'enquiry_qualified',
-                "Enquiry marked as Qualified Referral",
-                $enquiry
-            );
-        }
-
-        if (!$enquiry->wasChanged('status') && !$enquiry->wasChanged('qualified_as_referral')) {
+        } else {
             ActivityLogger::log('enquiry_updated', "Enquiry details updated", $enquiry);
         }
     }

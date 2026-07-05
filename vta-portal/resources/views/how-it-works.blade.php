@@ -22,9 +22,9 @@
                 Enquiry
             </div>
             <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
-            <div class="flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs font-semibold whitespace-nowrap" style="background:#0f766e;">
+            <div class="flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs font-semibold whitespace-nowrap" style="background:#059669;">
                 <span class="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 font-bold" style="font-size:10px;">2</span>
-                Qualification
+                Referral
             </div>
             <i class="fa-solid fa-chevron-right text-gray-300 text-xs"></i>
             <div class="flex items-center gap-2 rounded-full px-4 py-2 text-white text-xs font-semibold whitespace-nowrap" style="background:#7c3aed;">
@@ -108,8 +108,8 @@
                     </div>
                     <div class="space-y-3">
                         <div class="rounded-lg bg-green-50 border border-green-200 p-3">
-                            <p class="text-xs font-bold text-green-800 mb-1">✅ Qualified as Referral</p>
-                            <p class="text-xs text-green-700">Enquiry is marked <strong>Qualified</strong>. Proceed to create a Patient record. Enquiry ID copies across as Patient ID automatically.</p>
+                            <p class="text-xs font-bold text-green-800 mb-1">✅ Qualified — Promote to Referral</p>
+                            <p class="text-xs text-green-700">Enquiry is marked <strong>Qualified</strong>. Click <strong>"Promote to Referral"</strong> on the enquiry page — a Referral record is created with the same VTA-xxx reference. The referral then moves through its own stages (Assessment → Proposal → Approval) before a patient record is created.</p>
                         </div>
                         <div class="rounded-lg bg-red-50 border border-red-200 p-3">
                             <p class="text-xs font-bold text-red-800 mb-1">❌ Not Proceeding</p>
@@ -130,14 +130,89 @@
         </div>
     </div>
 
-    {{-- ══ STAGE 2 — PATIENT RECORD ══ --}}
+    {{-- ══ STAGE 2 — REFERRAL ══ --}}
     <div class="mb-6" id="stage-2">
         <div class="flex items-center gap-3 mb-3">
-            <div class="flex items-center gap-2.5 rounded-2xl px-4 py-2 text-white shadow-sm" style="background:#7c3aed;">
+            <div class="flex items-center gap-2.5 rounded-2xl px-4 py-2 text-white shadow-sm" style="background:#059669;">
                 <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/25 text-sm font-black">2</span>
+                <span class="text-base font-bold tracking-tight">Referral & Assessment</span>
+            </div>
+            <span class="rounded-full px-3 py-1 text-xs font-semibold" style="background:#d1fae5;color:#065f46;">Enquiry Promotes to Referral</span>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm" style="border-left: 4px solid #059669;">
+            <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-file-medical text-emerald-600"></i>
+                        <span class="text-sm font-semibold text-gray-800">What happens here?</span>
+                    </div>
+                    <p class="text-sm text-gray-600 leading-relaxed">The qualified enquiry is promoted to a <strong>Referral</strong>. An associate is assigned, conducts an assessment, and VTA produces a proposal for the insurer. The referral passes through up to 5 statuses before it is either approved (and converted to a patient) or closed.</p>
+                    <div class="mt-3 rounded-lg border p-3" style="background:#f0fdf4;border-color:#bbf7d0;">
+                        <p class="text-xs font-semibold mb-1" style="color:#065f46;"><i class="fa-solid fa-arrow-right mr-1"></i> Go to: <a href="{{ route('referrals.index') }}" class="underline hover:opacity-80">Referrals</a></p>
+                        <p class="text-xs" style="color:#166534;">Open the enquiry → click <strong>"Promote to Referral"</strong>. The referral is created with the same VTA-xxx reference number.</p>
+                    </div>
+                </div>
+
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-list-check text-emerald-600"></i>
+                        <span class="text-sm font-semibold text-gray-800">Steps in this stage</span>
+                    </div>
+                    <ol class="space-y-2 text-sm text-gray-600">
+                        <li class="flex items-start gap-2"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46;">1</span>Referral created → status <strong>In Progress</strong></li>
+                        <li class="flex items-start gap-2"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46;">2</span>Case manager confirms go-ahead → assign associate → status <strong>Assessment</strong></li>
+                        <li class="flex items-start gap-2"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46;">3</span>Associate conducts sessions, logs bills and documents from their portal</li>
+                        <li class="flex items-start gap-2"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46;">4</span>VTA sends proposal to insurer → status <strong>Proposal Submitted</strong></li>
+                        <li class="flex items-start gap-2"><span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46;">5</span>Insurer approves → status <strong>Approved</strong> → ready to convert</li>
+                    </ol>
+                    <div class="mt-3 flex items-center gap-1 flex-wrap text-xs font-semibold">
+                        <span class="rounded-full px-2.5 py-0.5" style="background:#dbeafe;color:#1e40af;">In Progress</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="rounded-full px-2.5 py-0.5" style="background:#ede9fe;color:#5b21b6;">Assessment</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="rounded-full px-2.5 py-0.5" style="background:#fef3c7;color:#78350f;">Proposal</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="rounded-full px-2.5 py-0.5" style="background:#d1fae5;color:#065f46;">Approved</span>
+                    </div>
+                </div>
+
+                <div class="p-5">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-code-branch text-emerald-600"></i>
+                        <span class="text-sm font-semibold text-gray-800">Decision point</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="rounded-lg p-3" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+                            <p class="text-xs font-bold mb-1" style="color:#065f46;">✅ Approved — Convert to Patient</p>
+                            <p class="text-xs" style="color:#166534;">Insurer approves the proposal. Click <strong>"Convert to Patient"</strong> on the referral page. A patient record is created with the same VTA-xxx ref and the referral status changes to Converted.</p>
+                        </div>
+                        <div class="rounded-lg bg-red-50 border border-red-200 p-3">
+                            <p class="text-xs font-bold text-red-800 mb-1">❌ Not Proceeding</p>
+                            <p class="text-xs text-red-700">Insurer declined, patient withdrew, or case unsuitable. Set status to <strong>Not Proceeding</strong>. The referral remains on record. No patient is created.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Arrow --}}
+    <div class="flex justify-center my-1 mb-5">
+        <div class="flex flex-col items-center gap-0.5">
+            <div class="w-0.5 h-4 bg-gray-200"></div>
+            <i class="fa-solid fa-arrow-down text-gray-300 text-lg"></i>
+        </div>
+    </div>
+
+    {{-- ══ STAGE 3 — PATIENT RECORD ══ --}}
+    <div class="mb-6" id="stage-3p">
+        <div class="flex items-center gap-3 mb-3">
+            <div class="flex items-center gap-2.5 rounded-2xl px-4 py-2 text-white shadow-sm" style="background:#7c3aed;">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/25 text-sm font-black">3</span>
                 <span class="text-base font-bold tracking-tight">Patient Record & Assessment</span>
             </div>
-            <span class="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">Enquiry Converts to Patient</span>
+            <span class="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">Referral Converts to Patient</span>
         </div>
 
         <div class="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm" style="border-left: 4px solid #7c3aed;">
@@ -150,7 +225,7 @@
                     <p class="text-sm text-gray-600 leading-relaxed">The qualified enquiry is converted into a <strong>Patient record</strong>. The Enquiry ID auto-copies as the Patient ID. Full patient details, next of kin, and referrers are captured. An assessment is then scheduled and conducted.</p>
                     <div class="mt-3 rounded-lg bg-violet-50 border border-violet-100 p-3">
                         <p class="text-xs font-semibold text-violet-800 mb-1"><i class="fa-solid fa-arrow-right mr-1"></i> Go to: <a href="{{ route('patients.index') }}" class="underline hover:text-violet-600">Patients</a></p>
-                        <p class="text-xs text-violet-700">Open the enquiry → click <strong>"Create Patient Record"</strong>. Then open patient → <strong>Assessment</strong> section.</p>
+                        <p class="text-xs text-violet-700">Open the approved referral → click <strong>"Convert to Patient"</strong>. The VTA-xxx reference, demographics, and associate carry through automatically.</p>
                     </div>
                 </div>
 
@@ -203,11 +278,11 @@
         </div>
     </div>
 
-    {{-- ══ STAGE 3 — TREATMENT (Associates & Appointments) ══ --}}
-    <div class="mb-6" id="stage-3">
+    {{-- ══ STAGE 4 — TREATMENT (Associates & Appointments) ══ --}}
+    <div class="mb-6" id="stage-4t">
         <div class="flex items-center gap-3 mb-3">
             <div class="flex items-center gap-2.5 rounded-2xl px-4 py-2 text-white shadow-sm" style="background:#15803d;">
-                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/25 text-sm font-black">3</span>
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/25 text-sm font-black">4</span>
                 <span class="text-base font-bold tracking-tight">Treatment — Associates & Appointments</span>
             </div>
             <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">Longest Stage — Multiple Roles</span>

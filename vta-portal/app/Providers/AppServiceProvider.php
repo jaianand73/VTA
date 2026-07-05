@@ -12,6 +12,7 @@ use App\Models\Enquiry;
 use App\Models\FundingCycle;
 use App\Models\Patient;
 use App\Models\PatientMdtMeeting;
+use App\Models\Referral;
 use App\Models\VtaInvoice;
 use App\Observers\AppointmentObserver;
 use App\Observers\AssociateComplianceDocumentObserver;
@@ -23,6 +24,7 @@ use App\Observers\EnquiryObserver;
 use App\Observers\FundingCycleObserver;
 use App\Observers\PatientMdtMeetingObserver;
 use App\Observers\PatientObserver;
+use App\Observers\ReferralObserver;
 use App\Observers\VtaInvoiceObserver;
 use Illuminate\Support\ServiceProvider;
 
@@ -43,5 +45,6 @@ class AppServiceProvider extends ServiceProvider
         Communication::observe(CommunicationObserver::class);
         AssociateComplianceDocument::observe(AssociateComplianceDocumentObserver::class);
         PatientMdtMeeting::observe(PatientMdtMeetingObserver::class);
+        Referral::observe(ReferralObserver::class);
     }
 }

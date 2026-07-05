@@ -63,6 +63,11 @@ class Enquiry extends Model
         return $this->hasOne(Patient::class);
     }
 
+    public function referral()
+    {
+        return $this->hasOne(\App\Models\Referral::class);
+    }
+
     public function nearestAssociate()
     {
         return $this->belongsTo(Associate::class, 'nearest_associate_id');

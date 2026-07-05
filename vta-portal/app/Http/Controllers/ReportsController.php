@@ -5,6 +5,7 @@ use App\Models\Patient;
 use App\Models\FundingCycle;
 use App\Models\VtaInvoice;
 use App\Models\AssociateInvoice;
+use App\Models\ReferralBill;
 use App\Models\Enquiry;
 use App\Models\CaseNote;
 use Illuminate\Http\Request;
@@ -33,7 +34,15 @@ class ReportsController extends Controller
         $associateInvoiced = AssociateInvoice::whereBetween('invoice_date', [$from, $to])->sum('total_amount');
         $associatePaid = AssociateInvoice::where('status', 'Paid')->whereBetween('invoice_date', [$from, $to])->sum('total_amount');
 
-        return view('reports.financial-summary', compact('from', 'to', 'vtaInvoiced', 'vtaPaid', 'associateInvoiced', 'associatePaid'));
+        $referralBillsTotal = ReferralBill::whereBetween('bill_date', [$from, $to])->sum('amount');
+        $referralBillsPaid  = ReferralBill::where('status', 'Paid')->whereBetween('bill_date', [$from, $to])->sum('amount');
+
+        return view('reports.financial-summary', compact(
+            'from', 'to',
+            'vtaInvoiced', 'vtaPaid',
+            'associateInvoiced', 'associatePaid',
+            'referralBillsTotal', 'referralBillsPaid'
+        ));
     }
 
     public function activePatientsByStatus(): View
@@ -82,8 +91,40 @@ class ReportsController extends Controller
             ->whereBetween('session_date', [$from, $to])
             ->selectRaw('associate_id, count(*) as total_notes, sum(case when is_signed_off then 1 else 0 end) as signed_off')
             ->groupBy('associate_id')
-            ->get();
+            ->get()
+            ->keyBy('associate_id');
 
-        return view('reports.associate-activity', compact('from', 'to', 'notes'));
+        // Referral sessions in period (by associate via referral)
+        $refSessions = ReferralBill::selectRaw('referrals.associate_id, count(*) as total_sessions')
+            ->join('referrals', 'referral_bills.referral_id', '=', 'referrals.id')
+            ->whereBetween('referral_bills.bill_date', [$from, $to])
+            ->whereNotNull('referrals.associate_id')
+            ->groupBy('referrals.associate_id')
+            ->pluck('total_sessions', 'referrals.associate_id');
+
+        $refSessionCounts = \App\Models\ReferralSession::selectRaw('referrals.associate_id, count(*) as cnt')
+            ->join('referrals', 'referral_sessions.referral_id', '=', 'referrals.id')
+            ->whereBetween('referral_sessions.session_date', [$from, $to])
+            ->whereNotNull('referrals.associate_id')
+            ->groupBy('referrals.associate_id')
+            ->pluck('cnt', 'referrals.associate_id');
+
+        $refBillTotals = ReferralBill::selectRaw('referrals.associate_id, sum(amount) as total_billed')
+            ->join('referrals', 'referral_bills.referral_id', '=', 'referrals.id')
+            ->whereBetween('referral_bills.bill_date', [$from, $to])
+            ->whereNotNull('referrals.associate_id')
+            ->groupBy('referrals.associate_id')
+            ->pluck('total_billed', 'referrals.associate_id');
+
+        // Merge all associate IDs
+        $allAssociateIds = $notes->keys()
+            ->merge($refSessionCounts->keys())
+            ->unique();
+
+        $associates = \App\Models\Associate::whereIn('id', $allAssociateIds)->orderBy('name')->get()->keyBy('id');
+
+        return view('reports.associate-activity', compact(
+            'from', 'to', 'notes', 'refSessionCounts', 'refBillTotals', 'associates', 'allAssociateIds'
+        ));
     }
 }

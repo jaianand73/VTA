@@ -12,6 +12,13 @@
                class="rounded-lg px-5 py-2 text-sm font-medium transition-colors {{ $tab === 'associate' ? 'bg-white text-[#0092b4] shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
                 <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Associate Invoices
             </a>
+            <a href="{{ route('accounts.index', ['tab' => 'referral-bills']) }}"
+               class="relative rounded-lg px-5 py-2 text-sm font-medium transition-colors {{ $tab === 'referral-bills' ? 'bg-white text-[#0092b4] shadow-sm' : 'text-gray-500 hover:text-gray-700' }}">
+                <i class="fa-solid fa-clipboard-list mr-1.5"></i> Referral Bills
+                @if($billSummary['pending_count'] > 0)
+                <span class="ml-1 inline-flex items-center justify-center rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700">{{ $billSummary['pending_count'] }}</span>
+                @endif
+            </a>
         </div>
 
         {{-- ── VTA INVOICES TAB ─────────────────────────────── --}}
@@ -159,6 +166,105 @@
             </table>
         </div>
         <div>{{ $associateInvoices->appends(request()->except('assoc_page'))->links() }}</div>
+        @endif
+
+        {{-- ── REFERRAL BILLS TAB ───────────────────────────── --}}
+        @if($tab === 'referral-bills')
+        <p class="text-sm text-gray-500">Bills raised during the referral/assessment stage (pre-patient)</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Billed This Month</p>
+                <p class="mt-1 text-xl font-bold text-gray-900">&pound;{{ number_format($billSummary['total_this_month'], 2) }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Paid</p>
+                <p class="mt-1 text-xl font-bold text-green-600">&pound;{{ number_format($billSummary['paid_total'], 2) }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Pending Payment</p>
+                <p class="mt-1 text-xl font-bold text-amber-600">&pound;{{ number_format($billSummary['pending_total'], 2) }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 bg-white p-4">
+                <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Awaiting Approval</p>
+                <p class="mt-1 text-xl font-bold text-{{ $billSummary['pending_count'] > 0 ? 'amber' : 'gray' }}-600">{{ $billSummary['pending_count'] }}</p>
+            </div>
+        </div>
+
+        {{-- Filters --}}
+        <form method="GET" action="{{ route('accounts.index', ['tab' => 'referral-bills']) }}" class="flex gap-3 items-end">
+            <input type="hidden" name="tab" value="referral-bills">
+            <div>
+                <label class="block text-xs font-medium text-gray-500">Associate</label>
+                <select name="bill_associate_id" class="mt-1 block rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                    <option value="">All Associates</option>
+                    @foreach($associates as $a)
+                    <option value="{{ $a->id }}" {{ request('bill_associate_id') == $a->id ? 'selected' : '' }}>{{ $a->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-500">Status</label>
+                <select name="bill_status" class="mt-1 block rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                    <option value="">All Statuses</option>
+                    <option value="Pending" {{ request('bill_status') === 'Pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="Paid" {{ request('bill_status') === 'Paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="Unpaid" {{ request('bill_status') === 'Unpaid' ? 'selected' : '' }}>Unpaid</option>
+                </select>
+            </div>
+            <button type="submit" class="rounded-lg bg-[#0092b4] px-4 py-2 text-sm font-medium text-white hover:bg-[#007a9a]">Filter</button>
+            @if(request('bill_associate_id') || request('bill_status'))
+            <a href="{{ route('accounts.index', ['tab' => 'referral-bills']) }}" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">Clear</a>
+            @endif
+        </form>
+
+        <div class="overflow-hidden rounded-xl border border-gray-200 bg-white">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Ref</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Patient</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Associate</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Bill Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Notes</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    @forelse($referralBills as $bill)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm font-medium text-[#0092b4]">
+                            <a href="{{ route('referrals.show', $bill->referral) }}" class="hover:underline font-mono">{{ $bill->referral->referral_ref }}</a>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ $bill->referral->patient_first_name }} {{ $bill->referral->patient_last_name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ $bill->referral->associate?->name ?? '—' }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ $bill->bill_date?->format('d/m/Y') }}</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">&pound;{{ number_format($bill->amount, 2) }}</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium
+                                {{ $bill->status === 'Paid' ? 'bg-green-100 text-green-800' : ($bill->status === 'Pending' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800') }}">
+                                {{ $bill->status }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{{ $bill->notes ?? '—' }}</td>
+                        <td class="px-6 py-4 text-sm">
+                            @if($bill->status === 'Pending')
+                            <form method="POST" action="{{ route('referrals.bills.mark-paid', $bill) }}">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="text-xs rounded-lg bg-green-600 px-2.5 py-1 text-white hover:bg-green-700">Mark Paid</button>
+                            </form>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="8" class="px-6 py-12 text-center text-sm text-gray-500">No referral bills found.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div>{{ $referralBills->appends(request()->except('bill_page'))->links() }}</div>
         @endif
 
     </div>

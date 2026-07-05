@@ -8,8 +8,11 @@ use App\Models\Appointment;
 use App\Models\CaseNote;
 use App\Models\ActivityType;
 use App\Models\Document;
+use App\Models\Referral;
+use App\Models\ReferralDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class AssociatePortalController extends Controller
 {
@@ -30,6 +33,10 @@ class AssociatePortalController extends Controller
 
         $patientCount = $associate->patients()->count();
 
+        $activeReferralCount = Referral::where('associate_id', $associate->id)
+            ->whereIn('status', ['Assessment', 'Proposal Submitted', 'Approved'])
+            ->count();
+
         $upcomingAppointments = Appointment::where('associate_id', $associate->id)
             ->where('scheduled_at', '>=', now())
             ->where('scheduled_at', '<=', now()->addDays(14))
@@ -44,7 +51,7 @@ class AssociatePortalController extends Controller
             ->get();
 
         return view('portal.associate.dashboard', compact(
-            'associate', 'patientCount', 'upcomingAppointments', 'completedAppointments'
+            'associate', 'patientCount', 'activeReferralCount', 'upcomingAppointments', 'completedAppointments'
         ));
     }
 
@@ -160,5 +167,62 @@ class AssociatePortalController extends Controller
         $activityTypes = ActivityType::where('is_active', true)->get();
 
         return view('portal.associate.calendar', compact('associate', 'activityTypes'));
+    }
+
+    public function referrals()
+    {
+        $associate = $this->getAssociate();
+
+        $referrals = Referral::where('associate_id', $associate->id)
+            ->whereIn('status', ['Assessment', 'Proposal Submitted', 'Approved'])
+            ->with('enquiry')
+            ->latest()
+            ->get();
+
+        return view('portal.associate.referrals', compact('associate', 'referrals'));
+    }
+
+    public function referral(Referral $referral)
+    {
+        $associate = $this->getAssociate();
+
+        if ($referral->associate_id !== $associate->id) {
+            abort(403, 'You are not assigned to this referral.');
+        }
+
+        $referral->load([
+            'enquiry', 'company', 'caseManager',
+            'sessions.createdBy', 'sessions.activityType',
+            'bills.createdBy',
+            'communications.createdBy',
+            'documents' => fn($q) => $q->where('visible_to_associate', true),
+        ]);
+
+        $activityTypes = \App\Models\ActivityType::where('is_active', true)->orderBy('name')->get();
+
+        return view('portal.associate.referral', compact('referral', 'associate', 'activityTypes'));
+    }
+
+    public function reuploadDocument(Request $request, Referral $referral, ReferralDocument $document)
+    {
+        $associate = $this->getAssociate();
+
+        if ($referral->associate_id !== $associate->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:pdf,doc,docx,jpg,png|max:20480',
+        ]);
+
+        Storage::disk('public')->delete($document->file_path);
+
+        $document->update([
+            'file_path'          => $request->file('file')->store('referrals/documents', 'public'),
+            'revision_requested' => false,
+            'revision_notes'     => null,
+        ]);
+
+        return back()->with('success', 'Document re-uploaded. Samy will be notified.');
     }
 }

@@ -63,6 +63,7 @@
                         <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-green-500"></span><span><strong>Completed</strong> — appointment has taken place</span></div>
                         <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-red-500"></span><span><strong>Cancelled</strong> — appointment was cancelled</span></div>
                         <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full bg-amber-500"></span><span><strong>DNA</strong> — patient Did Not Attend</span></div>
+                        <div class="flex items-center gap-2"><span class="inline-block h-3 w-3 rounded-full shrink-0" style="background-color:#059669"></span><span><strong>Referral Session</strong> — first assessment session (pre-patient)</span></div>
                         <div class="flex items-center gap-2 pt-2 border-t border-gray-100"><span class="inline-block h-3 w-3 rounded-full shrink-0" style="background-color:#8B5CF6"></span><span><strong>Follow-up</strong> — a scheduled follow-up logged under Associate Communications</span></div>
                     </div>
                 </div>
@@ -177,6 +178,22 @@
                         modalMarkDoneBtn.classList.remove('hidden');
                         modalMarkDoneBtn.dataset.completeUrl = props.completeUrl;
                         modalMarkDoneBtn.dataset.eventId = info.event.id;
+                    } else if (props.type === 'referral_session') {
+                        document.getElementById('modal-title').textContent = 'Referral Assessment Session';
+                        modalBody.innerHTML = `
+                            <div class="grid grid-cols-2 gap-3">
+                                <div><span class="text-gray-500">Patient:</span><br><span class="font-medium">${props.patient || '-'}</span></div>
+                                <div><span class="text-gray-500">Ref:</span><br><span class="font-medium font-mono text-xs">${props.ref || '-'}</span></div>
+                                <div><span class="text-gray-500">Associate:</span><br><span class="font-medium">${props.associate || '-'}</span></div>
+                                <div><span class="text-gray-500">Activity:</span><br><span class="font-medium">${props.activity || '-'}</span></div>
+                                <div><span class="text-gray-500">Location:</span><br><span class="font-medium">${props.location || '-'}</span></div>
+                                <div><span class="text-gray-500">Duration:</span><br><span class="font-medium">${props.duration ? props.duration + ' min' : '—'}</span></div>
+                                ${props.notes ? `<div class="col-span-2"><span class="text-gray-500">Notes:</span><br><span class="font-medium">${props.notes}</span></div>` : ''}
+                            </div>
+                        `;
+                        modalViewLink.href = props.url || '#';
+                        modalViewLink.textContent = 'View Referral';
+                        modalMarkDoneBtn.classList.add('hidden');
                     } else {
                         document.getElementById('modal-title').textContent = 'Appointment Details';
                         modalBody.innerHTML = `

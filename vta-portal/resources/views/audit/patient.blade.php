@@ -102,6 +102,123 @@
         </a>
     </div>
 
+    {{-- Referral Stage Journey --}}
+    @if($referral)
+    @php
+        $milestones = [
+            ['label' => 'Enquiry logged',       'date' => $referral->enquiry?->enquiry_date,        'icon' => 'fa-circle-question', 'color' => '#d97706'],
+            ['label' => 'Promoted to referral', 'date' => $referral->created_at?->toDateString(),   'icon' => 'fa-file-medical',    'color' => '#0092b4'],
+            ['label' => 'Go-ahead received',    'date' => $referral->visit_approved_date,            'icon' => 'fa-circle-check',    'color' => '#059669'],
+            ['label' => 'Proposal submitted',   'date' => $referral->proposal_submitted_date,        'icon' => 'fa-paper-plane',     'color' => '#7c3aed'],
+            ['label' => 'Proposal approved',    'date' => $referral->proposal_approved_date,         'icon' => 'fa-thumbs-up',       'color' => '#16a34a'],
+            ['label' => 'Converted to patient', 'date' => $patient->created_at?->toDateString(),     'icon' => 'fa-user-plus',       'color' => '#0092b4'],
+        ];
+    @endphp
+    <div class="rounded-xl border mb-4 overflow-hidden" style="border-color:#d1fae5;">
+        <div class="px-5 py-3 flex items-center justify-between" style="background:#ecfdf5;">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-file-medical text-sm" style="color:#059669;"></i>
+                <span class="font-semibold text-sm text-gray-800">Referral Stage</span>
+                <span class="text-xs text-gray-500 font-mono">{{ $referral->referral_ref }}</span>
+                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style="background:#d1fae5;color:#065f46;">{{ $referral->status }}</span>
+            </div>
+            <a href="{{ route('referrals.show', $referral) }}" class="text-xs font-medium hover:underline" style="color:#059669;">
+                View Referral <i class="fa-solid fa-arrow-right ml-1"></i>
+            </a>
+        </div>
+
+        {{-- Milestone timeline --}}
+        <div class="px-5 py-4 bg-white">
+            <div class="flex flex-wrap gap-x-0 gap-y-2">
+                @foreach($milestones as $i => $m)
+                @if($m['date'])
+                <div class="flex items-center">
+                    <div class="flex flex-col items-center">
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                             style="background:{{ $m['color'] }}18;border:2px solid {{ $m['color'] }};">
+                            <i class="fa-solid {{ $m['icon'] }} text-xs" style="color:{{ $m['color'] }};"></i>
+                        </div>
+                        <p class="text-xs font-medium text-gray-700 mt-1 whitespace-nowrap">{{ $m['label'] }}</p>
+                        <p class="text-xs text-gray-400">{{ \Carbon\Carbon::parse($m['date'])->format('d M Y') }}</p>
+                    </div>
+                    @if(!$loop->last)
+                    <div class="w-8 h-px mx-1 mb-8 flex-shrink-0" style="background:#d1fae5;"></div>
+                    @endif
+                </div>
+                @endif
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Activity counts --}}
+        <div class="px-5 py-3 border-t grid grid-cols-2 sm:grid-cols-4 gap-3" style="border-color:#d1fae5;background:#f9fafb;">
+            @php
+                $actTiles = [
+                    ['label'=>'Sessions',      'value'=>$referral->sessions->count(),      'icon'=>'fa-clipboard',         'color'=>'#059669'],
+                    ['label'=>'Bills raised',  'value'=>$referral->bills->count(),          'icon'=>'fa-receipt',           'color'=>'#0369a1'],
+                    ['label'=>'Comms',         'value'=>$referral->communications->count(), 'icon'=>'fa-comments',          'color'=>'#7c3aed'],
+                    ['label'=>'Documents',     'value'=>$referral->documents->count(),      'icon'=>'fa-file-lines',        'color'=>'#d97706'],
+                ];
+            @endphp
+            @foreach($actTiles as $t)
+            <div class="flex items-center gap-2 rounded-lg bg-white border border-gray-100 px-3 py-2">
+                <i class="fa-solid {{ $t['icon'] }} text-sm" style="color:{{ $t['color'] }};"></i>
+                <div>
+                    <p class="text-base font-bold text-gray-800 leading-tight">{{ $t['value'] }}</p>
+                    <p class="text-xs text-gray-500">{{ $t['label'] }}</p>
+                </div>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Referral sessions mini-list --}}
+        @if($referral->sessions->isNotEmpty())
+        <div class="px-5 py-3 border-t" style="border-color:#d1fae5;">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Assessment Sessions</p>
+            <div class="space-y-1.5">
+                @foreach($referral->sessions->sortBy('session_date') as $sess)
+                <div class="flex items-center justify-between rounded-lg bg-white border border-gray-100 px-3 py-2 text-sm">
+                    <div>
+                        <span class="font-medium text-gray-700">{{ $sess->activityType?->name ?? 'Session' }}</span>
+                        @if($sess->location) <span class="text-gray-400 text-xs ml-1">&middot; {{ $sess->location }}</span> @endif
+                        @if($sess->notes) <p class="text-xs text-gray-400 mt-0.5 truncate max-w-sm">{{ $sess->notes }}</p> @endif
+                    </div>
+                    <span class="text-xs text-gray-400 flex-shrink-0 ml-3">
+                        {{ $sess->session_date ? \Carbon\Carbon::parse($sess->session_date)->format('d M Y') : '—' }}
+                        @if($sess->duration_minutes) &middot; {{ $sess->duration_minutes }}min @endif
+                    </span>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Referral bills mini-list --}}
+        @if($referral->bills->isNotEmpty())
+        <div class="px-5 py-3 border-t" style="border-color:#d1fae5;">
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Assessment Bills</p>
+            <div class="space-y-1.5">
+                @foreach($referral->bills->sortBy('bill_date') as $bill)
+                <div class="flex items-center justify-between rounded-lg bg-white border border-gray-100 px-3 py-2 text-sm">
+                    <div>
+                        <span class="font-medium text-gray-700">£{{ number_format($bill->amount, 2) }}</span>
+                        @if($bill->notes) <span class="text-xs text-gray-400 ml-1">{{ $bill->notes }}</span> @endif
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400">{{ $bill->bill_date?->format('d M Y') }}</span>
+                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                            {{ $bill->status === 'Paid' ? 'bg-green-100 text-green-700' : ($bill->status === 'Pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700') }}">
+                            {{ $bill->status }}
+                        </span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
+
     {{-- Smart Summary --}}
     @if(!empty($summary))
     @php

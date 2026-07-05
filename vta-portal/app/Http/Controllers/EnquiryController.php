@@ -88,7 +88,7 @@ class EnquiryController extends Controller
 
     public function show(Enquiry $enquiry)
     {
-        $enquiry->load('createdBy', 'company', 'selectedCompany', 'selectedCaseManager', 'caseManager', 'contacts', 'nearestAssociate');
+        $enquiry->load('createdBy', 'company', 'selectedCompany', 'selectedCaseManager', 'caseManager', 'contacts', 'nearestAssociate', 'referral');
 
         $communications = \App\Models\Communication::where('enquiry_id', $enquiry->id)
             ->latest('communication_date')
@@ -164,85 +164,6 @@ class EnquiryController extends Controller
         return redirect()->route('enquiries.show', $enquiry);
     }
 
-    public function qualify(Request $request, Enquiry $enquiry): RedirectResponse
-    {
-        $data = $request->validate([
-            'qualified_date'    => 'required|date',
-            'qualified_remarks' => 'nullable|string|max:2000',
-        ]);
-
-        $enquiry->update([
-            'qualified_as_referral' => true,
-            'qualified_date'        => $data['qualified_date'],
-            'qualified_remarks'     => $data['qualified_remarks'],
-            'status'                => 'Qualified',
-        ]);
-
-        return back()->with('success', 'Enquiry marked as Qualified.');
-    }
-
-    public function convert(Request $request, Enquiry $enquiry)
-    {
-        $request->validate([
-            'existing_cm_id' => 'nullable|exists:case_managers,id',
-        ]);
-
-        if ($request->existing_cm_id) {
-            $cm = CaseManager::with('company')->findOrFail($request->existing_cm_id);
-            $company = $cm->company;
-            $caseManager = $cm;
-        } else {
-            $rules = [
-                'existing_company_id' => 'nullable|exists:companies,id',
-                'case_manager.first_name' => 'required|string|max:255',
-                'case_manager.last_name' => 'required|string|max:255',
-                'case_manager.email' => 'required|email|max:255',
-            ];
-
-            if (!$request->existing_company_id) {
-                $rules = array_merge($rules, [
-                    'company_name' => 'required|string|max:255',
-                    'company_type' => 'required|in:Case Management,Law Firm,Solicitor,Insurance,Individual,Other',
-                    'address' => 'required|string|max:255',
-                    'city' => 'required|string|max:255',
-                    'phone' => 'required|string|max:50',
-                    'email' => 'required|email|max:255',
-                ]);
-            }
-
-            $data = $request->validate($rules);
-
-            $company = $data['existing_company_id'] ?? null
-                ? Company::findOrFail($data['existing_company_id'])
-                : Company::create([
-                    'name' => $data['company_name'],
-                    'type' => $data['company_type'],
-                    'address' => $data['address'],
-                    'city' => $data['city'],
-                    'phone' => $data['phone'],
-                    'email' => $data['email'],
-                    'created_by' => Auth::id(),
-                ]);
-
-            $caseManager = CaseManager::create([
-                'company_id' => $company->id,
-                'first_name' => $data['case_manager']['first_name'],
-                'last_name' => $data['case_manager']['last_name'],
-                'email' => $data['case_manager']['email'],
-                'created_by' => Auth::id(),
-            ]);
-        }
-
-        $enquiry->update([
-            'converted_to_company_id' => $company->id,
-            'converted_to_case_manager_id' => $caseManager->id,
-            'converted_date' => now(),
-            'status' => 'Converted',
-        ]);
-
-        return redirect()->route('enquiries.show', $enquiry);
-    }
-
     public function destroy(Enquiry $enquiry): RedirectResponse
     {
         $name = $enquiry->enquirer_name;
@@ -250,5 +171,20 @@ class EnquiryController extends Controller
 
         return redirect()->route('enquiries.index')
             ->with('success', "Enquiry for \"{$name}\" has been deleted.");
+    }
+
+    public function promoteToReferral(Enquiry $enquiry)
+    {
+        if ($enquiry->status === 'Not Proceeding') {
+            return redirect()->route('enquiries.show', $enquiry)
+                ->with('error', 'This enquiry is marked Not Proceeding and cannot be promoted to a referral.');
+        }
+
+        if ($enquiry->referral()->exists()) {
+            return redirect()->route('referrals.show', $enquiry->referral)
+                ->with('info', 'This enquiry has already been promoted to a referral.');
+        }
+
+        return redirect()->route('referrals.create', ['enquiry_id' => $enquiry->id]);
     }
 }

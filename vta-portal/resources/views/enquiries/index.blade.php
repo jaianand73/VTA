@@ -12,7 +12,7 @@
                     <option value="">All Statuses</option>
                     <option value="New" @selected(request('status') === 'New')>New</option>
                     <option value="In Progress" @selected(request('status') === 'In Progress')>In Progress</option>
-                    <option value="Converted" @selected(request('status') === 'Converted')>Converted</option>
+                    <option value="Converted to Referral" @selected(request('status') === 'Converted to Referral')>Converted to Referral</option>
                     <option value="Not Proceeding" @selected(request('status') === 'Not Proceeding')>Not Proceeding</option>
                 </select>
                 <button type="submit" class="rounded-lg bg-[#0092b4] px-4 py-2 text-sm text-white hover:bg-[#007a9a]">Filter</button>
@@ -49,7 +49,7 @@
                     <td class="px-4 py-3 text-gray-600">{{ $enquiry->source }}</td>
                     <td class="px-4 py-3">
                         @php
-                            $colors = ['New' => 'bg-blue-100 text-blue-700', 'In Progress' => 'bg-amber-100 text-amber-700', 'Converted' => 'bg-green-100 text-green-700', 'Not Proceeding' => 'bg-gray-100 text-gray-600'];
+                            $colors = ['New' => 'bg-blue-100 text-blue-700', 'In Progress' => 'bg-amber-100 text-amber-700', 'Converted to Referral' => 'bg-teal-100 text-teal-700', 'Not Proceeding' => 'bg-gray-100 text-gray-600'];
                         @endphp
                         <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $colors[$enquiry->status] ?? 'bg-gray-100 text-gray-600' }}">{{ $enquiry->status }}</span>
                     </td>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\Associate;
 use App\Models\Patient;
+use App\Models\ReferralSession;
+use App\Models\ReferralBill;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -65,6 +67,7 @@ class AuditController extends Controller
             ->get(['id', 'first_name', 'last_name', 'status', 'enquiry_id']);
 
         $patient    = null;
+        $referral   = null;
         $logs       = collect();
         $rangeLogs  = collect();
         $upcoming   = collect();
@@ -76,6 +79,12 @@ class AuditController extends Controller
         if ($request->filled('patient_id')) {
             $patient = Patient::with(['caseManager', 'fundingCycles', 'patientAssociates.associate', 'assessment'])
                 ->findOrFail($request->patient_id);
+
+            if ($patient->referral_id) {
+                $referral = \App\Models\Referral::with([
+                    'sessions.activityType', 'bills', 'communications', 'documents', 'associate',
+                ])->find($patient->referral_id);
+            }
 
             // Enquiry-phase log IDs
             $enquiryLogIds = collect();
@@ -118,7 +127,7 @@ class AuditController extends Controller
         }
 
         return view('audit.patient', compact(
-            'patients', 'patient', 'logs', 'rangeLogs',
+            'patients', 'patient', 'referral', 'logs', 'rangeLogs',
             'upcoming', 'summary', 'allTime', 'dateFrom', 'dateTo'
         ));
     }
@@ -152,12 +161,13 @@ class AuditController extends Controller
     {
         $associates = Associate::orderBy('name')->get(['id', 'name', 'region', 'is_active']);
 
-        $associate  = null;
-        $logs       = collect();
-        $rangeLogs  = collect();
-        $upcoming   = collect();
-        $stats      = [];
-        $summary    = [];
+        $associate        = null;
+        $logs             = collect();
+        $rangeLogs        = collect();
+        $upcoming         = collect();
+        $referralSessions = collect();
+        $stats            = [];
+        $summary          = [];
         $allTime    = $request->boolean('all_time');
         $dateFrom   = $request->input('date_from', now()->subDays(30)->toDateString());
         $dateTo     = $request->input('date_to', today()->toDateString());
@@ -194,7 +204,19 @@ class AuditController extends Controller
                 ->where('associate_id', $associate->id)
                 ->where('status', 'Paid')->sum('total_amount');
 
-            $stats = compact('activePatients','completedPatients','sessionsThisMonth','pendingInvoices','totalEarned');
+            // Referral-stage stats
+            $referralSessionsCount = ReferralSession::whereHas('referral', fn($q) => $q->where('associate_id', $associate->id))->count();
+            $referralBillsPending  = ReferralBill::whereHas('referral', fn($q) => $q->where('associate_id', $associate->id))->where('status', 'Pending')->count();
+            $referralBillsPaid     = ReferralBill::whereHas('referral', fn($q) => $q->where('associate_id', $associate->id))->where('status', 'Paid')->sum('amount');
+            $referralSessions      = ReferralSession::with(['referral', 'activityType'])
+                ->whereHas('referral', fn($q) => $q->where('associate_id', $associate->id))
+                ->orderBy('session_date', 'desc')
+                ->get();
+
+            $stats = compact(
+                'activePatients','completedPatients','sessionsThisMonth','pendingInvoices','totalEarned',
+                'referralSessionsCount','referralBillsPending','referralBillsPaid'
+            );
 
             // Summary for the selected range
             $summary = $this->buildAssociateSummary($associate, $logs, $allTime, $dateFrom, $dateTo);
@@ -212,7 +234,8 @@ class AuditController extends Controller
 
         return view('audit.associate', compact(
             'associates', 'associate', 'logs', 'rangeLogs',
-            'upcoming', 'stats', 'summary', 'allTime', 'dateFrom', 'dateTo'
+            'upcoming', 'stats', 'summary', 'allTime', 'dateFrom', 'dateTo',
+            'referralSessions'
         ));
     }
 

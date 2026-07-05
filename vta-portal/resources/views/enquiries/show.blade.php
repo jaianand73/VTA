@@ -1,5 +1,32 @@
 <x-app-layout>
-    <x-slot name="header">Enquiry Details</x-slot>
+    <x-slot name="header">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">Enquiry Details</h2>
+                <p class="text-sm text-gray-500 mt-0.5">Stage 1 — Intelligence gathering</p>
+            </div>
+            <div class="flex gap-2">
+                @if(!$enquiry->referral && $enquiry->status !== 'Converted to Referral')
+                <form method="POST" action="{{ route('enquiries.promoteToReferral', $enquiry) }}">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                        style="background:#0092b4;">
+                        <i class="fa-solid fa-arrow-right"></i> Promote to Referral
+                    </button>
+                </form>
+                @elseif($enquiry->referral)
+                <a href="{{ route('referrals.show', $enquiry->referral) }}"
+                    class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                    style="background:#0f766e;">
+                    <i class="fa-solid fa-file-medical"></i> View Referral
+                </a>
+                @endif
+                <a href="{{ route('enquiries.index') }}" class="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                    <i class="fa-solid fa-arrow-left"></i> All Enquiries
+                </a>
+            </div>
+        </div>
+    </x-slot>
 
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="space-y-6">
@@ -39,11 +66,8 @@
                     <div>
                         <dt class="text-gray-500">Status</dt>
                         <dd>
-                            @php $colors = ['New'=>'bg-blue-100 text-blue-700','In Progress'=>'bg-amber-100 text-amber-700','Qualified'=>'bg-teal-100 text-teal-700','Converted'=>'bg-green-100 text-green-700','Not Proceeding'=>'bg-gray-100 text-gray-600']; @endphp
+                            @php $colors = ['New'=>'bg-blue-100 text-blue-700','In Progress'=>'bg-amber-100 text-amber-700','Converted to Referral'=>'bg-teal-100 text-teal-700','Not Proceeding'=>'bg-gray-100 text-gray-600']; @endphp
                             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $colors[$enquiry->status] ?? 'bg-gray-100 text-gray-600' }}">{{ $enquiry->status }}</span>
-                            @if($enquiry->qualified_as_referral)
-                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-700 ml-1"><i class="fa-solid fa-check mr-1"></i> Qualified {{ $enquiry->qualified_date?->format('d/m/Y') }}</span>
-                            @endif
                         </dd>
                     </div>
                     <div class="col-span-2"><dt class="text-gray-500">Reason</dt><dd class="font-medium text-gray-800">{{ $enquiry->reason ?? '—' }}</dd></div>
@@ -100,8 +124,7 @@
                             <select name="status" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
                                 <option value="New" @selected($enquiry->status === 'New')>New</option>
                                 <option value="In Progress" @selected($enquiry->status === 'In Progress')>In Progress</option>
-                                <option value="Qualified" @selected($enquiry->status === 'Qualified')>Qualified</option>
-                                <option value="Converted" @selected($enquiry->status === 'Converted')>Converted</option>
+                                <option value="Converted to Referral" @selected($enquiry->status === 'Converted to Referral')>Converted to Referral</option>
                                 <option value="Not Proceeding" @selected($enquiry->status === 'Not Proceeding')>Not Proceeding</option>
                             </select>
                         </div>
@@ -181,151 +204,9 @@
             </div>
             @endif
 
-            @if(Auth::user()->role === 'admin' && !$enquiry->qualified_as_referral && !in_array($enquiry->status, ['Converted', 'Not Proceeding']))
-            <div class="rounded-lg border border-gray-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Mark as Qualified Referral</h3>
-                <p class="text-sm text-gray-500 mb-4">Confirm this enquiry meets referral criteria before proceeding to patient creation.</p>
-                <form method="POST" action="{{ route('enquiries.qualify', $enquiry) }}" data-swal="Mark this enquiry as a qualified referral?">
-                    @csrf
-                    <div class="flex gap-3 items-end flex-wrap">
-                        <div class="flex-shrink-0">
-                            <label class="block text-sm font-medium text-gray-700">Qualified Date <span class="text-red-500">*</span></label>
-                            <input type="date" name="qualified_date" value="{{ now()->format('Y-m-d') }}" required class="mt-1 block rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
-                        </div>
-                        <div class="flex-1 min-w-48">
-                            <label class="block text-sm font-medium text-gray-700">Remarks</label>
-                            <input type="text" name="qualified_remarks" placeholder="Optional notes on qualification…" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
-                        </div>
-                    </div>
-                    <button type="submit" class="mt-4 rounded-lg px-4 py-2 text-sm text-white" style="background-color:#0092b4;">
-                        <i class="fa-solid fa-check-circle mr-1"></i> Mark as Qualified
-                    </button>
-                </form>
-            </div>
-            @endif
         </div>
 
         <div class="space-y-6">
-            @if($enquiry->qualified_as_referral && !$enquiry->converted_to_case_manager_id)
-            <div class="rounded-lg border border-gray-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-1">Convert to Patient Record</h3>
-                <p class="text-sm text-gray-500 mb-4">Link this enquiry to a company and case manager to create the patient record.</p>
-
-                @php
-                    $linkedCm      = $enquiry->selectedCaseManager ?? ($enquiry->case_manager_id ? $caseManagers->firstWhere('id', $enquiry->case_manager_id) : null);
-                    $linkedCompany = $enquiry->selectedCompany ?? ($enquiry->company_id ? $companies->firstWhere('id', $enquiry->company_id) : null);
-                    $hasQuickConvert = $linkedCm !== null;
-                @endphp
-
-                @if($hasQuickConvert)
-                {{-- Simple one-click confirm when CM already selected --}}
-                <div class="rounded-lg border border-green-200 bg-green-50 p-4 mb-4">
-                    <p class="text-xs font-medium text-green-700 mb-2 uppercase tracking-wide">Ready to convert using existing records</p>
-                    <div class="flex flex-wrap gap-6 text-sm text-gray-700">
-                        <div>
-                            <span class="text-gray-400 text-xs block">Company</span>
-                            <span class="font-medium">{{ $linkedCompany?->name ?? '—' }}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-400 text-xs block">Case Manager</span>
-                            <span class="font-medium">{{ $linkedCm->first_name }} {{ $linkedCm->last_name }}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-400 text-xs block">Email</span>
-                            <span class="font-medium">{{ $linkedCm->email ?? '—' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <form method="POST" action="{{ route('enquiries.convert', $enquiry) }}" data-swal="Convert this enquiry using the existing company and case manager?">
-                    @csrf
-                    <input type="hidden" name="existing_cm_id" value="{{ $linkedCm->id }}">
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <button type="submit" class="rounded-lg px-4 py-2 text-sm text-white" style="background-color:#0092b4;">
-                            <i class="fa-solid fa-check-circle mr-1"></i> Confirm Conversion
-                        </button>
-                        <button type="button" onclick="document.getElementById('fullConvertForm').classList.toggle('hidden')" class="text-sm text-[#0092b4] underline">
-                            Use different company / case manager
-                        </button>
-                    </div>
-                </form>
-
-                <div id="fullConvertForm" class="hidden mt-5 border-t border-gray-200 pt-5">
-                @endif
-
-                {{-- Full form (always shown when no CM linked; collapsible otherwise) --}}
-                <form method="POST" action="{{ route('enquiries.convert', $enquiry) }}" data-swal="Convert this enquiry to a full patient record?">
-                    @csrf
-                    @if(!$hasQuickConvert)<p class="text-sm font-medium text-gray-700 mb-3">Select or create a Company</p>@endif
-                    <div class="mb-4">
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Existing Company</label>
-                        <select name="existing_company_id" onchange="toggleCompanyFields(this)" class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
-                            <option value="">-- Create New Company --</option>
-                            @foreach($companies as $company)
-                                <option value="{{ $company->id }}" @selected($enquiry->company_id == $company->id)>{{ $company->name }} ({{ $company->type }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div id="newCompanyFields" class="border-t border-gray-200 pt-4 mb-4" style="{{ $enquiry->company_id ? 'display:none' : '' }}">
-                        <p class="text-xs font-medium text-gray-500 mb-3">New Company Details</p>
-                        <div class="grid gap-3 sm:grid-cols-2">
-                            <div><label class="block text-xs font-medium text-gray-500">Company Name</label><input type="text" name="company_name" value="{{ $enquiry->selectedCompany?->name ?? $enquiry->company_name }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
-                            <div><label class="block text-xs font-medium text-gray-500">Type</label>
-                                <select name="company_type" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
-                                    <option value="Case Management">Case Management</option>
-                                    <option value="Law Firm">Law Firm</option>
-                                    <option value="Solicitor">Solicitor</option>
-                                    <option value="Insurance">Insurance</option>
-                                    <option value="Individual">Individual</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-                            <div><label class="block text-xs font-medium text-gray-500">Address</label><input type="text" name="address" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
-                            <div><label class="block text-xs font-medium text-gray-500">City</label><input type="text" name="city" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
-                            <div><label class="block text-xs font-medium text-gray-500">Phone</label><input type="text" name="phone" value="{{ $enquiry->phone }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
-                            <div><label class="block text-xs font-medium text-gray-500">Email</label><input type="email" name="email" value="{{ $enquiry->email }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
-                        </div>
-                    </div>
-                    <div class="border-t border-gray-200 pt-4 mb-4">
-                        <p class="text-xs font-medium text-gray-500 mb-3">Case Manager</p>
-                        <div class="mb-3">
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Existing Case Manager</label>
-                            <select name="existing_cm_id" onchange="toggleCmFields(this)" class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
-                                <option value="">-- Create New Case Manager --</option>
-                                @foreach($caseManagers as $cm)
-                                    <option value="{{ $cm->id }}" @selected($enquiry->case_manager_id == $cm->id)>{{ $cm->first_name }} {{ $cm->last_name }} ({{ $cm->company?->name ?? 'N/A' }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div id="newCmFields" style="{{ $enquiry->case_manager_id ? 'display:none' : '' }}">
-                            <div class="grid gap-3 sm:grid-cols-2">
-                                <div><label class="block text-xs font-medium text-gray-500">First Name</label><input type="text" name="case_manager[first_name]" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
-                                <div><label class="block text-xs font-medium text-gray-500">Last Name</label><input type="text" name="case_manager[last_name]" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
-                                <div><label class="block text-xs font-medium text-gray-500">Email</label><input type="email" name="case_manager[email]" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" class="rounded-lg px-4 py-2 text-sm text-white" style="background-color:#0092b4;">
-                        <i class="fa-solid fa-arrow-right mr-1"></i> Confirm Conversion
-                    </button>
-                </form>
-
-                @if($hasQuickConvert)
-                </div>{{-- end #fullConvertForm --}}
-                @endif
-            </div>
-            @endif
-
-            @if($enquiry->qualified_as_referral && $enquiry->converted_to_case_manager_id && !$enquiry->patient)
-            <div class="rounded-lg border border-gray-200 bg-white p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Create Patient Record</h3>
-                <p class="text-sm text-gray-500 mb-4">The company and case manager have been created. Now create the patient record to proceed.</p>
-                <a href="{{ route('patients.create', ['enquiry_id' => $enquiry->id]) }}" class="inline-flex items-center rounded-lg bg-[#0092b4] px-4 py-2 text-sm text-white hover:bg-[#007a9a]">
-                    <i class="fa-solid fa-user-plus mr-1"></i> Create Patient
-                </a>
-            </div>
-            @endif
-
             @if($enquiry->patient)
             <div class="rounded-lg border border-gray-200 bg-white p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">Patient Record</h3>
@@ -346,8 +227,8 @@
                 <form id="addCommForm" method="POST" action="{{ route('communications.store') }}" class="hidden mb-4 grid gap-3 rounded-md border border-gray-200 bg-gray-50 p-4 sm:grid-cols-2">
                     @csrf
                     <input type="hidden" name="enquiry_id" value="{{ $enquiry->id }}">
-                    @if($enquiry->case_manager_id || $enquiry->converted_to_case_manager_id)
-                    <input type="hidden" name="case_manager_id" value="{{ $enquiry->converted_to_case_manager_id ?? $enquiry->case_manager_id }}">
+                    @if($enquiry->case_manager_id)
+                    <input type="hidden" name="case_manager_id" value="{{ $enquiry->case_manager_id }}">
                     @endif
                     <div>
                         <label class="block text-xs font-medium text-gray-500">Type</label>
@@ -432,8 +313,8 @@
                     <input type="hidden" name="enquiry_id" value="{{ $enquiry->id }}">
                     <input type="hidden" name="type" value="Follow Up">
                     <input type="hidden" name="direction" value="Outbound">
-                    @if($enquiry->case_manager_id || $enquiry->converted_to_case_manager_id)
-                    <input type="hidden" name="case_manager_id" value="{{ $enquiry->converted_to_case_manager_id ?? $enquiry->case_manager_id }}">
+                    @if($enquiry->case_manager_id)
+                    <input type="hidden" name="case_manager_id" value="{{ $enquiry->case_manager_id }}">
                     @endif
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-medium text-gray-500">Notes / Summary</label>
@@ -487,8 +368,8 @@
                 <form id="addEnqDocForm" method="POST" action="{{ route('documents.store') }}" enctype="multipart/form-data" class="hidden mb-4 grid gap-3 rounded-md border border-gray-200 bg-gray-50 p-4">
                     @csrf
                     <input type="hidden" name="enquiry_id" value="{{ $enquiry->id }}">
-                    @if($enquiry->case_manager_id || $enquiry->converted_to_case_manager_id)
-                    <input type="hidden" name="case_manager_id" value="{{ $enquiry->converted_to_case_manager_id ?? $enquiry->case_manager_id }}">
+                    @if($enquiry->case_manager_id)
+                    <input type="hidden" name="case_manager_id" value="{{ $enquiry->case_manager_id }}">
                     @endif
                     <div>
                         <label class="block text-xs font-medium text-gray-500">Document Type</label>

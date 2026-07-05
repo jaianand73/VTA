@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\VtaInvoice;
 use App\Models\AssociateInvoice;
+use App\Models\ReferralBill;
 use App\Models\Associate;
 use Illuminate\Http\Request;
 
@@ -41,10 +42,28 @@ class AccountsController extends Controller
             'overdue_count'       => AssociateInvoice::whereIn('status', ['Received', 'Verified'])->where('due_date', '<', now())->count(),
         ];
 
+        // Referral Bills
+        $billQuery = ReferralBill::with(['referral.associate', 'referral']);
+        if ($request->filled('bill_associate_id')) {
+            $billQuery->whereHas('referral', fn($q) => $q->where('associate_id', $request->bill_associate_id));
+        }
+        if ($request->filled('bill_status')) {
+            $billQuery->where('status', $request->bill_status);
+        }
+        $referralBills = $billQuery->latest('bill_date')->paginate(20, ['*'], 'bill_page');
+
+        $billSummary = [
+            'total_this_month' => ReferralBill::whereMonth('bill_date', now()->month)->whereYear('bill_date', now()->year)->sum('amount'),
+            'paid_total'       => ReferralBill::where('status', 'Paid')->sum('amount'),
+            'pending_total'    => ReferralBill::where('status', 'Pending')->sum('amount'),
+            'pending_count'    => ReferralBill::where('status', 'Pending')->count(),
+        ];
+
         $associates = Associate::where('is_active', true)->orderBy('name')->get();
 
         return view('accounts.index', compact(
-            'tab', 'vtaInvoices', 'vtaSummary', 'associateInvoices', 'assocSummary', 'associates'
+            'tab', 'vtaInvoices', 'vtaSummary', 'associateInvoices', 'assocSummary',
+            'referralBills', 'billSummary', 'associates'
         ));
     }
 }
