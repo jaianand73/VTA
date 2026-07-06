@@ -60,13 +60,13 @@ Changes to existing fields and layout. No new DB columns needed.
 
 | # | Task | Status | Source |
 |---|------|--------|--------|
-| 10.2.1 | Rename "Notes" field label → "Special Instructions" on enquiry form | ⏳ | C82 point 6 |
-| 10.2.2 | Remove "Follow-ups" section from enquiry show page | ⏳ | C82 point 4 |
-| 10.2.3 | Replace document type dropdown with free-text label field | ⏳ | C82 point 5 |
-| 10.2.4 | Detach company name from case manager display label | ⏳ | C81 point 4 |
-| 10.2.5 | Case manager autofill: email + phone populate when case manager selected | ⏳ | C81 point 5 |
-| 10.2.6 | Communication log: add Edit and Delete actions per entry | ⏳ | C82 point 8 |
-| 10.2.7 | Enquiry create: allow multiple communication entries ("Add another") | ⏳ | C81 point 7 |
+| 10.2.1 | Rename "Notes" field label → "Special Instructions" on enquiry form | ✅ | C82 point 6 |
+| 10.2.2 | Remove "Follow-ups" section from enquiry show page | ✅ | C82 point 4 |
+| 10.2.3 | Replace document type dropdown with free-text label field | ✅ | C82 point 5 |
+| 10.2.4 | Detach company name from case manager display label | ✅ | C81 point 4 |
+| 10.2.5 | Case manager autofill: email + phone populate when case manager selected | ✅ | C81 point 5 |
+| 10.2.6 | Communication log: add Edit and Delete actions per entry | ✅ | C82 point 8 |
+| 10.2.7 | Enquiry create: allow multiple communication entries ("Add another") | ✅ | C81 point 7 |
 
 ### Notes for 10.2.3
 The `enquiry_documents` table likely has a `type` or `category` column with a fixed enum. Changing to free-text means either (a) changing the column type on both local and production, or (b) keeping the column but changing the UI to a plain `<input type="text">`. Option (b) is lower risk. Check the column type first.
@@ -86,9 +86,9 @@ New functionality that requires schema or controller changes.
 | # | Task | Status | Source |
 |---|------|--------|--------|
 | 10.3.1 | "Role" dropdown on enquiry form (replacing "Enquirer" field) | ❌ | C81 point 3 — blocked, waiting on Samy's role list |
-| 10.3.2 | "Approved for Initial Assessment" field on enquiry (Yes/No + reason) | ⏳ | C81 point 9 |
-| 10.3.3 | Document upload available at enquiry creation time (not just after save) | ⏳ | C81 point 6 |
-| 10.3.4 | Company delete from companies list | ⏳ | C81 point 1 |
+| 10.3.2 | "Approved for Initial Assessment" field on enquiry (Yes/No + reason) | ✅ | C81 point 9 |
+| 10.3.3 | Document upload available at enquiry creation time (not just after save) | ✅ | C81 point 6 — implemented as Option C: banner after save prompts to upload now |
+| 10.3.4 | Company delete from companies list | ✅ | C81 point 1 |
 
 ### Notes for 10.3.2
 New columns needed on `enquiries` table:
@@ -113,7 +113,7 @@ Option C is lowest risk. Confirm with Samy whether true creation-time upload is 
 
 | # | Task | Status | Source |
 |---|------|--------|--------|
-| 10.4.1 | Delete all companies except CCM from production | ⏳ | C81 point 1 |
+| 10.4.1 | Delete all companies except CCM from production | ✅ | C81 point 1 — deleted 7 companies + 5 case managers; only CCM (ID 8) remains |
 
 **Approach:** Write a PHP script locally → SCP to `/tmp/` → run → delete. Must show a confirmation list of companies to be deleted before executing. Never delete CCM.
 
