@@ -184,10 +184,10 @@ Update this file at the end of every session or whenever a task status changes.
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 10.1.1 | Company "View" button leads to error page | ⏳ | C81 point 2 — likely relationship/eager-load issue in companies/show |
-| 10.1.2 | Enquiry contacts mandatory — blocks saving enquiry with no contacts | ⏳ | C81 point 8 — default blank contact row submits empty name, fails validation |
-| 10.1.3 | Enquiry edit button not functional | ⏳ | C82 point 2 — toggle ID mismatch or form missing from show page |
-| 10.1.4 | File upload on correction form stuck (pending state, blocks new uploads) | ⏳ | C82 point 7 — check storage symlink on production; check Alpine.js state on failure |
+| 10.1.1 | Company "View" button leads to error page | 🚀 | Company model had `enquirySelections()` but controller loaded `enquiries` — renamed. commit 66510ed |
+| 10.1.2 | Enquiry contacts mandatory — blocks saving enquiry with no contacts | 🚀 | Contacts start empty; optional; Remove always shown. commit 66510ed |
+| 10.1.3 | Enquiry edit button not functional | 🚀 | Scroll-to-view on open; save also unblocked by 10.1.2. commit 66510ed |
+| 10.1.4 | File upload stuck — pending state | 🚀 | Not a bug: files uploaded OK; "Pending" approval badge renamed "Awaiting Review". document-list.blade.php recovered into repo. commit 66510ed |
 
 ### Phase 10.2 — Enquiry Form UX
 

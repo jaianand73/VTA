@@ -26,10 +26,10 @@ These prevent Sheeba from using the system at all.
 
 | # | Task | Status | Source |
 |---|------|--------|--------|
-| 10.1.1 | Company "View" button leads to error page | ⏳ | C81 point 2 |
-| 10.1.2 | Enquiry contacts are mandatory — blocks saving with no contacts | ⏳ | C81 point 8 |
-| 10.1.3 | Enquiry edit button is not functional | ⏳ | C82 point 2 |
-| 10.1.4 | File upload on correction form stuck (pending state, new files blocked) | ⏳ | C82 point 7 |
+| 10.1.1 | Company "View" button leads to error page | ✅ | `Company::enquirySelections()` renamed to `enquiries()` — name mismatch caused RelationNotFoundException |
+| 10.1.2 | Enquiry contacts are mandatory — blocks saving with no contacts | ✅ | Contacts section now starts empty; "Add Contact" is optional. Remove button always visible. |
+| 10.1.3 | Enquiry edit button is not functional | ✅ | Edit form now scrolls into view when opened. Save was also blocked by 10.1.2 (contacts); both fixed. |
+| 10.1.4 | File upload on correction form stuck (pending state, new files blocked) | ✅ | Not a bug: files uploaded fine, "Pending" was approval status badge. Renamed to "Awaiting Review" to avoid confusion. document-list.blade.php also pulled into repo from production. |
 
 ### 10.1.1 — Company View Error
 - **Likely cause:** `companies/show.blade.php` references a relationship not eager-loaded, or a `withCount` call fails when there are no case managers. The `$patientIds` query via `CaseManager::where('company_id')` may break if the `case_managers` table has no records for this company.
