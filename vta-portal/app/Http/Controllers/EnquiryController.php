@@ -64,6 +64,12 @@ class EnquiryController extends Controller
             'contacts.*.role' => 'nullable|string|max:255',
             'contacts.*.email' => 'nullable|email|max:255',
             'contacts.*.phone' => 'nullable|string|max:50',
+            'communications' => 'nullable|array',
+            'communications.*.type' => 'required_with:communications.*.subject|string|max:50',
+            'communications.*.direction' => 'nullable|string|max:10',
+            'communications.*.subject' => 'nullable|string|max:255',
+            'communications.*.summary' => 'nullable|string',
+            'communications.*.communication_date' => 'nullable|date',
         ]);
 
         if ($data['company_id'] ?? null) {
@@ -80,6 +86,21 @@ class EnquiryController extends Controller
         foreach ($request->contacts ?? [] as $contact) {
             if (!empty($contact['name'])) {
                 $enquiry->contacts()->create($contact);
+            }
+        }
+
+        foreach ($request->communications ?? [] as $comm) {
+            if (!empty($comm['subject']) || !empty($comm['summary'])) {
+                \App\Models\Communication::create([
+                    'enquiry_id' => $enquiry->id,
+                    'case_manager_id' => $enquiry->case_manager_id,
+                    'type' => $comm['type'] ?? 'Other',
+                    'direction' => $comm['direction'] ?? 'Outbound',
+                    'subject' => $comm['subject'] ?? ($comm['type'] ?? 'Note'),
+                    'summary' => $comm['summary'] ?? null,
+                    'communication_date' => $comm['communication_date'] ?? now(),
+                    'created_by' => Auth::id(),
+                ]);
             }
         }
 

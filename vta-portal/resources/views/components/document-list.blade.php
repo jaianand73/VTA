@@ -35,7 +35,7 @@
                 </span>
             </div>
             <p class="text-xs text-gray-400 mt-0.5">
-                {{ $doc->documentType?->name ?? '—' }}
+                {{ $doc->title ?? $doc->documentType?->name ?? '—' }}
                 @if($doc->uploadedBy) &middot; {{ $doc->uploadedBy->name }} @endif
                 &middot; {{ \Carbon\Carbon::parse($doc->created_at)->format('d M Y') }}
             </p>

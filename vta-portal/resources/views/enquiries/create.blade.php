@@ -37,7 +37,7 @@
                         <select id="case_manager_id" name="case_manager_id" class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
                             <option value="">-- Select (optional) --</option>
                             @foreach($caseManagers as $cm)
-                                <option value="{{ $cm->id }}" @selected(old('case_manager_id') == $cm->id)>{{ $cm->first_name }} {{ $cm->last_name }} ({{ $cm->company?->name ?? 'N/A' }})</option>
+                                <option value="{{ $cm->id }}" data-email="{{ $cm->email }}" data-phone="{{ $cm->phone }}" @selected(old('case_manager_id') == $cm->id)>{{ $cm->first_name }} {{ $cm->last_name }}</option>
                             @endforeach
                         </select>
                         <button type="button" onclick="document.getElementById('cmQuickAddModal').classList.remove('hidden')" class="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 whitespace-nowrap">
@@ -113,8 +113,8 @@
             </div>
 
             <div class="mt-6">
-                <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
-                <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">{{ old('notes') }}</textarea>
+                <label for="notes" class="block text-sm font-medium text-gray-700">Special Instructions</label>
+                <textarea id="notes" name="notes" rows="3" placeholder="Language needs, access requirements, availability, urgent notes…" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">{{ old('notes') }}</textarea>
                 @error('notes') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
 
@@ -152,6 +152,54 @@
                 </template>
                 <button type="button" @click="contacts.push({ name: '', role: 'Case Manager', email: '', phone: '' })" class="text-sm text-[#0092b4] hover:underline">
                     <i class="fa-solid fa-plus mr-1"></i> Add Contact
+                </button>
+            </div>
+
+            {{-- Communications --}}
+            <div class="mt-6 rounded-lg border border-gray-200 bg-white p-6" x-data="{ comms: [] }">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Communications <span class="text-sm font-normal text-gray-400">(optional)</span></h3>
+                </div>
+                <template x-for="(comm, index) in comms" :key="index">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Type</label>
+                            <select x-model="comm.type" :name="'communications['+index+'][type]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                                <option value="Email">Email</option>
+                                <option value="Phone">Phone</option>
+                                <option value="Letter">Letter</option>
+                                <option value="Meeting">Meeting</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Direction</label>
+                            <select x-model="comm.direction" :name="'communications['+index+'][direction]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                                <option value="Inbound">Inbound</option>
+                                <option value="Outbound">Outbound</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Subject</label>
+                            <input type="text" x-model="comm.subject" :name="'communications['+index+'][subject]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Date</label>
+                            <input type="date" x-model="comm.communication_date" :name="'communications['+index+'][communication_date]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-medium text-gray-500">Summary</label>
+                            <textarea x-model="comm.summary" :name="'communications['+index+'][summary]'" rows="2" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]"></textarea>
+                        </div>
+                        <div class="md:col-span-2 text-right">
+                            <button type="button" @click="comms.splice(index, 1)" class="text-xs text-red-600 hover:underline">Remove</button>
+                        </div>
+                    </div>
+                </template>
+                <button type="button" @click="comms.push({ type: 'Email', direction: 'Inbound', subject: '', summary: '', communication_date: '' })" class="text-sm text-[#0092b4] hover:underline">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Communication
                 </button>
             </div>
 
@@ -304,7 +352,7 @@
                     const select = document.getElementById('case_manager_id');
                     const opt = document.createElement('option');
                     opt.value = data.id;
-                    opt.textContent = data.name + ' (' + (data.company_name || 'N/A') + ')';
+                    opt.textContent = data.name;
                     opt.selected = true;
                     select.appendChild(opt);
                     document.getElementById('cmQuickAddModal').classList.add('hidden');
@@ -314,6 +362,16 @@
             .catch(() => {
                 alert('Failed to save. Please try again or refresh the page.');
             });
+        });
+
+        document.getElementById('case_manager_id')?.addEventListener('change', function() {
+            const opt = this.options[this.selectedIndex];
+            const email = opt.dataset.email || '';
+            const phone = opt.dataset.phone || '';
+            const emailField = document.getElementById('email');
+            const phoneField = document.getElementById('phone');
+            if (emailField && !emailField.value) emailField.value = email;
+            if (phoneField && !phoneField.value) phoneField.value = phone;
         });
     </script>
     @endpush

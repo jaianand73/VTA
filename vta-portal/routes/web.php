@@ -95,6 +95,7 @@ Route::middleware(['auth', 'verified', 'role:admin,staff'])->group(function () {
     Route::resource('patients', PatientController::class);
 
     Route::post('/communications', [CommunicationController::class, 'store'])->name('communications.store');
+    Route::patch('/communications/{communication}', [CommunicationController::class, 'update'])->name('communications.update');
     Route::patch('/communications/{communication}/complete-follow-up', [CommunicationController::class, 'completeFollowUp'])->name('communications.complete-follow-up');
     Route::delete('/communications/{id}', [CommunicationController::class, 'destroy'])->name('communications.destroy');
 

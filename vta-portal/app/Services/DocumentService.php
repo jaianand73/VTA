@@ -45,6 +45,7 @@ class DocumentService
 
         return Document::create([
             'document_type_id' => $data['document_type_id'] ?? null,
+            'title' => $data['title'] ?? null,
             'patient_id' => $data['patient_id'] ?? null,
             'case_manager_id' => $data['case_manager_id'] ?? null,
             'appointment_id' => $data['appointment_id'] ?? null,

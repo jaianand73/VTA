@@ -15,6 +15,7 @@ class DocumentController extends Controller
     {
         $data = $request->validate([
             'document_type_id' => 'nullable|exists:document_types,id',
+            'title' => 'nullable|string|max:500',
             'patient_id' => 'nullable|exists:patients,id',
             'case_manager_id' => 'nullable|exists:case_managers,id',
             'appointment_id' => 'nullable|exists:appointments,id',

@@ -15,7 +15,7 @@ class Document extends Model
     ];
 
     protected $fillable = [
-        'document_type_id', 'patient_id', 'case_manager_id', 'appointment_id', 'enquiry_id',
+        'document_type_id', 'title', 'patient_id', 'case_manager_id', 'appointment_id', 'enquiry_id',
         'file_name', 'stored_file_name', 'file_path', 'file_size', 'mime_type',
         'is_password_protected', 'report_password', 'password_shared_date',
         'password_shared_via', 'uploaded_by',
