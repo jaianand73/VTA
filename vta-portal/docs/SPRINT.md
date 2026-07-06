@@ -1,6 +1,6 @@
 # VTA Portal — Development Sprint Tracker
 
-**Last updated:** 2026-07-05  
+**Last updated:** 2026-07-06  
 **Single source of truth for all active and planned development.**  
 Update this file at the end of every session or whenever a task status changes.
 
@@ -159,7 +159,7 @@ Update this file at the end of every session or whenever a task status changes.
 | 9.2 | Deploy changed files via SCP | 🚀 | All controllers, models, views, routes, migrations deployed 2026-07-06 |
 | 9.3 | Run migrations on production | 🚀 | All 11 migrations ran successfully |
 | 9.4 | Verify routes on production | 🚀 | All referral routes confirmed live |
-| 9.5 | Smoke test on production | ⏳ | Manual E→R→P flow test needed |
+| 9.5 | Smoke test on production | 🚀 | Full E→R→P flow verified 2026-07-06. Two bugs found & fixed: (1) referral_ref nullable + auto-gen, (2) referral_date + case_manager_id NOT NULL in storePatient(). Smoke data cleaned up. |
 
 **Migrations to run on production (in order):**
 1. `2026_07_05_155007_create_referrals_table`
@@ -173,6 +173,48 @@ Update this file at the end of every session or whenever a task status changes.
 9. `2026_07_05_172727_create_referral_documents_table`
 10. `2026_07_05_174032_add_revision_fields_to_referral_documents_table`
 11. `2026_07_05_180523_swap_method_for_activity_type_on_referral_sessions_table`
+
+---
+
+## Phase 10 — Sheeba UAT Corrections
+
+> Source: Corrections C81 + C82 logged by Sheeba on 2026-07-05/06. Full detail in `docs/sprints/phase-10-sheeba-uat-corrections.md`.
+
+### Phase 10.1 — Blocking Bugs
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 10.1.1 | Company "View" button leads to error page | ⏳ | C81 point 2 — likely relationship/eager-load issue in companies/show |
+| 10.1.2 | Enquiry contacts mandatory — blocks saving enquiry with no contacts | ⏳ | C81 point 8 — default blank contact row submits empty name, fails validation |
+| 10.1.3 | Enquiry edit button not functional | ⏳ | C82 point 2 — toggle ID mismatch or form missing from show page |
+| 10.1.4 | File upload on correction form stuck (pending state, blocks new uploads) | ⏳ | C82 point 7 — check storage symlink on production; check Alpine.js state on failure |
+
+### Phase 10.2 — Enquiry Form UX
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 10.2.1 | Rename "Notes" → "Special Instructions" on enquiry form | ⏳ | C82 point 6 — label change only |
+| 10.2.2 | Remove "Follow-ups" section from enquiry show page | ⏳ | C82 point 4 |
+| 10.2.3 | Replace document type dropdown with free-text label field | ⏳ | C82 point 5 |
+| 10.2.4 | Detach company name from case manager display label in dropdowns | ⏳ | C81 point 4 |
+| 10.2.5 | Case manager autofill: email + phone populate on selection | ⏳ | C81 point 5 — JS on the enquiry create form |
+| 10.2.6 | Communication log: add Edit + Delete per entry | ⏳ | C82 point 8 |
+| 10.2.7 | Enquiry create: allow multiple communication entries ("Add another") | ⏳ | C81 point 7 |
+
+### Phase 10.3 — New Fields & Features
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 10.3.1 | "Role" dropdown on enquiry form (replacing "Enquirer" field) | ❌ | C81 point 3 — blocked, waiting on Samy's confirmed role list |
+| 10.3.2 | "Approved for Initial Assessment" (Yes/No + reason) on enquiry | ⏳ | C81 point 9 — new migration: initial_assessment_approved + reason |
+| 10.3.3 | Document upload at enquiry creation time | ⏳ | C81 point 6 — confirm approach with Samy before building |
+| 10.3.4 | Company delete from companies list | ⏳ | C81 point 1 — FK safety check required |
+
+### Phase 10.4 — Data Cleanup (production only)
+
+| # | Task | Status | Notes |
+|---|------|--------|-------|
+| 10.4.1 | Delete all companies except CCM from production | ⏳ | C81 point 1 — PHP script via /tmp, confirm list before deleting |
 
 ---
 

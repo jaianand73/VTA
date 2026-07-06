@@ -124,6 +124,24 @@ This document records WHY certain things were built the way they are, so future 
 
 ---
 
+## patients.case_manager_id — Made Nullable
+
+**Decision:** The `case_manager_id` column on the `patients` table was changed from `NOT NULL` to nullable via migration `2026_07_06_000001_make_patients_case_manager_nullable`.
+
+**Why:** In the new three-stage flow, a referral can be created with no case manager assigned — Samy may not know who the case manager is at the time of referral. When `ReferralController::storePatient()` converts an approved referral to a patient, it passes `$referral->case_manager_id` which may be null. The original `patients` table schema (from the pre-referral era) had `case_manager_id NOT NULL` with no default, so any conversion from a referral with no case manager caused a 500. Making it nullable matches the business reality: a case manager can be assigned to the patient record at any point after conversion.
+
+---
+
+## how-it-works.blade.php — Replaced with Interactive UAT Guide
+
+**Decision:** The original static "how it works" page was replaced in full with an interactive 4-stage UAT testing guide (2026-07-06).
+
+**Why:** The page had described the old two-stage flow (Enquiry → Patient directly). Rather than update the static copy, it was repurposed as a living test guide for Samy — covering all four stages (Enquiry, Referral, Associate Portal, Patient) with step-by-step instructions, expand/collapse steps, Key/Optional tags, and deliberate error scenarios to probe. This doubles as developer QA documentation and a client onboarding tool.
+
+**CSS approach:** All styles use `tg-` prefixed classes (scoped to this page) and hardcoded hex colour values — not new Tailwind classes — because the compiled Tailwind bundle is fixed. See [[tailwind-inline-styles]] decision.
+
+---
+
 ## SSH via PowerShell Only
 
 **Decision:** All SSH and SCP operations to Bluehost must use the PowerShell tool with `dangerouslyDisableSandbox: true`.

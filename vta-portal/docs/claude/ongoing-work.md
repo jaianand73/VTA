@@ -1,6 +1,6 @@
 # VTA Portal — Ongoing Work & Open Items
 
-_Last updated: 2026-07-05 (session 5)_
+_Last updated: 2026-07-06 (session 7)_
 
 ## Current Phase
 
@@ -44,6 +44,53 @@ All 5 UAT improvements (A1, A2, A6, A12, A17) are marked `dev_status = done`. De
 | 77 | Q19 | Case managers — should they be visible anywhere in the portal? | Associates | Awaiting Samy's answer |
 
 **Context for Q19:** Case managers are stored under Companies as contacts. They have user accounts (role = case_manager) but cannot log in. Q19 asks whether Samy wants a dedicated list of all case managers anywhere in the portal, or if per-company viewing is sufficient. No dev action until Samy responds.
+
+---
+
+## Phase 10 — Sheeba UAT Corrections Sprint (IN PROGRESS, 2026-07-06)
+
+Sheeba completed her first UAT walkthrough of the Enquiry flow. She raised corrections C81 and C82, surfacing 18 issues. Full sprint plan: `docs/sprints/phase-10-sheeba-uat-corrections.md`.
+
+**Blocking bugs (10.1) — fix first:**
+- 10.1.1 Company "View" → error page (C81 point 2)
+- 10.1.2 Enquiry contacts mandatory — blocks saving (C81 point 8)
+- 10.1.3 Enquiry edit button not working (C82 point 2)
+- 10.1.4 File upload stuck in pending state — Sheeba's screenshot never uploaded (C82 point 7); investigate storage symlink on production first
+
+**Corrections UI fix (deployed 2026-07-06):**
+- Added inline edit form to each correction card (title/severity/description)
+- Added `white-space:pre-wrap` to description and samy_response panels
+
+**Open questions before building 10.3:**
+- Q1: Role list for enquiry "Role" dropdown — waiting on Samy (replaces "Enquirer" field, C81 point 3)
+- Q2: Document upload at creation time — confirm approach (C81 point 6)
+- Q3: Company delete — hard-delete or soft-delete? (C81 point 1)
+
+---
+
+## Phase 9 Production Deploy — COMPLETE (2026-07-06)
+
+Full Phase 1–8 build deployed to production. Smoke test run end-to-end. Two bugs found and fixed:
+
+1. **`ReferralController::store()`** — `referral_ref` changed from required to nullable; auto-generates from `enquiry_ref` or VTA-xxx sequence if not provided.
+2. **`ReferralController::storePatient()`** — `referral_date` was missing from `Patient::create()`, causing a NOT NULL constraint failure. Added `'referral_date' => now()->toDateString()`.
+3. **`patients.case_manager_id` column** — was `NOT NULL` on production but referrals can have no case manager. Migration `2026_07_06_000001_make_patients_case_manager_nullable` deployed and run.
+
+Both fixes committed locally as `0a644f7` and deployed to production via SCP. Smoke test data (VTA-001, Smoke Test) cleaned up from production after test.
+
+---
+
+## `how-it-works.blade.php` — Replaced with Interactive Testing Guide (2026-07-06)
+
+The old static how-it-works page has been replaced with a full interactive 4-stage testing guide for Samy's UAT. Deployed to production at `https://nett.co.in/vta-portal/how-it-works`.
+
+**4 stages:**
+- Stage 1 — Enquiry (5 steps)
+- Stage 2 — Referral (10 steps)
+- Stage 3 — Associate Portal (8 steps)
+- Stage 4 — Patient (9 steps)
+
+Each step is expandable, tagged Key/Optional, with a "Things to deliberately try" section per stage. Font sizes and colours improved after initial deploy.
 
 ---
 
@@ -116,8 +163,8 @@ All 5 UAT improvements (A1, A2, A6, A12, A17) are marked `dev_status = done`. De
 
 #### Documentation Updates
 - [ ] `understanding-each-page.blade.php` — update Enquiries section (remove Qualify/Convert steps); add Referrals section; update Patients section
-- [ ] `how-it-works.blade.php` — update flow diagram/steps to show 3 stages
-- [ ] `uat-guide/show.blade.php` — replace old qualify/convert test steps with new 3-stage test scenario
+- [x] `how-it-works.blade.php` — replaced entirely with interactive 4-stage testing guide (2026-07-06)
+- [x] `uat-guide/show.blade.php` — Section G added covering full E→R→P flow (Phase 7.3, done in session 5)
 
 #### Enquiry Status Enum
 - [x] Updated enquiry status values: removed 'Qualified', renamed 'Converted' → 'Converted to Referral' in index filter, index colour map, and show edit dropdown

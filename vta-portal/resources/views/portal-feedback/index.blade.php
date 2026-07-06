@@ -574,8 +574,47 @@
                         <i class="fa-solid text-gray-400 text-xs" :class="open ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
                     </div>
                 </div>
-                <div x-show="open" x-collapse class="border-t border-gray-100 p-4 space-y-3">
-                    <p class="text-sm text-gray-600">{{ $item->description }}</p>
+                <div x-show="open" x-collapse class="border-t border-gray-100 p-4 space-y-3" x-data="{ editing: false }">
+
+                    {{-- View mode --}}
+                    <div x-show="!editing">
+                        <p class="text-sm text-gray-600" style="white-space:pre-wrap;">{{ $item->description }}</p>
+                        <button type="button" @click="editing = true"
+                                class="mt-2 inline-flex items-center gap-1 text-xs text-[#0092b4] hover:underline">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit this correction
+                        </button>
+                    </div>
+
+                    {{-- Edit mode --}}
+                    <form x-show="editing" x-cloak method="POST" action="{{ route('portal-feedback.respond', $item) }}" class="space-y-3">
+                        @csrf @method('PATCH')
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Title</label>
+                            <input type="text" name="title" value="{{ $item->title }}"
+                                   class="w-full rounded-lg border-gray-300 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Severity</label>
+                            <select name="severity" class="rounded-lg border-gray-300 text-sm">
+                                @foreach(['critical','high','medium','low'] as $sev)
+                                <option value="{{ $sev }}" {{ $item->severity === $sev ? 'selected' : '' }}>{{ ucfirst($sev) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Description</label>
+                            <textarea name="description" rows="4" class="w-full rounded-lg border-gray-300 text-sm">{{ $item->description }}</textarea>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-[#0092b4] px-4 py-2 text-sm font-medium text-white hover:bg-[#007a99]">
+                                <i class="fa-solid fa-save"></i> Save changes
+                            </button>
+                            <button type="button" @click="editing = false"
+                                    class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
 
                     @if($item->screenshots && count($item->screenshots) > 0)
                     <div>
@@ -595,7 +634,7 @@
                     @if($item->samy_response)
                     <div class="bg-orange-50 border border-orange-100 rounded-lg p-3">
                         <p class="text-xs font-semibold text-orange-700 mb-1">Your notes</p>
-                        <p class="text-sm text-orange-900">{{ $item->samy_response }}</p>
+                        <p class="text-sm text-orange-900" style="white-space:pre-wrap;">{{ $item->samy_response }}</p>
                     </div>
                     @endif
 

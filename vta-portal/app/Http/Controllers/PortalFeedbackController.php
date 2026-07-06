@@ -41,6 +41,9 @@ class PortalFeedbackController extends Controller
             'dev_notes'      => 'nullable|string|max:5000',
             'client_notes'   => 'nullable|string|max:5000',
             'dev_follow_up'  => 'nullable|string|max:5000',
+            'title'          => 'nullable|string|max:500',
+            'description'    => 'nullable|string',
+            'severity'       => 'nullable|in:critical,high,medium,low',
         ]);
 
         $updates = [];
@@ -68,6 +71,19 @@ class PortalFeedbackController extends Controller
 
         if (array_key_exists('dev_follow_up', $data)) {
             $updates['dev_follow_up'] = $data['dev_follow_up'];
+        }
+
+        if (!empty($data['title'])) {
+            $updates['title'] = $data['title'];
+        }
+
+        if (!empty($data['description'])) {
+            $updates['description'] = $data['description'];
+        }
+
+        if (!empty($data['severity'])) {
+            $updates['severity'] = $data['severity'];
+            $updates['priority'] = $data['severity'];
         }
 
         if (!empty($updates)) {
