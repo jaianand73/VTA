@@ -118,8 +118,10 @@
                 @error('notes') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
             </div>
 
-            <div class="rounded-lg border border-gray-200 bg-white p-6" x-data="{ contacts: [{ name: '', role: 'Case Manager', email: '', phone: '' }] }">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Contacts</h3>
+            <div class="rounded-lg border border-gray-200 bg-white p-6" x-data="{ contacts: [] }">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Contacts <span class="text-sm font-normal text-gray-400">(optional)</span></h3>
+                </div>
                 <template x-for="(contact, index) in contacts" :key="index">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3 p-3 bg-gray-50 rounded-lg">
                         <div>
@@ -144,12 +146,12 @@
                         <div>
                             <label class="block text-xs font-medium text-gray-500">Phone</label>
                             <input type="text" x-model="contact.phone" :name="'contacts['+index+'][phone]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
-                            <button type="button" @click="contacts.splice(index, 1)" class="mt-2 text-xs text-red-600 hover:underline" x-show="contacts.length > 1">Remove</button>
+                            <button type="button" @click="contacts.splice(index, 1)" class="mt-2 text-xs text-red-600 hover:underline">Remove</button>
                         </div>
                     </div>
                 </template>
                 <button type="button" @click="contacts.push({ name: '', role: 'Case Manager', email: '', phone: '' })" class="text-sm text-[#0092b4] hover:underline">
-                    <i class="fa-solid fa-plus mr-1"></i> Add Another Contact
+                    <i class="fa-solid fa-plus mr-1"></i> Add Contact
                 </button>
             </div>
 

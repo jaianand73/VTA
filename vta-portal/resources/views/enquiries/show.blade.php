@@ -34,7 +34,7 @@
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-800">Enquiry Information</h3>
                     <div class="flex items-center gap-3">
-                        <button type="button" onclick="document.getElementById('enquiryForm').classList.toggle('hidden')" class="text-sm text-[#0092b4] hover:underline">
+                        <button type="button" onclick="var f=document.getElementById('enquiryForm');f.classList.toggle('hidden');if(!f.classList.contains('hidden'))f.scrollIntoView({behavior:'smooth',block:'start'});" class="text-sm text-[#0092b4] hover:underline">
                             <i class="fa-solid fa-pen mr-1"></i> Edit
                         </button>
                         @if(in_array(Auth::user()->role, ['admin', 'staff', 'developer']))
@@ -159,7 +159,7 @@
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500">Phone</label>
                                     <input type="text" x-model="contact.phone" :name="'contacts['+index+'][phone]'" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
-                                    <button type="button" @click="contacts.splice(index, 1)" class="mt-2 text-xs text-red-600 hover:underline" x-show="contacts.length > 1">Remove</button>
+                                    <button type="button" @click="contacts.splice(index, 1)" class="mt-2 text-xs text-red-600 hover:underline">Remove</button>
                                 </div>
                             </div>
                         </template>

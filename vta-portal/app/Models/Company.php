@@ -20,7 +20,7 @@ class Company extends Model
         return $this->hasMany(CaseManager::class);
     }
 
-    public function enquirySelections()
+    public function enquiries()
     {
         return $this->hasMany(Enquiry::class, 'company_id');
     }

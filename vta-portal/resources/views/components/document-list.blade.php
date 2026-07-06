@@ -13,9 +13,9 @@
     @foreach($documents as $doc)
     @php
         $statusColor = match($doc->approval_status) {
-            'approved' => ['bg'=>'#dcfce7','text'=>'#15803d','icon'=>'fa-circle-check'],
-            'rejected' => ['bg'=>'#fee2e2','text'=>'#b91c1c','icon'=>'fa-circle-xmark'],
-            default    => ['bg'=>'#fef9c3','text'=>'#92400e','icon'=>'fa-clock'],
+            'approved' => ['bg'=>'#dcfce7','text'=>'#15803d','icon'=>'fa-circle-check','label'=>'Approved'],
+            'rejected' => ['bg'=>'#fee2e2','text'=>'#b91c1c','icon'=>'fa-circle-xmark','label'=>'Rejected'],
+            default    => ['bg'=>'#fef9c3','text'=>'#92400e','icon'=>'fa-clock','label'=>'Awaiting Review'],
         };
     @endphp
     <div class="flex items-start gap-3 rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5"
@@ -31,7 +31,7 @@
                 <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
                       style="background:{{ $statusColor['bg'] }};color:{{ $statusColor['text'] }};">
                     <i class="fa-solid {{ $statusColor['icon'] }} text-xs"></i>
-                    {{ ucfirst($doc->approval_status) }}
+                    {{ $statusColor['label'] }}
                 </span>
             </div>
             <p class="text-xs text-gray-400 mt-0.5">
