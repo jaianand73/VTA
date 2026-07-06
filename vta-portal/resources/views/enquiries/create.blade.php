@@ -17,6 +17,15 @@
                     @error('enquirer_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
                 <div>
+                    <label for="enquirer_role" class="block text-sm font-medium text-gray-700">Enquirer Role</label>
+                    <select id="enquirer_role" name="enquirer_role" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">
+                        <option value="">— Select (optional) —</option>
+                        @foreach(['Case Manager','Lead Professional','Health Professional','Line Manager','Solicitor','Insurer','Insurance Company','Employer','HR','Other'] as $role)
+                        <option value="{{ $role }}" @selected(old('enquirer_role') === $role)>{{ $role }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <label for="company_id" class="block text-sm font-medium text-gray-700">Company <span class="text-red-500">*</span></label>
                     <div class="mt-1 flex gap-2">
                         <select id="company_id" name="company_id" required class="block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4]">

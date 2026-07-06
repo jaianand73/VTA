@@ -46,6 +46,7 @@ class EnquiryController extends Controller
         $data = $request->validate([
             'enquiry_ref' => 'nullable|string|max:50',
             'enquirer_name' => 'required|string|max:255',
+            'enquirer_role' => 'nullable|string|max:100',
             'company_id' => 'required|exists:companies,id',
             'case_manager_id' => 'nullable|exists:case_managers,id',
             'email' => 'nullable|email|max:255',
@@ -145,6 +146,7 @@ class EnquiryController extends Controller
         $data = $request->validate([
             'enquiry_ref' => 'nullable|string|max:50',
             'enquirer_name' => 'required|string|max:255',
+            'enquirer_role' => 'nullable|string|max:100',
             'company_id' => 'nullable|exists:companies,id',
             'case_manager_id' => 'nullable|exists:case_managers,id',
             'email' => 'nullable|email|max:255',

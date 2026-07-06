@@ -50,7 +50,7 @@
                 </div>
                 <dl class="grid grid-cols-2 gap-4 text-sm">
                     <div><dt class="text-gray-500">Enquiry ID</dt><dd class="font-medium text-gray-800">{{ $enquiry->enquiry_ref ?? '—' }}</dd></div>
-                    <div><dt class="text-gray-500">Enquirer Name</dt><dd class="font-medium text-gray-800">{{ $enquiry->enquirer_name }}</dd></div>
+                    <div><dt class="text-gray-500">Enquirer</dt><dd class="font-medium text-gray-800">{{ $enquiry->enquirer_name }}{{ $enquiry->enquirer_role ? ' — ' . $enquiry->enquirer_role : '' }}</dd></div>
                     <div><dt class="text-gray-500">Company</dt><dd class="font-medium text-gray-800">{{ $enquiry->selectedCompany?->name ?? $enquiry->company_name }}</dd></div>
                     <div><dt class="text-gray-500">Case Manager</dt><dd class="font-medium text-gray-800">{{ $enquiry->selectedCaseManager ? $enquiry->selectedCaseManager->first_name . ' ' . $enquiry->selectedCaseManager->last_name : '—' }}</dd></div>
                     <div><dt class="text-gray-500">Email</dt><dd class="font-medium text-gray-800">{{ $enquiry->email ?? '—' }}</dd></div>
@@ -94,6 +94,14 @@
                     <div class="grid gap-4 sm:grid-cols-2">
                             <div><label class="block text-sm font-medium text-gray-700">Enquiry ID</label><input type="text" name="enquiry_ref" value="{{ $enquiry->enquiry_ref }}" placeholder="e.g. E001" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
                     <div><label class="block text-sm font-medium text-gray-700">Enquirer Name</label><input type="text" name="enquirer_name" value="{{ $enquiry->enquirer_name }}" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Enquirer Role</label>
+                        <select name="enquirer_role" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
+                            <option value="">— Select (optional) —</option>
+                            @foreach(['Case Manager','Lead Professional','Health Professional','Line Manager','Solicitor','Insurer','Insurance Company','Employer','HR','Other'] as $role)
+                            <option value="{{ $role }}" @selected($enquiry->enquirer_role === $role)>{{ $role }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                         <div><label class="block text-sm font-medium text-gray-700">Company</label>
                             <select name="company_id" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">
                                 <option value="">-- Select --</option>

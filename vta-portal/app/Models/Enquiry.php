@@ -17,7 +17,7 @@ class Enquiry extends Model
     ];
 
     protected $fillable = [
-        'enquiry_ref', 'enquirer_name', 'company_name', 'company_id', 'case_manager_id', 'email', 'phone', 'source', 'reason',
+        'enquiry_ref', 'enquirer_name', 'enquirer_role', 'company_name', 'company_id', 'case_manager_id', 'email', 'phone', 'source', 'reason',
         'client_location', 'nearest_associate_id',
         'enquiry_date', 'first_response_date', 'first_response_remarks', 'status',
         'converted_to_company_id', 'converted_to_case_manager_id', 'converted_date',
