@@ -72,6 +72,21 @@
                     </div>
                     <div class="col-span-2"><dt class="text-gray-500">Reason</dt><dd class="font-medium text-gray-800">{{ $enquiry->reason ?? '—' }}</dd></div>
                     <div class="col-span-2"><dt class="text-gray-500">Special Instructions</dt><dd class="font-medium text-gray-800" style="white-space:pre-wrap;">{{ $enquiry->notes ?? '—' }}</dd></div>
+                    <div>
+                        <dt class="text-gray-500">Approved for Initial Assessment</dt>
+                        <dd class="font-medium text-gray-800">
+                            @if(is_null($enquiry->initial_assessment_approved))
+                                <span class="text-gray-400">—</span>
+                            @elseif($enquiry->initial_assessment_approved)
+                                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium" style="background:#dcfce7;color:#15803d;"><i class="fa-solid fa-check"></i> Yes</span>
+                            @else
+                                <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium" style="background:#fee2e2;color:#b91c1c;"><i class="fa-solid fa-xmark"></i> No</span>
+                            @endif
+                        </dd>
+                    </div>
+                    @if(!$enquiry->initial_assessment_approved && $enquiry->initial_assessment_reason)
+                    <div><dt class="text-gray-500">Reason (Not Approved)</dt><dd class="font-medium text-gray-800" style="white-space:pre-wrap;">{{ $enquiry->initial_assessment_reason }}</dd></div>
+                    @endif
                 </dl>
 
                 <form id="enquiryForm" method="POST" action="{{ route('enquiries.update', $enquiry) }}" class="hidden mt-6 border-t border-gray-200 pt-6">
@@ -131,6 +146,25 @@
                     </div>
                     <div class="mt-4"><label class="block text-sm font-medium text-gray-700">Reason</label><textarea name="reason" rows="2" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">{{ $enquiry->reason }}</textarea></div>
                     <div class="mt-4"><label class="block text-sm font-medium text-gray-700">Special Instructions</label><textarea name="notes" rows="2" placeholder="Language needs, access requirements, availability, urgent notes…" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">{{ $enquiry->notes }}</textarea></div>
+
+                    <div class="mt-4" x-data="{ approved: '{{ is_null($enquiry->initial_assessment_approved) ? '' : ($enquiry->initial_assessment_approved ? '1' : '0') }}' }">
+                        <label class="block text-sm font-medium text-gray-700">Approved for Initial Assessment</label>
+                        <div class="mt-2 flex gap-4">
+                            <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                <input type="radio" name="initial_assessment_approved" value="1" x-model="approved" class="text-[#0092b4] focus:ring-[#0092b4]"> Yes
+                            </label>
+                            <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                <input type="radio" name="initial_assessment_approved" value="0" x-model="approved" class="text-[#0092b4] focus:ring-[#0092b4]"> No
+                            </label>
+                            <label class="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
+                                <input type="radio" name="initial_assessment_approved" value="" x-model="approved" class="focus:ring-[#0092b4]"> Not set
+                            </label>
+                        </div>
+                        <div x-show="approved === '0'" x-cloak class="mt-2">
+                            <label class="block text-sm font-medium text-gray-700">Reason (Not Approved)</label>
+                            <textarea name="initial_assessment_reason" rows="2" class="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-[#0092b4] focus:outline-none focus:ring-1 focus:ring-[#0092b4] text-sm">{{ $enquiry->initial_assessment_reason }}</textarea>
+                        </div>
+                    </div>
 
                     <div class="mt-6 rounded-lg border border-gray-200 bg-white p-4" x-data="{ contacts: @js($enquiry->contacts->map(fn($c) => ['name' => $c->name, 'role' => $c->role, 'email' => $c->email, 'phone' => $c->phone])->values()) }">
                         <h4 class="text-sm font-semibold text-gray-700 mb-3">Contacts</h4>
@@ -347,6 +381,16 @@
                     @endforelse
                 </div>
             </div>
+
+            @if(session('just_created'))
+            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 flex items-start gap-3">
+                <i class="fa-solid fa-circle-check text-blue-500 mt-0.5"></i>
+                <div>
+                    <p class="text-sm font-semibold text-blue-800">Enquiry saved!</p>
+                    <p class="text-sm text-blue-700 mt-0.5">Add any supporting documents now using the Upload button below, or come back to this page later.</p>
+                </div>
+            </div>
+            @endif
 
             <div class="rounded-lg border border-gray-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">

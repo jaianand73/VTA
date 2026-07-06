@@ -109,4 +109,21 @@ class CompanyController extends Controller
 
         return redirect()->route('companies.show', $company);
     }
+
+    public function destroy(Company $company)
+    {
+        $cmCount = $company->caseManagers()->count();
+        $enquiryCount = $company->enquiries()->count();
+
+        if ($cmCount > 0 || $enquiryCount > 0) {
+            return redirect()->route('companies.show', $company)
+                ->with('error', "Cannot delete \"{$company->name}\" — it has {$cmCount} case manager(s) and {$enquiryCount} enquiry(s) attached. Remove these first.");
+        }
+
+        $name = $company->name;
+        $company->delete();
+
+        return redirect()->route('companies.index')
+            ->with('success', "Company \"{$name}\" has been deleted.");
+    }
 }

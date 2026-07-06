@@ -13,6 +13,7 @@ class Enquiry extends Model
         'converted_date' => 'date',
         'qualified_date' => 'date',
         'qualified_as_referral' => 'boolean',
+        'initial_assessment_approved' => 'boolean',
     ];
 
     protected $fillable = [
@@ -21,6 +22,7 @@ class Enquiry extends Model
         'enquiry_date', 'first_response_date', 'first_response_remarks', 'status',
         'converted_to_company_id', 'converted_to_case_manager_id', 'converted_date',
         'notes', 'created_by', 'qualified_as_referral', 'qualified_date', 'qualified_remarks',
+        'initial_assessment_approved', 'initial_assessment_reason',
     ];
 
     public function createdBy()

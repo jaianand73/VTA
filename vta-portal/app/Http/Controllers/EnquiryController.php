@@ -59,6 +59,8 @@ class EnquiryController extends Controller
             'first_response_remarks' => 'nullable|string',
             'status' => 'nullable|string|max:50',
             'notes' => 'nullable|string',
+            'initial_assessment_approved' => 'nullable|boolean',
+            'initial_assessment_reason' => 'nullable|string',
             'contacts' => 'nullable|array',
             'contacts.*.name' => 'required_with:contacts.*.role|string|max:255',
             'contacts.*.role' => 'nullable|string|max:255',
@@ -104,7 +106,7 @@ class EnquiryController extends Controller
             }
         }
 
-        return redirect()->route('enquiries.show', $enquiry);
+        return redirect()->route('enquiries.show', $enquiry)->with('just_created', true);
     }
 
     public function show(Enquiry $enquiry)
@@ -156,6 +158,8 @@ class EnquiryController extends Controller
             'first_response_remarks' => 'nullable|string',
             'status' => 'nullable|string|max:50',
             'notes' => 'nullable|string',
+            'initial_assessment_approved' => 'nullable|boolean',
+            'initial_assessment_reason' => 'nullable|string',
             'contacts' => 'nullable|array',
             'contacts.*.name' => 'required_with:contacts.*.role|string|max:255',
             'contacts.*.role' => 'nullable|string|max:255',

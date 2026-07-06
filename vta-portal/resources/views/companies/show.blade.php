@@ -6,10 +6,26 @@
             <div class="rounded-lg border border-gray-200 bg-white p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-lg font-semibold text-gray-800">Company Information</h3>
-                    <a href="{{ route('companies.edit', $company) }}" class="text-sm text-[#0092b4] hover:underline">
-                        <i class="fa-solid fa-pen mr-1"></i> Edit
-                    </a>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('companies.edit', $company) }}" class="text-sm text-[#0092b4] hover:underline">
+                            <i class="fa-solid fa-pen mr-1"></i> Edit
+                        </a>
+                        @if(in_array(Auth::user()->role, ['admin','staff','developer']))
+                        <form method="POST" action="{{ route('companies.destroy', $company) }}"
+                              data-swal="Delete {{ $company->name }}? This cannot be undone.">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="text-sm text-red-500 hover:underline">
+                                <i class="fa-solid fa-trash mr-1"></i> Delete
+                            </button>
+                        </form>
+                        @endif
+                    </div>
                 </div>
+                @if(session('error'))
+                <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    <i class="fa-solid fa-circle-exclamation mr-2"></i>{{ session('error') }}
+                </div>
+                @endif
                 <dl class="grid grid-cols-2 gap-4 text-sm">
                     <div><dt class="text-gray-500">Name</dt><dd class="font-medium text-gray-800">{{ $company->name }}</dd></div>
                     <div><dt class="text-gray-500">Type</dt><dd class="font-medium text-gray-800">{{ $company->type }}</dd></div>
